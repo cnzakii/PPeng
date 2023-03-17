@@ -2,6 +2,7 @@ package fun.zhub.ppeng;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * <p>
@@ -12,6 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @version 1.0
  * @since 2023-03-17
  **/
+
+
+@EnableDiscoveryClient
 @SpringBootApplication
 public class PPengModuleGatewayApplication {
     public static void main(String[] args) {

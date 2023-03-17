@@ -1,5 +1,9 @@
 package fun.zhub.ppeng;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
 /**
  * <p>
  *  主启动类
@@ -9,9 +13,10 @@ package fun.zhub.ppeng;
  * @version 1.0
  * @since 2023-03-17
  **/
-
+@EnableDiscoveryClient
+@SpringBootApplication
 public class PPengOtherApiApplication {
     public static void main(String[] args) {
-
+        SpringApplication.run(PPengOtherApiApplication.class);
     }
 }

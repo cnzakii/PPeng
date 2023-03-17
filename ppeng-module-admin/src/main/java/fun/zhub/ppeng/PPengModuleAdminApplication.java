@@ -1,7 +1,9 @@
 package fun.zhub.ppeng;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * <p>
@@ -13,7 +15,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 2023-03-17
  **/
 
+@EnableDiscoveryClient
 @SpringBootApplication
+@MapperScan("fun.zhub.ppeng.mapper")
 public class PPengModuleAdminApplication {
     public static void main(String[] args) {
         SpringApplication.run(PPengModuleAdminApplication.class);
