@@ -16,6 +16,7 @@
         <module>ppeng-module-admin</module>
         <module>ppeng-module-recommend</module>
         <module>ppeng-module-search</module>
+        <module>ppeng-other-api</module>
     </modules>
 
 
@@ -49,7 +50,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--spring cloud alibaba 2022.0.0.0-RC1-->
+            <!--spring cloud alibaba 2.2.10-RC1-->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>

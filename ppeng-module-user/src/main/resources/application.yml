@@ -1,42 +1,61 @@
+server:
+  port: 3377
+
 spring:
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.115.207.226:3306/db_ppeng?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=Asia/Shanghai
+  profiles:
+    include:
+      - druid
+  application:
+    name: ppeng-module-user
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848  # Nacos服务注册中心地址
+    sentinel:
+      transport:
+        dashboard: localhost:8080  # 配置Sentinel dashboard地址
+        port: 8719 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
+  # redis配置
+  redis:
+    database: 0           # Redis数据库索引
+    host: 47.115.207.226
+    port: 6379
+    password:
+    timeout: 5000ms       # 连接超时时间
+    lettuce:
+      pool:
+        max-active: 20    # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 10      # 连接池中的最大空闲连接
+        min-idle: 5       # 连接池中的最小空闲连接
+        max-wait: 5000ms  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
     username: root
-    password: Ghidb!sd902#!.
-    druid:
-      # 配置druid连接池
-      initial-size: 5 # 初始化数量
-      min-idle: 5     # 最小连接数
-      max-active: 20  # 最大连接数
-      max-wait: 60000 # 获取连接等待超时的时间
-      time-between-eviction-runs-millis: 60000 # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
-      min-evictable-idle-time-millis: 30000 # 配置一个连接在池中最小生存的时间，单位是毫秒
-      validation-query: SELECT 1 FROM DUAL
-      test-while-idle: true
-      test-on-borrow: true
-      test-on-return: false
-      pool-prepared-statements: true # 是否缓存preparedStatement
-      max-pool-prepared-statement-per-connection-size: 20
-      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，wall用于防火墙
-      filter:
-        stat:
-          merge-sql: true
-          slow-sql-millis: 5000
-          # 基础监控配置
-          web-stat-filter:
-            enabled: true
-            url-pattern: /*
-            # 设置不统计哪些URL
-            exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
-            session-stat-enable: true
-            session-stat-max-count: 100
-      stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: true
-        #设置监控页面的登录名和密码
-        login-username: admin
-        login-password: admin
-        allow: 127.0.0.1
+    password: root
+    virtual-host: /
+    listener:
+      simple:
+        prefetch: 1
+        acknowledge-mode: auto    # none,关闭ack; manual,手动ack; auto: 自动ack
+        retry:
+          enabled: true          # 开启消费者失败重试
+          initial-interval: 1000 # 初始的失败等待时长为1秒
+          multiplier: 1          # 下次失败的等待时长倍数，下次等待时长 = multiplier * last-interval
+          max-attempts: 3        # 最大重试次数
+          stateless: true        # true无状态； false有状态。如果业务中包含事务，这里改为false
+
+sa-token:
+  token-name: authentication # token名称 (同时也是cookie名称)
+  timeout: 2592000           # token有效期，单位s 默认30天, -1代表永不过期
+  activity-timeout: 1800     # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
+  is-concurrent: true        # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-share: true             # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  token-style: simple-uuid   # token风格
+  is-log: true               # 是否输出操作日志
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
