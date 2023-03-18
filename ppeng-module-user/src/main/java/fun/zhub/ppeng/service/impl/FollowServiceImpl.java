@@ -1,9 +1,9 @@
 package fun.zhub.ppeng.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.mapper.FollowMapper;
 import fun.zhub.ppeng.service.FollowService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

@@ -1,7 +1,17 @@
 package fun.zhub.ppeng.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.crypto.asymmetric.RSA;
+import com.zhub.ppeng.common.ResponseResult;
+import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_ROLE;
+import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
+import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.service.UserService;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -11,8 +21,88 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Zaki
  * @since 2023-03-17
  */
+
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
+    @Resource
+    private RSA rsa;
+
+    @Resource
+    private UserService userService;
+
+
+    /**
+     * GET方法获取公钥，用于密码登录
+     *
+     * @return RSA公钥
+     */
+    @GetMapping("/login")
+    public ResponseResult<String> getPublicKey() {
+        return ResponseResult.success(rsa.getPublicKeyBase64());
+    }
+
+
+    /**
+     * 通过手机号和密码登录
+     *
+     * @param loginFormDTO 用户密码登录结构体
+     * @return authentication
+     */
+    @PostMapping("/login/by/password")
+    public ResponseResult<String> loginByPassword(@Valid PasswordLoginFormDTO loginFormDTO) {
+
+        User user = userService.loginByPassword(loginFormDTO);
+
+        StpUtil.login(user.getId());
+        // 将用户基本信息和权限信息保存进session中
+        StpUtil.getSession().set(SESSION_USER, user).set(SESSION_ROLE, user.getRole());
+
+        /*
+         * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
+         */
+
+
+        return ResponseResult.success(StpUtil.getTokenValue());
+    }
+
+
+    /**
+     * 通过手机号和手机验证码登录或注册
+     *
+     * @param loginFormDTO 用户验证码登录结构体
+     * @return authentication
+     */
+    @PostMapping("/login/by/code")
+    public ResponseResult<String> loginByVerifyCode(@Valid VerifyCodeLoginFormDTO loginFormDTO) {
+
+        User user = userService.loginByVerifyCode(loginFormDTO);
+
+        StpUtil.login(user.getId());
+        // 将用户基本信息和权限信息保存进session中
+        StpUtil.getSession().set(SESSION_USER, user).set(SESSION_ROLE, user.getRole());
+
+        /*
+         * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
+         */
+
+        return ResponseResult.success(StpUtil.getTokenValue());
+    }
+
+
+
+    /**
+     * 用户登出
+     *
+     * @param token authentication
+     * @return success
+     */
+    @PostMapping("/logout")
+    public ResponseResult<String> logout(@RequestHeader("authentication") String token) {
+        StpUtil.logoutByTokenValue(token);
+        return ResponseResult.success();
+    }
+
 
 }

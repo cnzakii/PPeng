@@ -3,12 +3,13 @@ package fun.zhub.ppeng.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -62,10 +63,6 @@ public class UserInfo implements Serializable {
      */
     private LocalDate birthday;
 
-    /**
-     * 用户等级，0-9
-     */
-    private Byte level;
 
     /**
      * 创建时间

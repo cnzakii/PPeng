@@ -114,7 +114,7 @@
     <!-- 监听xxx包下所有类产生的日志信息
         不设置additivity属性，那么默认additivity = true,表示会继承父级（在这里它的父级只有root一个），
         也就是会将日志信息也输出在控制台，但级别会覆盖父级的级别，也就是在控制台会输出debug级别及以上的日志信息 -->
-    <logger name="com.fzu.crowdsense" level="debug">
+    <logger name="fun.zhub.ppeng" level="debug">
         <!-- 表示按照debugAppender的设置去打印日志 -->
         <appender-ref ref="debugAppender"/>
         <!-- 表示按照infoAppender的设置去打印日志 -->

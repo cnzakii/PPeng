@@ -1,23 +1,22 @@
 package fun.zhub.ppeng.exception;
 
+
 import com.zhub.ppeng.common.ResponseResult;
+import static com.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_400;
 import com.zhub.ppeng.exception.BusinessException;
-import com.zhub.ppeng.exception.ExceptionData;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -39,39 +38,40 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * exception handler for bad request.(400)
-     * Include: BindException, ValidationException and MethodArgumentNotValidException
+     * 处理参数验证异常
      *
      * @param e exception
      * @return ResponseResult
      */
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseBody
     @ExceptionHandler(value = {
             BindException.class,
-            ValidationException.class,
-            MethodArgumentNotValidException.class
+            ValidationException.class
     })
-    public ResponseResult<ExceptionData> handleParameterVerificationException(Exception e) {
+    public ResponseResult<String> handleParameterVerificationException(Exception e) {
 
-        ExceptionData.ExceptionDataBuilder exceptionDataBuilder = ExceptionData.builder();
-        log.error("Exception: ", e);
+        List<String> exceptionMsg = new ArrayList<>();
+
+        log.error("Exception: {}", e.getMessage());
+
         if (e instanceof BindException) {
-            BindingResult bindingResult = ((MethodArgumentNotValidException) e).getBindingResult();
+            BindingResult bindingResult = ((BindException) e).getBindingResult();
             bindingResult.getAllErrors()
-                    .forEach(a -> exceptionDataBuilder.error(((FieldError) a).getField() + ": " + a.getDefaultMessage()));
+                    .forEach(a -> exceptionMsg.add(a.getDefaultMessage()));
         } else if (e instanceof ConstraintViolationException) {
             if (e.getMessage() != null) {
-                exceptionDataBuilder.error(e.getMessage());
+                exceptionMsg.add(e.getMessage());
             }
         } else {
-            exceptionDataBuilder.error("invalid parameter");
+            exceptionMsg.add("invalid parameter");
         }
-        return ResponseResult.fail(exceptionDataBuilder.build(), HttpStatus.BAD_REQUEST.getReasonPhrase());
+
+        return ResponseResult.base(HTTP_STATUS_400, null, exceptionMsg.toString());
     }
 
 
     /**
-     * handle business exception.
+     * 处理业务异常
      *
      * @param businessException business exception
      * @return ResponseResult
@@ -79,13 +79,15 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(BusinessException.class)
     public ResponseResult<BusinessException> processBusinessException(BusinessException businessException) {
-        log.error(businessException.getLocalizedMessage(), businessException);
-        // 这里可以屏蔽掉后台的异常栈信息，直接返回"business error"
-        return ResponseResult.fail(businessException, businessException.getLocalizedMessage());
+
+        log.error("ResponseCode：{},Exception: {}", businessException.getCode(), businessException.getDescription());
+
+        return ResponseResult.fail(businessException.getDescription());
     }
 
+
     /**
-     * handle other exception.
+     * 处理其他异常
      *
      * @param exception exception
      * @return ResponseResult
@@ -93,8 +95,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public ResponseResult<Exception> processException(Exception exception) {
-        log.error(exception.getLocalizedMessage(), exception);
+        log.error("Exception: {}", exception.getMessage());
         // 这里可以屏蔽掉后台的异常栈信息，直接返回"server error"
-        return ResponseResult.fail(exception, exception.getLocalizedMessage());
+        return ResponseResult.fail(exception.getLocalizedMessage());
     }
 }

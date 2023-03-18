@@ -1,9 +1,9 @@
 package fun.zhub.ppeng.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.entity.Like;
 import fun.zhub.ppeng.mapper.LikeMapper;
 import fun.zhub.ppeng.service.LikeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
