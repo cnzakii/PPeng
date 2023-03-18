@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.mapper;
 
-import fun.zhub.ppeng.entity.Recipe;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import fun.zhub.ppeng.entity.Recipe;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

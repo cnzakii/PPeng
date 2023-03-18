@@ -1,9 +1,9 @@
 package fun.zhub.ppeng.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.entity.RecipeType;
 import fun.zhub.ppeng.mapper.RecipeTypeMapper;
 import fun.zhub.ppeng.service.RecipeTypeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

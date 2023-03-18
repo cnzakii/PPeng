@@ -1,9 +1,9 @@
 package fun.zhub.ppeng.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.entity.Admin;
 import fun.zhub.ppeng.mapper.AdminMapper;
 import fun.zhub.ppeng.service.AdminService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

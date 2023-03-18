@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.mapper;
 
-import fun.zhub.ppeng.entity.ReviewComment;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import fun.zhub.ppeng.entity.ReviewComment;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

@@ -15,8 +15,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  **/
 @EnableDiscoveryClient
 @SpringBootApplication
-public class PPengModuleRecommend {
+public class PPengModuleRecommendApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PPengModuleRecommend.class);
+        SpringApplication.run(PPengModuleRecommendApplication.class);
     }
 }

@@ -3,11 +3,12 @@ package fun.zhub.ppeng.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -52,9 +53,9 @@ public class Admin implements Serializable {
     private String icon;
 
     /**
-     * 管理员等级：0普通，1超级
+     * 用户角色：admin，superAdmin
      */
-    private Byte level;
+    private String role;
 
     /**
      * 已处理任务数

@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.service;
 
-import fun.zhub.ppeng.entity.RecipeType;
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.zhub.ppeng.entity.RecipeType;
 
 /**
  * <p>
