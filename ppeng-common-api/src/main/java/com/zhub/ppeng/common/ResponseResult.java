@@ -93,4 +93,23 @@ public class ResponseResult<T> {
                 .build();
     }
 
+
+    /**
+     * 自定义状态码
+     *
+     * @param status  状态码
+     * @param data    数据
+     * @param message 信息
+     * @param <T>     data类型
+     * @return 响应结果
+     */
+    public static <T> ResponseResult<T> base(ResponseStatus status, T data, String message) {
+        return ResponseResult.<T>builder().data(data)
+                .message(message)
+                .status(status.getResponseCode())
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+
 }
