@@ -1,8 +1,6 @@
 package fun.zhub.ppeng.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -71,5 +69,7 @@ public class User implements Serializable {
     /**
      * 逻辑删除
      */
+    @TableField(fill = FieldFill.INSERT)
+    @TableLogic(value = "0",delval = "1")
     private Byte isDeleted;
 }

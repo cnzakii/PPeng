@@ -17,6 +17,7 @@ import fun.zhub.ppeng.entity.User;
  */
 public interface UserService extends IService<User> {
 
+
     /**
      * 通过验证码登录
      *
@@ -27,8 +28,9 @@ public interface UserService extends IService<User> {
 
 
     /**
-     *  通过密码登录
-     * @param loginFormDTO  用户密码登录结构体
+     * 通过密码登录
+     *
+     * @param loginFormDTO 用户密码登录结构体
      * @return User
      */
     User loginByPassword(PasswordLoginFormDTO loginFormDTO);
@@ -37,7 +39,7 @@ public interface UserService extends IService<User> {
     /**
      * 根据id和手机号创建新用户
      *
-     * @param id id
+     * @param id    id
      * @param phone 用户手机号
      * @return User对象
      */

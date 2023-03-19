@@ -138,6 +138,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         int i = userMapper.insert(user);
         if (i == 0) {
+            log.error("创建用户{}失败",user.getId());
             throw new BusinessException(ResponseStatus.FAIL, "新建用户失败");
         }
 

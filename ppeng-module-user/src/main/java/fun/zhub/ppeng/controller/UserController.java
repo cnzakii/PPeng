@@ -3,7 +3,8 @@ package fun.zhub.ppeng.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_ROLE;
+import static com.zhub.ppeng.constant.RedisConstants.ROLE_KEY;
+import static com.zhub.ppeng.constant.RedisConstants.ROLE_TTL;
 import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
 import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
@@ -11,7 +12,10 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -31,6 +35,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
 
     /**
@@ -56,8 +63,12 @@ public class UserController {
         User user = userService.loginByPassword(loginFormDTO);
 
         StpUtil.login(user.getId());
-        // 将用户基本信息和权限信息保存进session中
-        StpUtil.getSession().set(SESSION_USER, user).set(SESSION_ROLE, user.getRole());
+        // 将用户基本信保存进session中
+        StpUtil.getSession().set(SESSION_USER, user);
+
+        // 设置权限信息
+        stringRedisTemplate.opsForValue().set(ROLE_KEY+user.getId(),user.getRole(),ROLE_TTL, TimeUnit.MINUTES);
+
 
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
@@ -80,8 +91,11 @@ public class UserController {
         User user = userService.loginByVerifyCode(loginFormDTO);
 
         StpUtil.login(user.getId());
-        // 将用户基本信息和权限信息保存进session中
-        StpUtil.getSession().set(SESSION_USER, user).set(SESSION_ROLE, user.getRole());
+        // 将用户基本信保存进session中
+        StpUtil.getSession().set(SESSION_USER, user);
+
+        // 设置权限信息
+        stringRedisTemplate.opsForValue().set(ROLE_KEY+user.getId(),user.getRole(),ROLE_TTL, TimeUnit.MINUTES);
 
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
