@@ -10,14 +10,25 @@ package com.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface RedisConstants {
+
+    /**
+     * 手机验证码前缀
+     */
     String LOGIN_CODE_KEY = "login:code:";
 
+    /**
+     * 手机验证码过期时间
+     */
     Long LOGIN_CODE_TTL = 2L;
 
+    /**
+     * 用户角色前缀
+     */
+    String USER_ROLE = "user:role:";
 
-    String ROLE_KEY = "role:";
-
-    Long ROLE_TTL = 30L;
-
+    /**
+     * 用户角色信息过期时间
+     */
+    Long USER_ROLE_TTL = 30L;
 
 }

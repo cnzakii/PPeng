@@ -10,8 +10,12 @@ package com.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface SaTokenConstants {
+
+    /**
+     * 用户
+     */
     String SESSION_USER = "user";
 
 
-    String SESSION_ROLE = "role";
+
 }
