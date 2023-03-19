@@ -2,17 +2,15 @@ package fun.zhub.ppeng.config;
 
 
 import cn.dev33.satoken.stp.StpInterface;
-import cn.dev33.satoken.stp.StpUtil;
-import static com.zhub.ppeng.constant.RedisConstants.ROLE_KEY;
-import static com.zhub.ppeng.constant.RedisConstants.ROLE_TTL;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_ROLE;
+import static com.zhub.ppeng.constant.RedisConstants.USER_ROLE;
+
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+
 
 /**
  * <p>
@@ -51,16 +49,12 @@ public class StpInterfaceImpl implements StpInterface {
      */
     @Override
     public List<String> getRoleList(Object loginId, String loginType) {
-        String key = ROLE_KEY + loginId;
-
-        String s = stringRedisTemplate.opsForValue().get(key);
-
-        if (s != null) {
-            stringRedisTemplate.expire(key, ROLE_TTL, TimeUnit.MINUTES);
-        }
-
         List<String> list = new ArrayList<>();
-        list.add(s);
+
+        // 从redis中获取角色信息
+        String role = stringRedisTemplate.opsForValue().get(USER_ROLE + loginId);
+
+        list.add(role);
 
         return list;
     }

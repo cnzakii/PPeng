@@ -44,4 +44,12 @@ public interface UserService extends IService<User> {
      * @return User对象
      */
     User createUser(Long id, String phone);
+
+    /**
+     * 在验证登录信息成功之后做的事情
+     *
+     * @param user 用户
+     * @return authentication
+     */
+    String afterLogin(User user);
 }

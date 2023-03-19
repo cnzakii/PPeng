@@ -1,5 +1,7 @@
 package fun.zhub.ppeng.service.impl;
 
+import cn.dev33.satoken.session.SaSession;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -9,9 +11,10 @@ import cn.hutool.crypto.asymmetric.RSA;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
-import static com.zhub.ppeng.constant.RedisConstants.LOGIN_CODE_KEY;
+import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import com.zhub.ppeng.exception.BusinessException;
 
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
@@ -25,6 +28,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -138,11 +142,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         int i = userMapper.insert(user);
         if (i == 0) {
-            log.error("创建用户{}失败",user.getId());
+            log.error("创建用户{}失败", user.getId());
             throw new BusinessException(ResponseStatus.FAIL, "新建用户失败");
         }
 
         log.info("创建用户{}成功,创建时间：{}", user.getId(), user.getCreateTime());
         return user;
+    }
+
+    /**
+     * 实现验证登录信息之后的操作
+     *
+     * @param user 用户
+     * @return authentication
+     */
+    @Override
+    public String afterLogin(User user) {
+
+        StpUtil.login(user.getId());
+
+        SaSession session = StpUtil.getSession();
+
+        // 查询session是否存在user角色等信息
+        if (session.get(SESSION_USER) == null) {
+            // 将用户基本信息和角色信息保存进session中
+            session.set(SESSION_USER, user);
+            // 将user的用户信息存入redis
+            stringRedisTemplate.opsForValue().set(USER_ROLE+user.getId(),user.getRole(),USER_ROLE_TTL, TimeUnit.DAYS);
+        }
+
+
+
+        /*
+         * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
+         */
+
+
+        return StpUtil.getTokenValue();
     }
 }
