@@ -15,4 +15,9 @@ public interface RedisConstants {
     Long LOGIN_CODE_TTL = 2L;
 
 
+    String ROLE_KEY = "role:";
+
+    Long ROLE_TTL = 30L;
+
+
 }
