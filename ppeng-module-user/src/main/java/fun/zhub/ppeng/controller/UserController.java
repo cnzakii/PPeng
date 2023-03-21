@@ -77,10 +77,6 @@ public class UserController {
         return ResponseResult.success(token);
     }
 
-
-
-
-
     /**
      * 用户登出
      *
@@ -90,6 +86,14 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseResult<String> logout(@RequestHeader("authentication") String token) {
         StpUtil.logoutByTokenValue(token);
+        return ResponseResult.success();
+    }
+
+
+
+    @PostMapping("/current")
+    public ResponseResult<String> getCurrentInfo(){
+
         return ResponseResult.success();
     }
 

@@ -11,12 +11,13 @@ import cn.hutool.crypto.asymmetric.RSA;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
+import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
+import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import com.zhub.ppeng.exception.BusinessException;
-
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
 import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
 import fun.zhub.ppeng.entity.User;
@@ -24,6 +25,7 @@ import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     @Resource
     private UserMapper userMapper;
@@ -168,16 +173,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 将用户基本信息和角色信息保存进session中
             session.set(SESSION_USER, user);
             // 将user的用户信息存入redis
-            stringRedisTemplate.opsForValue().set(USER_ROLE+user.getId(),user.getRole(),USER_ROLE_TTL, TimeUnit.DAYS);
+            stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.DAYS);
         }
-
 
 
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
+        rabbitTemplate.convertAndSend(USER_EXCHANGE_NAME, ROUTING_USER_CACHE, user.getId());
 
 
         return StpUtil.getTokenValue();
     }
+
+
 }

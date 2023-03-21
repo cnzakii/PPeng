@@ -5,7 +5,8 @@ import fun.zhub.ppeng.entity.UserInfo;
 
 /**
  * <p>
- * 用户信息表，包含更加详细的用户信息：所在城市，自我介绍，性别，生日 等 服务类
+ * UserInfoService interface
+ * 更加详细的用户信息：所在城市，自我介绍，性别，生日 等 服务类
  * </p>
  *
  * @author Zaki
@@ -13,4 +14,11 @@ import fun.zhub.ppeng.entity.UserInfo;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+    /**
+     * 根据用户id查询用户具体信息
+     *
+     * @param userId 用户id
+     * @return UserInfo
+     */
+    UserInfo getUserInfoById(Long userId);
 }
