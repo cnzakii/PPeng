@@ -31,4 +31,28 @@ public interface RedisConstants {
      */
     Long USER_ROLE_TTL = 30L;
 
+
+    /**
+     * 用户关注数据前缀
+     */
+    String USER_FOLLOWS = "user:follows:";
+
+    /**
+     * 用户关注数据过期时间
+     */
+    Long USER_FOLLOWS_TTL = 30L;
+
+
+    /**
+     * 用户粉丝数据前缀
+     */
+    String USER_FANS = "user:fans:";
+
+    /**
+     * 用户粉丝数据过期时间
+     */
+    Long USER_FANS_TTL = 30L;
+
+
+
 }
