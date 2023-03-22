@@ -16,9 +16,5 @@ public interface SaTokenConstants {
      */
     String SESSION_USER = "user";
 
-    /**
-     * 用户信息
-     */
-    String SESSION_USER_INFO = "userInfo";
 
 }

@@ -32,6 +32,11 @@ public interface RedisConstants {
     Long USER_ROLE_TTL = 30L;
 
 
+    String USER_INFO = "user:info:";
+
+    Long USER_INFO_TTL = 30L;
+
+
     /**
      * 用户关注数据前缀
      */
