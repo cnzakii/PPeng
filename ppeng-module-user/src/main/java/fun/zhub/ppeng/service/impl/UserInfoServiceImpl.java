@@ -1,14 +1,19 @@
 package fun.zhub.ppeng.service.impl;
 
-import cn.dev33.satoken.session.SaSession;
-import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.bean.BeanUtil;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER_INFO;
+import static com.zhub.ppeng.constant.RedisConstants.USER_INFO;
+import static com.zhub.ppeng.constant.RedisConstants.USER_INFO_TTL;
 import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserInfoMapper;
 import fun.zhub.ppeng.service.UserInfoService;
+import jakarta.annotation.Resource;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -21,6 +26,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 实现根据用户id查询用户具体信息
@@ -30,21 +37,20 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public UserInfo getUserInfoById(Long userId) {
-        UserInfo userInfo;
-        SaSession session = StpUtil.getSessionByLoginId(userId);
+        String key = USER_INFO + userId;
+        // 先查询redis
+        String info = stringRedisTemplate.opsForValue().get(key);
 
-        // 先从Session中查找
-        userInfo = (UserInfo) session.get(SESSION_USER_INFO);
-
-        if (!BeanUtil.isEmpty(userInfo)) {
-            return userInfo;
+        if (StrUtil.isNotEmpty(info)) {
+            stringRedisTemplate.expire(key, USER_INFO_TTL, TimeUnit.MINUTES);
+            return JSONUtil.toBean(info, UserInfo.class);
         }
 
-        // 如果不存在，查询数据库
-        userInfo = query().eq("user_id", userId).one();
+        // 查询数据库
+        UserInfo userInfo = query().eq("user_id", userId).one();
 
-        // 写入Session
-        session.set(SESSION_USER_INFO, userInfo);
+        // 写入redis
+        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfo), USER_INFO_TTL, TimeUnit.MINUTES);
 
         return userInfo;
     }
