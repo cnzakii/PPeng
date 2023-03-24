@@ -1,0 +1,41 @@
+spring:
+  cloud:
+    nacos:
+      # 配置中心
+      config:
+        server-addr: ****:8848
+        enabled: true
+        file-extension: yaml
+        group: PPENG_GROUP
+        namespace: ppeng
+        username: ppeng
+        password: **confidential**
+        shared-configs[0]:
+          data-id: logback.yaml
+          group: PPENG_GROUP
+          refresh: true
+        shared-configs[1]:
+          data-id: sa-token.yaml
+          group: PPENG_GROUP
+          refresh: true
+        shared-configs[2]:
+          data-id: redis.yaml
+          group: PPENG_GROUP
+          refresh: true
+        shared-configs[3]:
+          data-id: rabbitmq.yaml
+          group: PPENG_GROUP
+          refresh: true
+        shared-configs[4]:
+          data-id: mysql-druid.yaml
+          group: PPENG_GROUP
+          refresh: true
+
+
+
+
+
+
+
+
+
