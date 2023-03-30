@@ -2,9 +2,9 @@ server:
   port: 9836
 
 spring:
-  profiles:
-    include:
-      - druid
+  output:
+    ansi:
+      enabled: always
   application:
     name: ppeng-module-recipe
   cloud:

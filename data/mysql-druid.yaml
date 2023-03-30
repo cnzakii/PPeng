@@ -21,22 +21,9 @@ spring:
       max-pool-prepared-statement-per-connection-size: 20
       # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，wall用于防火墙
       filter:
-        stat:
-          merge-sql: true
-          slow-sql-millis: 5000
-          # 基础监控配置
-          web-stat-filter:
-            enabled: true
-            url-pattern: /*
-            # 设置不统计哪些URL
-            exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
-            session-stat-enable: true
-            session-stat-max-count: 100
+        config:
+          enabled: false
+      web-stat-filter:
+        enabled: false
       stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: true
-        #设置监控页面的登录名和密码
-        login-username: admin
-        login-password: admin
-        allow: 127.0.0.1
+        enabled: false

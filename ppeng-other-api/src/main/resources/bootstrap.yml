@@ -11,18 +11,6 @@ spring:
         username: ppeng
         password: **confidential**
         shared-configs[0]:
-          data-id: redis.yaml
+          data-id: rabbitmq.yaml
           group: PPENG_GROUP
           refresh: true
-        shared-configs[1]:
-          data-id: sa-token.yaml
-          group: PPENG_GROUP
-          refresh: true
-
-
-
-
-
-
-
-

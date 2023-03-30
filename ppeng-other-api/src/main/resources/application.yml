@@ -2,11 +2,11 @@ server:
   port: 3450
 
 spring:
-  profiles:
-    include:
-      - druid
   application:
     name: ppeng-other-api
+  output:
+    ansi:
+      enabled: always
   cloud:
     nacos:
       discovery:
@@ -15,19 +15,4 @@ spring:
       transport:
         dashboard: localhost:8080  # 配置Sentinel dashboard地址
         port: 8719                 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
-  rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: root
-    password: root
-    virtual-host: /
-    listener:
-      simple:
-        prefetch: 1
-        acknowledge-mode: auto     # none,关闭ack; manual,手动ack; auto: 自动ack
-        retry:
-          enabled: true            # 开启消费者失败重试
-          initial-interval: 1000   # 初始的失败等待时长为1秒
-          multiplier: 1            # 下次失败的等待时长倍数，下次等待时长 = multiplier * last-interval
-          max-attempts: 3          # 最大重试次数
-          stateless: true          # true无状态； false有状态。如果业务中包含事务，这里改为false
+

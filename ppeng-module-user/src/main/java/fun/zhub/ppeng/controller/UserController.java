@@ -9,6 +9,7 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
     @Resource
     private RSA rsa;
@@ -41,6 +43,7 @@ public class UserController {
      */
     @GetMapping("/login")
     public ResponseResult<String> getPublicKey() {
+        log.warn(rsa.getPublicKeyBase64());
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
@@ -85,6 +88,7 @@ public class UserController {
      */
     @PostMapping("/logout")
     public ResponseResult<String> logout(@RequestHeader("authentication") String token) {
+        // TODO 删除用户其他信息
         StpUtil.logoutByTokenValue(token);
         return ResponseResult.success();
     }

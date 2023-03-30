@@ -2,43 +2,32 @@ server:
   port: 7679
 
 spring:
-  profiles:
-    include:
-      - druid
   application:
     name: ppeng-module-admin
+  output:
+    ansi:
+      enabled: always
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848  # Nacos服务注册中心地址
+        server-addr: ****:8848
+        namespace: ppeng
+        group: PPENG_GROUP
+        username: ppeng
+        password: **confidential**
     sentinel:
       transport:
-        dashboard: localhost:8080  # 配置Sentinel dashboard地址
-        port: 8719 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
-  data:
-    # redis配置
-    redis:
-      database: 0           # Redis数据库索引
-      host: 47.115.207.226
-      port: 6379
-      timeout: 5000ms   # 连接超时时间
-      lettuce:
-        pool:
-          max-active: 20    # 连接池最大连接数（使用负值表示没有限制）
-          max-idle: 10      # 连接池中的最大空闲连接
-          min-idle: 5       # 连接池中的最小空闲连接
-          max-wait: 5000ms  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        dashboard: ****:8976  # 配置Sentinel dashboard地址
+        port: 8719                 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
 
 
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-value: 1       # 逻辑已删除
+      logic-not-delete-value: 0   # 逻辑未删除
 
-sa-token:
-  token-name: authentication # token名称 (同时也是cookie名称)
-  timeout: 2592000           # token有效期，单位s 默认30天, -1代表永不过期
-  activity-timeout: 1800     # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
-  is-concurrent: true        # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
-  is-share: true             # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
-  token-style: simple-uuid   # token风格
-  is-log: true               # 是否输出操作日志
+
 
 management:
   endpoints:

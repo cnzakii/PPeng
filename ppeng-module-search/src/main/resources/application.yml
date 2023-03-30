@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: ppeng-module-search
+  output:
+    ansi:
+      enabled: always
   cloud:
     nacos:
       discovery:

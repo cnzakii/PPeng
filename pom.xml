@@ -50,11 +50,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--spring cloud alibaba 2.2.10-RC1-->
+            <!--spring cloud alibaba 2022.0.0.0-RC1-->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>2.2.10-RC1</version>
+                <version>2022.0.0.0-RC1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

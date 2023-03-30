@@ -14,15 +14,3 @@ spring:
           data-id: redis.yaml
           group: PPENG_GROUP
           refresh: true
-        shared-configs[1]:
-          data-id: sa-token.yaml
-          group: PPENG_GROUP
-          refresh: true
-
-
-
-
-
-
-
-
