@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     public ResponseResult<BusinessException> processBusinessException(BusinessException businessException) {
 
         log.error("ResponseCode：{},Exception: {}", businessException.getCode(), businessException.getDescription());
-
+        businessException.printStackTrace();
         return ResponseResult.fail(businessException.getDescription());
     }
 

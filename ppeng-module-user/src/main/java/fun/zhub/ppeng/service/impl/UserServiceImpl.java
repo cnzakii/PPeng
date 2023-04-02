@@ -2,34 +2,47 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
+import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
+
 import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
 import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
+
 import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.dto.DeleteUserDTO;
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.UpdateUserDTO;
 import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import jdk.jfr.DataAmount;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +62,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private DataSource dataSource;
 
     @Resource
     private UserMapper userMapper;
@@ -186,5 +202,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return StpUtil.getTokenValue();
     }
 
+    /**
+     * 实现根据用户id更新用户信息
+     *
+     * @param userDTO 用户
+     * @return user
+     */
+    @Override
+    public Boolean updateUser(UpdateUserDTO userDTO) {
+
+        User user = BeanUtil.toBean(userDTO, User.class);
+        user.setUpdateTime(DateUtil.toLocalDateTime(new Date(System.currentTimeMillis())));
+        int i = userMapper.updateById(user);
+        if (i == 0) {
+            log.error("更新用户{}失败", user.getId());
+            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
+        }
+
+        log.info("更新用户{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
+        return true;
+    }
+
+    /**
+     * 实现根据用户id删除用户信息
+     *
+     * @param userDTO
+     * @return
+     */
+    @Override
+    public Boolean deleteUser(DeleteUserDTO userDTO) {
+        User user = BeanUtil.toBean(userDTO, User.class);
+        user.setUpdateTime(DateUtil.toLocalDateTime(new Date(System.currentTimeMillis())));
+        int i = userMapper.updateById(user);
+        int j = userMapper.deleteById(user);
+        if (j == 0) {
+            log.error("删除用户{}失败", user.getId());
+            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
+        }
+        log.info("删除用户{}成功,删除时间：{}", user.getId(), user.getUpdateTime());
+        return true;
+    }
 
 }

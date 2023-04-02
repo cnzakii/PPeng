@@ -1,7 +1,9 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.zhub.ppeng.dto.DeleteUserDTO;
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.UpdateUserDTO;
 import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
 import fun.zhub.ppeng.entity.User;
 
@@ -52,4 +54,20 @@ public interface UserService extends IService<User> {
      * @return authentication
      */
     String afterLogin(User user);
+
+    /**
+     * 根据id更新用户信息
+     *
+     * @param user
+     * @return User对象
+     */
+    Boolean updateUser(UpdateUserDTO user);
+
+    /**
+     * 根据id删除用户信息
+     *
+     * @param user
+     * @return User对象
+     */
+    Boolean deleteUser(DeleteUserDTO user);
 }

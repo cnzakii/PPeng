@@ -1,6 +1,9 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
+import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;
 
 /**
@@ -21,4 +24,21 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return UserInfo
      */
     UserInfo getUserInfoById(Long userId);
+
+    /**
+     * 根据用户id更新用户具体信息
+     *
+     * @param userInfo user
+     * @return UserInfo
+     */
+    Boolean updataUserInfo(UpdateUserInfoDTO userInfo);
+    /**
+     * 根据用户id删除用户具体信息
+     *
+     * @param userInfo user
+     * @return UserInfo
+     */
+    Boolean deleteUserInfo(DeleteUserInfoDTO userInfo);
+
+
 }

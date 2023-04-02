@@ -1,9 +1,12 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.dto.DeleteUserDTO;
 import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.UpdateUserDTO;
 import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
@@ -11,6 +14,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 
 
 /**
@@ -31,7 +35,6 @@ public class UserController {
 
     @Resource
     private UserService userService;
-
 
 
     /**
@@ -90,12 +93,31 @@ public class UserController {
     }
 
 
-
     @PostMapping("/current")
-    public ResponseResult<String> getCurrentInfo(){
+    public ResponseResult<String> getCurrentInfo() {
 
         return ResponseResult.success();
     }
 
+    /**
+     * 更新用户基本信息
+     * @param user
+     * @return
+     */
+    @PutMapping("/PUT")
+    public ResponseResult<String> updateUser(@RequestBody @Valid  UpdateUserDTO user) {
+        userService.updateUser(user);
+        return ResponseResult.success();
+    }
 
+    /**
+     * 删除用户基本信息
+     * @param user
+     * @return
+     */
+    @DeleteMapping("/DEL")
+    public ResponseResult<String> deleteUser(@RequestBody DeleteUserDTO user){
+        userService.deleteUser(user);
+        return ResponseResult.success();
+    }
 }
