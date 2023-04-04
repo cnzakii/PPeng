@@ -1,15 +1,14 @@
 package fun.zhub.ppeng.dto;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 /**
  * <p>
- *  用户具体信息更新
+ * 用户具体信息更新
  * <p>
  *
  * @author lbl
@@ -18,9 +17,10 @@ import java.time.LocalDateTime;
  **/
 @Data
 public class UpdateUserInfoDTO implements Serializable {
+
     @NotNull(message = "userId不能为空")
     private Long userId;
-    @NotEmpty(message = "city不能为空")
+
     private String city;
 
 

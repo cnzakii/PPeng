@@ -3,7 +3,6 @@ package fun.zhub.ppeng.controller;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
 import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
-import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -24,25 +23,25 @@ public class UserInfoController {
     private UserInfoService userInfoService;
 
     /**
-     * 更新用户基本信息
+     * 更新用户具体信息
      *
-     * @param userInfo
-     * @return
+     * @param userInfo userInfo
+     * @return success
      */
 
-    @PutMapping("/PUT")
-    public ResponseResult<String> updateUserInfo(@RequestBody @Valid UpdateUserInfoDTO userInfo) {
+    @PutMapping("/current")
+    public ResponseResult<String> updateUserInfo(@Valid UpdateUserInfoDTO userInfo) {
         userInfoService.updataUserInfo(userInfo);
         return ResponseResult.success();
     }
 
     /**
-     * 更新用户基本信息
+     * 删除用户具体信息
      *
-     * @param userInfo
-     * @return
+     * @param userInfo userInfo
+     * @return success
      */
-    @DeleteMapping("/DEL")
+    @DeleteMapping("/current")
     public ResponseResult<String> deleteUserInfo(@RequestBody @Valid DeleteUserInfoDTO userInfo) {
         userInfoService.deleteUserInfo(userInfo);
         return ResponseResult.success();

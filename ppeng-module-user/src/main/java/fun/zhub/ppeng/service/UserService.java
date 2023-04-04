@@ -1,10 +1,11 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import fun.zhub.ppeng.dto.DeleteUserDTO;
-import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.UpdateUserDTO;
-import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 
 /**
@@ -56,18 +57,41 @@ public interface UserService extends IService<User> {
     String afterLogin(User user);
 
     /**
-     * 根据id更新用户信息
+     * 根据id获取用户信息
      *
-     * @param user
-     * @return User对象
+     * @param id id
+     * @return userDTO
      */
-    Boolean updateUser(UpdateUserDTO user);
+    UserDTO getUserInfoById(Long id);
+
 
     /**
-     * 根据id删除用户信息
+     * 更新用户密码
      *
-     * @param user
-     * @return User对象
+     * @param userPasswordDTO userPasswordDTO
      */
-    Boolean deleteUser(DeleteUserDTO user);
+    void updatePassword(UpdateUserPasswordDTO userPasswordDTO);
+
+
+    /**
+     * 更新用户手机号
+     *
+     * @param userPhoneDTO userPhoneDTO
+     */
+    void updatePhone(UpdateUserPhoneDTO userPhoneDTO);
+
+
+
+
+    /**
+     * 匹配 验证码和手机号
+     *
+     * @param phone phone
+     * @param code  验证码
+     * @param key   redis存储对应验证码的前缀
+     * @return 是否匹配
+     */
+    Boolean verifyPhone(String phone, String code, String key);
+
+
 }

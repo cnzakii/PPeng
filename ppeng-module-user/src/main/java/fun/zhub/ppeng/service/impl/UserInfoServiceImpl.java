@@ -6,20 +6,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import static com.zhub.ppeng.constant.RedisConstants.USER_INFO;
-import static com.zhub.ppeng.constant.RedisConstants.USER_INFO_TTL;
-
-import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.common.ResponseStatus;
+import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO;
+import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
 import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
-import fun.zhub.ppeng.dto.UpdateUserDTO;
 import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
-import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserInfoMapper;
-import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -53,12 +47,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      */
     @Override
     public UserInfo getUserInfoById(Long userId) {
-        String key = USER_INFO + userId;
+        String key = USER_DETAIL_INFO + userId;
         // 先查询redis
         String info = stringRedisTemplate.opsForValue().get(key);
 
         if (StrUtil.isNotEmpty(info)) {
-            stringRedisTemplate.expire(key, USER_INFO_TTL, TimeUnit.MINUTES);
+            stringRedisTemplate.expire(key, USER_DETAIL_INFO_TTL, TimeUnit.MINUTES);
             return JSONUtil.toBean(info, UserInfo.class);
         }
 
@@ -66,7 +60,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         UserInfo userInfo = query().eq("user_id", userId).one();
 
         // 写入redis
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfo), USER_INFO_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfo), USER_DETAIL_INFO_TTL, TimeUnit.MINUTES);
 
         return userInfo;
     }

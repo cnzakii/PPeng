@@ -1,20 +1,18 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.DeleteUserDTO;
-import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.UpdateUserDTO;
-import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 
 /**
@@ -42,7 +40,7 @@ public class UserController {
      *
      * @return RSA公钥
      */
-    @GetMapping("/login")
+    @GetMapping("/rsa")
     public ResponseResult<String> getPublicKey() {
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
@@ -93,31 +91,50 @@ public class UserController {
     }
 
 
+    /**
+     * 获取当前用户基本信息
+     *
+     * @return userBaseInfo
+     */
     @PostMapping("/current")
-    public ResponseResult<String> getCurrentInfo() {
+    public ResponseResult<UserDTO> getCurrentInfo() {
+        Long id = (Long) StpUtil.getLoginId();
+        // 获取经过脱敏处理后的userInfo
+        UserDTO userDTO = userService.getUserInfoById(id);
+
+        return ResponseResult.success(userDTO);
+    }
+
+
+    /**
+     * 更新用户密码
+     *
+     * @return success
+     */
+    @PutMapping("update/password")
+    public ResponseResult<String> updateUserPassword(@Valid UpdateUserPasswordDTO userPasswordDTO) {
+
+        userService.updatePassword(userPasswordDTO);
+
+        StpUtil.logout();
 
         return ResponseResult.success();
     }
 
     /**
-     * 更新用户基本信息
-     * @param user
-     * @return
+     * 更新用户手机号
+     *
+     * @return success
      */
-    @PutMapping("/PUT")
-    public ResponseResult<String> updateUser(@RequestBody @Valid  UpdateUserDTO user) {
-        userService.updateUser(user);
+    @PutMapping("update/phone")
+    public ResponseResult<String> updateUserPhone(@Valid UpdateUserPhoneDTO userPhoneDTO) {
+
+        userService.updatePhone(userPhoneDTO);
+
+        StpUtil.logout();
+
         return ResponseResult.success();
     }
 
-    /**
-     * 删除用户基本信息
-     * @param user
-     * @return
-     */
-    @DeleteMapping("/DEL")
-    public ResponseResult<String> deleteUser(@RequestBody DeleteUserDTO user){
-        userService.deleteUser(user);
-        return ResponseResult.success();
-    }
+
 }
