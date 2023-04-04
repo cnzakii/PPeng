@@ -3,7 +3,6 @@ package fun.zhub.ppeng.config;
 
 import cn.dev33.satoken.stp.StpInterface;
 import static com.zhub.ppeng.constant.RedisConstants.USER_ROLE;
-
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;

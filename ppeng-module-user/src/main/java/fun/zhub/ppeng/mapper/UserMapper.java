@@ -3,7 +3,6 @@ package fun.zhub.ppeng.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import fun.zhub.ppeng.entity.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * <p>

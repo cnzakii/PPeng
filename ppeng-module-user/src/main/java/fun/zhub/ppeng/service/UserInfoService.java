@@ -1,7 +1,6 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
 import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;

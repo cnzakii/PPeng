@@ -2,7 +2,6 @@ package fun.zhub.ppeng.util;
 
 
 import cn.hutool.crypto.SmUtil;
-import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;

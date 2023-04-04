@@ -12,14 +12,26 @@ package com.zhub.ppeng.constant;
 public interface RedisConstants {
 
     /**
-     * 手机验证码前缀
+     * 手机验证码登录前缀
      */
     String LOGIN_CODE_KEY = "login:code:";
 
     /**
-     * 手机验证码过期时间
+     * 手机验证码登录过期时间
      */
     Long LOGIN_CODE_TTL = 2L;
+
+    /**
+     * 手机验证码更新前缀
+     */
+    String USER_UPDATE_CODE_KEY = "user:update:code:";
+
+    /**
+     * 手机验证码更新过期时间
+     */
+    Long USER_UPDATE_CODE_TTL = 1L;
+
+
 
     /**
      * 用户角色前缀
@@ -31,10 +43,26 @@ public interface RedisConstants {
      */
     Long USER_ROLE_TTL = 30L;
 
+    /**
+     * 用户基本信息
+     */
+    String USER_BASE_INFO = "user:info:base:";
 
-    String USER_INFO = "user:info:";
+    /**
+     * 用户基本信息过期时间
+     */
+    Long USER_BASE_INFO_TTL = 30L;
 
-    Long USER_INFO_TTL = 30L;
+
+    /**
+     * 用户详细信息
+     */
+    String USER_DETAIL_INFO = "user:info:detail";
+
+    /**
+     * 用户详细信息过期时间
+     */
+    Long USER_DETAIL_INFO_TTL = 30L;
 
 
     /**
@@ -57,7 +85,6 @@ public interface RedisConstants {
      * 用户粉丝数据过期时间
      */
     Long USER_FANS_TTL = 30L;
-
 
 
 }
