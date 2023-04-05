@@ -3,6 +3,7 @@ package fun.zhub.ppeng.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
+@ToString
 @Accessors(chain = true)
 @TableName("t_user")
 public class User implements Serializable {
@@ -26,9 +28,9 @@ public class User implements Serializable {
 
     /**
      * 手机号登录用户：雪花算法唯一ID
-微信登录用户：openid
+     * 微信登录用户：openid
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -49,16 +51,19 @@ public class User implements Serializable {
     /**
      * 头像路径
      */
+
     private String icon;
 
     /**
      * 用户角色：user
      */
+
     private String role;
 
     /**
      * 创建时间
      */
+
     private LocalDateTime createTime;
 
     /**
@@ -70,6 +75,6 @@ public class User implements Serializable {
      * 逻辑删除
      */
     @TableField(fill = FieldFill.INSERT)
-    @TableLogic(value = "0",delval = "1")
+    @TableLogic(value = "0", delval = "1")
     private Byte isDeleted;
 }

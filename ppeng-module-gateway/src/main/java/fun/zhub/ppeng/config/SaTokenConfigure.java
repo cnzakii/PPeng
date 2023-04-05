@@ -46,8 +46,7 @@ public class SaTokenConfigure {
                 })
                 // 异常处理方法：每次setAuth函数出现异常时进入
                 .setError(e -> {
-                    log.error(e.getMessage());
-
+                    log.warn(e.getMessage());
                     return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_400, null, e.getMessage()));
                 })
                 ;

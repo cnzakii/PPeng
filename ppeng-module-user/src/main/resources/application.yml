@@ -1,6 +1,13 @@
 server:
   port: 3377
 
+ppeng:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/db_ppeng?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: hsp
+
 spring:
   application:
     name: ppeng-module-user
@@ -21,12 +28,14 @@ spring:
         port: 8719                 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
 
 
+
 mybatis-plus:
   global-config:
     db-config:
       logic-delete-value: 1       # 逻辑已删除
       logic-not-delete-value: 0   # 逻辑未删除
-
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 management:
@@ -34,4 +43,3 @@ management:
     web:
       exposure:
         include: '*'
-

@@ -1,9 +1,10 @@
-package fun.zhub.ppeng.dto;
+package fun.zhub.ppeng.dto.login;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -19,6 +20,7 @@ import java.io.Serializable;
 @Data
 public class PasswordLoginFormDTO implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 3191241716373120793L;
 
 

@@ -1,17 +1,22 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
+import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -26,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
-@Slf4j
 public class UserController {
     @Resource
     private RSA rsa;
@@ -35,15 +39,13 @@ public class UserController {
     private UserService userService;
 
 
-
     /**
      * GET方法获取公钥，用于密码登录
      *
      * @return RSA公钥
      */
-    @GetMapping("/login")
+    @GetMapping("/rsa")
     public ResponseResult<String> getPublicKey() {
-        log.warn(rsa.getPublicKeyBase64());
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
@@ -55,7 +57,7 @@ public class UserController {
      * @return authentication
      */
     @PostMapping("/login/by/password")
-    public ResponseResult<String> loginByPassword(@Valid PasswordLoginFormDTO loginFormDTO) {
+    public ResponseResult<String> loginByPassword(@Valid @RequestBody PasswordLoginFormDTO loginFormDTO) {
         User user = userService.loginByPassword(loginFormDTO);
 
         String token = userService.afterLogin(user);
@@ -71,7 +73,7 @@ public class UserController {
      * @return authentication
      */
     @PostMapping("/login/by/code")
-    public ResponseResult<String> loginByVerifyCode(@Valid VerifyCodeLoginFormDTO loginFormDTO) {
+    public ResponseResult<String> loginByVerifyCode(@Valid @RequestBody VerifyCodeLoginFormDTO loginFormDTO) {
 
         User user = userService.loginByVerifyCode(loginFormDTO);
 
@@ -88,18 +90,107 @@ public class UserController {
      */
     @PostMapping("/logout")
     public ResponseResult<String> logout(@RequestHeader("authentication") String token) {
-        // TODO 删除用户其他信息
         StpUtil.logoutByTokenValue(token);
         return ResponseResult.success();
     }
 
 
-
+    /**
+     * 获取当前用户基本信息
+     *
+     * @return userBaseInfo
+     */
     @PostMapping("/current")
-    public ResponseResult<String> getCurrentInfo(){
+    public ResponseResult<UserDTO> getCurrentInfo() {
+        Long id = (Long) StpUtil.getLoginId();
+        // 获取经过脱敏处理后的userInfo
+        UserDTO userDTO = userService.getUserInfoById(id);
+
+        return ResponseResult.success(userDTO);
+    }
+
+
+    /**
+     * 更新用户密码
+     *
+     * @return success
+     */
+    @PutMapping("update/password")
+    public ResponseResult<String> updateUserPassword(@RequestBody @Valid UpdateUserPasswordDTO userPasswordDTO) {
+
+        userService.updatePassword(userPasswordDTO);
+
+        StpUtil.logout();
 
         return ResponseResult.success();
     }
 
+    /**
+     * 更新用户手机号
+     *
+     * @return success
+     */
+    @PutMapping("update/phone")
+    public ResponseResult<String> updateUserPhone(@RequestBody @Valid UpdateUserPhoneDTO userPhoneDTO) {
+
+        userService.updatePhone(userPhoneDTO);
+
+        StpUtil.logout();
+
+        return ResponseResult.success();
+    }
+
+
+    /**
+     * 更新用户昵称
+     *
+     * @param nickName 昵称
+     * @return success
+     */
+    @PutMapping("update/nick/name")
+    public ResponseResult<String> updateUserNickName(@RequestParam(value = "nickName") @NotNull(message = "新昵称不能为空") @Max(20) String nickName) {
+        Long id = (Long) StpUtil.getLoginId();
+
+        userService.updateNickNameById(id, nickName);
+
+        return ResponseResult.success();
+    }
+
+
+    /**
+     * 更新用户头像
+     *
+     * @param icon 头像
+     * @return path
+     */
+    @PutMapping("update/icon")
+    public ResponseResult<String> updateUserIcon(@RequestParam(value = "icon") @NotNull(message = "新头像不能为空") MultipartFile icon) {
+        Long id = (Long) StpUtil.getLoginId();
+
+        String path = userService.updateIconById(id, icon);
+
+        return ResponseResult.success(path);
+    }
+
+
+    /**
+     * 删除当前用户
+     *
+     * @return success
+     */
+    @DeleteMapping("/current")
+    public ResponseResult<String> DeleteUser() {
+        /*
+         * TODO 可能需要进行二次认证
+         */
+
+        Long id = (Long) StpUtil.getLoginId();
+
+        userService.deleteUserById(id);
+
+        StpUtil.logout();
+
+        return ResponseResult.success();
+    }
 
 }
