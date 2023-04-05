@@ -30,7 +30,8 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param userInfo user
      * @return UserInfo
      */
-    Boolean updataUserInfo(UpdateUserInfoDTO userInfo);
+    Boolean updateUserInfo(UpdateUserInfoDTO userInfo);
+
     /**
      * 根据用户id删除用户具体信息
      *

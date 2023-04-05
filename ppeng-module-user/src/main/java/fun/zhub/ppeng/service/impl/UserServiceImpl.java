@@ -12,6 +12,7 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
@@ -28,12 +29,14 @@ import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.mapper.UserMapper;
+import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +68,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private RSA rsa;
+
+    @Resource
+    private UserInfoService userInfoService;
 
 
     /**
@@ -288,6 +294,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
+    /**
+     * 实现根据用户id更新昵称
+     *
+     * @param id       id
+     * @param nickName 昵称
+     */
+    @Override
+    public void updateNickNameById(Long id, String nickName) {
+        boolean b = update(new UpdateWrapper<User>().set("nick_name", nickName).eq("id", id));
+        if (!b) {
+            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
+        }
+
+        /*
+         * TODO 使用MQ将昵称传个第三方审核接口进行审核。
+         */
+
+    }
+
+    /**
+     * 实现根据id更新头像
+     *
+     * @param id   id
+     * @param icon 头像
+     * @return 路径
+     */
+    @Override
+    public String updateIconById(Long id, MultipartFile icon) {
+        /*
+         * TODO 保存文件到OSS或者本地,得到存储路径
+         */
+        String path = "";
+
+        boolean b = update(new UpdateWrapper<User>().set("icon", icon).eq("id", id));
+
+        if (!b) {
+            /*
+             * TODO 删除文件
+             */
+            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
+        }
+
+
+        return path;
+    }
+
+    /**
+     * 实现根据id删除用户
+     *
+     * @param id id
+     */
+    @Override
+    public void deleteUserById(Long id) {
+        // 删除当前用户的基本信息
+        boolean b = removeById(id);
+
+        if (!b) {
+            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
+        }
+
+        // 删除用户的具体信息
+        userInfoService.deleteUserInfo(null);
+
+
+    }
 
 
     /**

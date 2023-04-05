@@ -22,16 +22,18 @@ public class UserInfoController {
     @Resource
     private UserInfoService userInfoService;
 
+
+
+
     /**
      * 更新用户具体信息
      *
      * @param userInfo userInfo
      * @return success
      */
-
     @PutMapping("/current")
     public ResponseResult<String> updateUserInfo(@Valid UpdateUserInfoDTO userInfo) {
-        userInfoService.updataUserInfo(userInfo);
+        userInfoService.updateUserInfo(userInfo);
         return ResponseResult.success();
     }
 

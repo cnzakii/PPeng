@@ -7,6 +7,7 @@ import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -38,15 +39,6 @@ public interface UserService extends IService<User> {
      */
     User loginByPassword(PasswordLoginFormDTO loginFormDTO);
 
-
-    /**
-     * 根据id和手机号创建新用户
-     *
-     * @param id    id
-     * @param phone 用户手机号
-     * @return User对象
-     */
-    User createUser(Long id, String phone);
 
     /**
      * 在验证登录信息成功之后做的事情
@@ -81,6 +73,39 @@ public interface UserService extends IService<User> {
     void updatePhone(UpdateUserPhoneDTO userPhoneDTO);
 
 
+    /**
+     * 更新用户昵称
+     *
+     * @param id       id
+     * @param nickName 昵称
+     */
+    void updateNickNameById(Long id, String nickName);
+
+
+    /**
+     * 更新用户头像
+     *
+     * @param id   id
+     * @param icon 头像
+     * @return 头像存储路径
+     */
+    String updateIconById(Long id, MultipartFile icon);
+
+    /**
+     * 根据id删除用户
+     *
+     * @param id id
+     */
+    void deleteUserById(Long id);
+
+    /**
+     * 根据id和手机号创建新用户
+     *
+     * @param id    id
+     * @param phone 用户手机号
+     * @return User对象
+     */
+    User createUser(Long id, String phone);
 
 
     /**

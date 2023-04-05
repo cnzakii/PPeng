@@ -65,6 +65,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         return userInfo;
     }
 
+
+
     /**
      * 实现根据用户id更新用户具体信息
      *
@@ -72,7 +74,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      * @return UserInfo
      */
     @Override
-    public Boolean updataUserInfo(UpdateUserInfoDTO userInfoDTO) {
+    public Boolean updateUserInfo(UpdateUserInfoDTO userInfoDTO) {
         UserInfo userInfo = BeanUtil.toBean(userInfoDTO, UserInfo.class);
         userInfo.setUpdateTime(DateUtil.toLocalDateTime(new Date(System.currentTimeMillis())));
         int i = userInfoMapper.updateById(userInfo);
