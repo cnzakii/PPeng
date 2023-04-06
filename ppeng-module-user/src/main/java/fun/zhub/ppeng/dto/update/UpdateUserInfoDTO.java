@@ -1,6 +1,6 @@
-package fun.zhub.ppeng.dto;
+package fun.zhub.ppeng.dto.update;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,7 +23,7 @@ public class UpdateUserInfoDTO implements Serializable {
 
     private String city;
 
-
+    @Max(value = 128, message = "超出字数限制")
     private String introduce;
 
     private Byte gender;

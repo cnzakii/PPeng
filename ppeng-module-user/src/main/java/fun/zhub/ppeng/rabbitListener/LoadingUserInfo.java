@@ -39,7 +39,7 @@ public class LoadingUserInfo {
             key = ROUTING_USER_CACHE
     ))
     public void ListenUserCacheQueue(Long id) {
-        log.info("开始缓存用户{}的数据",id);
+        log.info("开始缓存用户{}的数据", id);
         /*
          * 加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
@@ -52,6 +52,9 @@ public class LoadingUserInfo {
         // 缓存具体粉丝数
         followService.queryFansById(id);
 
+        /*
+         * TODO 缓存点赞的菜谱
+         */
 
     }
 }

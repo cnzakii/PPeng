@@ -104,7 +104,7 @@ public class UserController {
     public ResponseResult<UserDTO> getCurrentInfo() {
         Long id = (Long) StpUtil.getLoginId();
         // 获取经过脱敏处理后的userInfo
-        UserDTO userDTO = userService.getUserInfoById(id);
+        UserDTO userDTO = userService.getUserBaseInfoById(id);
 
         return ResponseResult.success(userDTO);
     }

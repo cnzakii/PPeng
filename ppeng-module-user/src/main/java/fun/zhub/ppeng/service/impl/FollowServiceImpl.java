@@ -88,6 +88,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         List<Follow> list = followMapper.selectList(new QueryWrapper<Follow>().eq(name, id));
 
 
+
         for (Follow follow : list) {
             String followId = String.valueOf(follow.getFollowId());
             set.add(followId);

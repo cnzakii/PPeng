@@ -1,8 +1,9 @@
 package fun.zhub.ppeng.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
-import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserInfoDTO;
+import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -22,11 +23,23 @@ public class UserInfoController {
     @Resource
     private UserInfoService userInfoService;
 
+    /**
+     * 获取当前用户的详细信息
+     *
+     * @return userInfo
+     */
+    @PostMapping("/current")
+    public ResponseResult<UserInfo> getUserInfo() {
+        Long id = (Long) StpUtil.getLoginId();
 
+        UserInfo userInfo = userInfoService.getUserInfoById(id);
+
+        return ResponseResult.success(userInfo);
+    }
 
 
     /**
-     * 更新用户具体信息
+     * 更新当前用户具体信息
      *
      * @param userInfo userInfo
      * @return success
@@ -37,15 +50,4 @@ public class UserInfoController {
         return ResponseResult.success();
     }
 
-    /**
-     * 删除用户具体信息
-     *
-     * @param userInfo userInfo
-     * @return success
-     */
-    @DeleteMapping("/current")
-    public ResponseResult<String> deleteUserInfo(@RequestBody @Valid DeleteUserInfoDTO userInfo) {
-        userInfoService.deleteUserInfo(userInfo);
-        return ResponseResult.success();
-    }
 }

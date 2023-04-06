@@ -115,7 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             password = rsa.decryptStr(loginFormDTO.getPassword(), KeyType.PrivateKey);
         } catch (Exception e) {
-            throw new BusinessException(ResponseStatus.FAIL, "密码未加密");
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
         }
 
 
@@ -146,7 +146,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String afterLogin(User user) {
 
+        // 登录
         StpUtil.login(user.getId());
+
+
+        // 将user的用户信息存入redis
+        stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.DAYS);
+
 
         SaSession session = StpUtil.getSession();
 
@@ -155,15 +161,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 将用户基本信息和角色信息保存进session中
             session.set(SESSION_USER, user);
             // 将user的用户信息存入redis
-            stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.DAYS);
+            stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.MINUTES);
         }
-
 
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
         rabbitTemplate.convertAndSend(USER_EXCHANGE_NAME, ROUTING_USER_CACHE, user.getId());
-
 
         return StpUtil.getTokenValue();
     }
@@ -176,7 +180,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return userDTO
      */
     @Override
-    public UserDTO getUserInfoById(Long id) {
+    public UserDTO getUserBaseInfoById(Long id) {
         String key = USER_BASE_INFO + id;
         // 先查询redis
         String baseInfo = stringRedisTemplate.opsForValue().get(key);
@@ -211,6 +215,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void updatePassword(UpdateUserPasswordDTO userPasswordDTO) {
         String phone = userPasswordDTO.getPhone();
+        Long id = userPasswordDTO.getUserId();
 
         if (!verifyPhone(phone, userPasswordDTO.getVerifyCode(), LOGIN_CODE_KEY)) {
             // 验证码错误
@@ -218,11 +223,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
 
-        // 一致，根据手机号查询用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("phone", phone));
+        // 一致，根据id查询用户
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
 
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
+        }
+
+        // 验证手机号是否一致
+        if (!StrUtil.equals(user.getPhone(), phone)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该手机号不属于该账号");
         }
 
 
@@ -241,9 +251,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.FAIL, "新旧密码不能一致");
         }
 
-        user.setPassword(newPassword);
 
-        boolean b = updateById(user);
+        boolean b = update(new UpdateWrapper<User>()
+                .set("password", newPassword)
+                .set("update_time", LocalDateTime.now())
+                .eq("id", id));
+
 
         if (!b) {
             log.error("更新用户{}失败", userPasswordDTO.getUserId());
@@ -259,6 +272,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void updatePhone(UpdateUserPhoneDTO userPhoneDTO) {
+        Long id = userPhoneDTO.getUserId();
         String oldPhone = userPhoneDTO.getOldPhone();
         String newPhone = userPhoneDTO.getNewPhone();
 
@@ -275,15 +289,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.FAIL, oldPhone + "新旧手机号不允许一致");
         }
 
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("phone", oldPhone));
+
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
 
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
         }
+        // 验证手机号是否一致
+        if (!StrUtil.equals(user.getPhone(), oldPhone)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该手机号不属于该账号");
+        }
 
-        user.setPhone(newPhone);
-
-        boolean b = updateById(user);
+        boolean b = update(new UpdateWrapper<User>()
+                .set("phone", newPhone)
+                .set("update_time", LocalDateTime.now())
+                .eq("id", id));
 
         if (!b) {
             log.error("更新用户{}失败", user.getId());
@@ -302,7 +322,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void updateNickNameById(Long id, String nickName) {
-        boolean b = update(new UpdateWrapper<User>().set("nick_name", nickName).eq("id", id));
+        boolean b = update(new UpdateWrapper<User>().set("nick_name", nickName).set("update_time", LocalDateTime.now()).eq("id", id));
         if (!b) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
@@ -327,7 +347,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
          */
         String path = "";
 
-        boolean b = update(new UpdateWrapper<User>().set("icon", icon).eq("id", id));
+        boolean b = update(new UpdateWrapper<User>().set("icon", icon).set("update_time", LocalDateTime.now()).eq("id", id));
 
         if (!b) {
             /*
@@ -355,7 +375,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 删除用户的具体信息
-        userInfoService.deleteUserInfo(null);
+        userInfoService.deleteUserInfoById(id);
 
 
     }
@@ -385,6 +405,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         log.info("创建用户{}成功,创建时间：{}", user.getId(), user.getCreateTime());
+
+
+        // 创建用户的具体信息
+        userInfoService.createUserInfoById(id);
+
         return user;
     }
 

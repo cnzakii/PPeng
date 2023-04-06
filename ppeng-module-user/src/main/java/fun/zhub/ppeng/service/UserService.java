@@ -54,7 +54,7 @@ public interface UserService extends IService<User> {
      * @param id id
      * @return userDTO
      */
-    UserDTO getUserInfoById(Long id);
+    UserDTO getUserBaseInfoById(Long id);
 
 
     /**

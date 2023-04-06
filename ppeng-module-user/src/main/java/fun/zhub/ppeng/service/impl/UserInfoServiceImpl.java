@@ -2,16 +2,15 @@ package fun.zhub.ppeng.service.impl;
 
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO;
 import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.DeleteUserInfoDTO;
-import fun.zhub.ppeng.dto.UpdateUserInfoDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserInfoMapper;
 import fun.zhub.ppeng.service.UserInfoService;
@@ -20,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,17 +65,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
 
-
     /**
      * 实现根据用户id更新用户具体信息
      *
      * @param userInfoDTO 用户具体信息
-     * @return UserInfo
      */
     @Override
-    public Boolean updateUserInfo(UpdateUserInfoDTO userInfoDTO) {
-        UserInfo userInfo = BeanUtil.toBean(userInfoDTO, UserInfo.class);
-        userInfo.setUpdateTime(DateUtil.toLocalDateTime(new Date(System.currentTimeMillis())));
+    public void updateUserInfo(UpdateUserInfoDTO userInfoDTO) {
+        UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO, UserInfo.class);
+        userInfo.setUpdateTime(LocalDateTime.now());
+
         int i = userInfoMapper.updateById(userInfo);
         if (i == 0) {
             log.error("更新用户具体信息{}失败", userInfo.getUserId());
@@ -84,27 +82,42 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
         log.info("更新用户具体信息{}成功,更新时间：{}", userInfo.getUserId(), userInfo.getUpdateTime());
-        return true;
     }
+
     /**
      * 实现根据用户id删除用户具体信息
      *
-     * @param deleteUserInfoDTO 用户具体信息
-     * @return UserInfo
+     * @param id id
      */
 
     @Override
-    public Boolean deleteUserInfo(DeleteUserInfoDTO deleteUserInfoDTO) {
-        UserInfo userInfo = BeanUtil.toBean(deleteUserInfoDTO, UserInfo.class);
-        userInfo.setUpdateTime(DateUtil.toLocalDateTime(new Date(System.currentTimeMillis())));
-        int i = userInfoMapper.deleteById(userInfo);
-        if (i == 0) {
-            log.error("删除用户具体信息{}失败", userInfo.getUserId());
+    public void deleteUserInfoById(Long id) {
+        boolean b = remove(new QueryWrapper<UserInfo>().eq("user_id", id));
+
+        if (!b) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
-        log.info("删除用户具体信息{}成功,更新时间：{}", userInfo.getUserId(), userInfo.getUpdateTime());
-        return true;
+        log.info("删除用户具体信息{}成功,更新时间：{}", id, LocalDateTime.now());
+    }
+
+    /**
+     * 实现根据id创建用户详细信息
+     *
+     * @param id id
+     */
+    @Override
+    public void createUserInfoById(Long id) {
+        UserInfo userInfo = new UserInfo();
+
+        userInfo.setUserId(id);
+        userInfo.setCreateTime(LocalDateTime.now());
+
+        boolean b = save(userInfo);
+        if (!b) {
+            log.error("用户{}详细信息创建错误", id);
+            throw new BusinessException(ResponseStatus.FAIL, "初始化用户信息错误");
+        }
     }
 }
 

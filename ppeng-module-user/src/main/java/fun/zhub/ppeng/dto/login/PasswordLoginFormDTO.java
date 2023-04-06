@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- *  用户登录结构体
+ * 用户登录结构体
  * <p>
  *
  * @author Zaki
@@ -25,9 +25,9 @@ public class PasswordLoginFormDTO implements Serializable {
 
 
     @NotEmpty(message = "手机号不能为空")
-    @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$",message = "手机号格式错误")
+    @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", message = "手机号格式错误")
     private String phone;
 
-   @NotEmpty(message = "密码不能为空")
+    @NotEmpty(message = "密码不能为空")
     private String password;
 }
