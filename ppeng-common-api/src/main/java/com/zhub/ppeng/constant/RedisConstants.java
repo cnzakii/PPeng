@@ -10,27 +10,35 @@ package com.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface RedisConstants {
+    /**
+     * 验证码注册前缀
+     */
+    String REGISTER_CODE_KEY = "register:code:";
 
     /**
-     * 手机验证码登录前缀
+     * 验证码更新过期时间
+     */
+    Long REGISTER_CODE_TTL = 1L;
+
+    /**
+     * 验证码登录前缀
      */
     String LOGIN_CODE_KEY = "login:code:";
 
     /**
-     * 手机验证码登录过期时间
+     * 验证码登录过期时间
      */
     Long LOGIN_CODE_TTL = 2L;
 
     /**
-     * 手机验证码更新前缀
+     * 验证码更新前缀
      */
-    String USER_UPDATE_CODE_KEY = "user:update:code:";
+    String UPDATE_CODE_KEY = "update:code:";
 
     /**
-     * 手机验证码更新过期时间
+     * 验证码更新过期时间
      */
-    Long USER_UPDATE_CODE_TTL = 1L;
-
+    Long UPDATE_CODE_TTL = 1L;
 
 
     /**

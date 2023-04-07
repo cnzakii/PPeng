@@ -28,9 +28,9 @@ public class UserDTO implements Serializable {
     private Long id;
 
     /**
-     * 用户手机号，脱敏处理
+     * 邮箱，脱敏处理
      */
-    private String phone;
+    private String email;
 
 
     /**

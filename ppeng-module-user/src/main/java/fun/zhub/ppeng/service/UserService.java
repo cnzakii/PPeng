@@ -2,10 +2,10 @@ package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import fun.zhub.ppeng.dto.UserDTO;
-import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.login.LoginFormDTO;
+import fun.zhub.ppeng.dto.register.RegisterDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,13 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UserService extends IService<User> {
 
 
-    /**
-     * 通过验证码登录
-     *
-     * @param loginFormDTO 用户验证码登录结构体
-     * @return user对象
-     */
-    User loginByVerifyCode(VerifyCodeLoginFormDTO loginFormDTO);
+    void register(RegisterDTO registerDTO);
 
 
     /**
@@ -37,7 +31,7 @@ public interface UserService extends IService<User> {
      * @param loginFormDTO 用户密码登录结构体
      * @return User
      */
-    User loginByPassword(PasswordLoginFormDTO loginFormDTO);
+    User loginByPassword(LoginFormDTO loginFormDTO);
 
 
     /**
@@ -47,6 +41,7 @@ public interface UserService extends IService<User> {
      * @return authentication
      */
     String afterLogin(User user);
+
 
     /**
      * 根据id获取用户信息
@@ -66,11 +61,11 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * 更新用户手机号
+     * 更新用户邮箱
      *
-     * @param userPhoneDTO userPhoneDTO
+     * @param userEmailDTO 邮箱
      */
-    void updatePhone(UpdateUserPhoneDTO userPhoneDTO);
+    void updateEmail(UpdateUserEmailDTO userEmailDTO);
 
 
     /**
@@ -98,25 +93,27 @@ public interface UserService extends IService<User> {
      */
     void deleteUserById(Long id);
 
+
     /**
-     * 根据id和手机号创建新用户
+     * 根据id，邮件，密码创建新用户
      *
-     * @param id    id
-     * @param phone 用户手机号
-     * @return User对象
+     * @param id       id
+     * @param email    邮件
+     * @param password 密码
+     * @return user
      */
-    User createUser(Long id, String phone);
+    User createUser(Long id, String email, String password);
 
 
     /**
      * 匹配 验证码和手机号
      *
-     * @param phone phone
+     * @param email email
      * @param code  验证码
      * @param key   redis存储对应验证码的前缀
      * @return 是否匹配
      */
-    Boolean verifyPhone(String phone, String code, String key);
+    Boolean verifyEmail(String email, String code, String key);
 
 
 }

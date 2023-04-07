@@ -5,16 +5,17 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.UserDTO;
-import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.login.LoginFormDTO;
+import fun.zhub.ppeng.dto.register.RegisterDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,9 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
 
     /**
      * GET方法获取公钥，用于密码登录
@@ -49,15 +53,27 @@ public class UserController {
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
+    /**
+     * 通过邮箱和密码注册
+     *
+     * @param registerDTO 用户密码登录结构体
+     * @return p-token
+     */
+    @PostMapping("/register")
+    public ResponseResult<String> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
+        userService.register(registerDTO);
+        return ResponseResult.success();
+    }
+
 
     /**
-     * 通过手机号和密码登录
+     * 通过邮箱和密码登录
      *
      * @param loginFormDTO 用户密码登录结构体
-     * @return authentication
+     * @return p-token
      */
     @PostMapping("/login/by/password")
-    public ResponseResult<String> loginByPassword(@Valid @RequestBody PasswordLoginFormDTO loginFormDTO) {
+    public ResponseResult<String> loginByPassword(@Valid @RequestBody LoginFormDTO loginFormDTO) {
         User user = userService.loginByPassword(loginFormDTO);
 
         String token = userService.afterLogin(user);
@@ -65,22 +81,6 @@ public class UserController {
         return ResponseResult.success(token);
     }
 
-
-    /**
-     * 通过手机号和手机验证码登录或注册
-     *
-     * @param loginFormDTO 用户验证码登录结构体
-     * @return authentication
-     */
-    @PostMapping("/login/by/code")
-    public ResponseResult<String> loginByVerifyCode(@Valid @RequestBody VerifyCodeLoginFormDTO loginFormDTO) {
-
-        User user = userService.loginByVerifyCode(loginFormDTO);
-
-        String token = userService.afterLogin(user);
-
-        return ResponseResult.success(token);
-    }
 
     /**
      * 用户登出
@@ -93,7 +93,6 @@ public class UserController {
         /*
          * TODO 异步删除用户其他缓存信息，如角色信息，具体粉丝等
          */
-
 
         return ResponseResult.success();
     }
@@ -130,14 +129,14 @@ public class UserController {
     }
 
     /**
-     * 更新用户手机号
+     * 更新用户邮箱
      *
      * @return success
      */
-    @PutMapping("update/phone")
-    public ResponseResult<String> updateUserPhone(@RequestBody @Valid UpdateUserPhoneDTO userPhoneDTO) {
+    @PutMapping("update/email")
+    public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
 
-        userService.updatePhone(userPhoneDTO);
+        userService.updateEmail(userEmailDTO);
 
         StpUtil.logout();
 

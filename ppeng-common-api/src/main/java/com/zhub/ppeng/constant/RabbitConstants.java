@@ -25,6 +25,8 @@ public interface RabbitConstants {
      */
     String ROUTING_USER_CACHE = "user.cache";
 
+    String ROUTING_USER_CACHE_DEL = "user.cache.delete";
+
 
 
 }

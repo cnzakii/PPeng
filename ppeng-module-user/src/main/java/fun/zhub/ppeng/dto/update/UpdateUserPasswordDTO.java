@@ -29,11 +29,12 @@ public class UpdateUserPasswordDTO implements Serializable {
     private Long userId;
 
     /**
-     * 手机号
+     * 邮箱
      */
-    @NotEmpty(message = "手机号不能为空")
-    @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", message = "手机号格式错误")
-    private String phone;
+    @NotEmpty(message = "邮箱不能为空")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$", message = "邮箱格式错误")
+    private String email;
+
 
     /**
      * 手机验证码
@@ -45,6 +46,7 @@ public class UpdateUserPasswordDTO implements Serializable {
      * 新密码
      */
     @NotEmpty(message = "新密码不能为空")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "密码太弱")
     private String newPassword;
 
 }

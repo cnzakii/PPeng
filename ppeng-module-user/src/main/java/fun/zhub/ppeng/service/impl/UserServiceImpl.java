@@ -23,10 +23,10 @@ import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.dto.UserDTO;
-import fun.zhub.ppeng.dto.login.PasswordLoginFormDTO;
-import fun.zhub.ppeng.dto.login.VerifyCodeLoginFormDTO;
+import fun.zhub.ppeng.dto.login.LoginFormDTO;
+import fun.zhub.ppeng.dto.register.RegisterDTO;
+import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserPhoneDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserInfoService;
@@ -74,31 +74,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     /**
-     * 实现通过验证码登录
+     * 实现用户注册功能
      *
-     * @param loginFormDTO 用户验证码登录结构体
-     * @return UserDTO
+     * @param registerDTO registerDTO
      */
     @Override
-    public User loginByVerifyCode(VerifyCodeLoginFormDTO loginFormDTO) {
-        String phone = loginFormDTO.getPhone();
+    public void register(RegisterDTO registerDTO) {
+        String email = registerDTO.getEmail();
+        String code = registerDTO.getCode();
+        String password = registerDTO.getPassword();
 
-        if (!verifyPhone(phone, loginFormDTO.getVerifyCode(), LOGIN_CODE_KEY)) {
-            // 验证码错误
+        // 验证验证码和邮箱
+        if (!verifyEmail(email, code, REGISTER_CODE_KEY)) {
             throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
 
-        // 一致，根据手机号查询用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("phone", phone));
+        // 查询email是否已经注册
+        User one = query().eq("email", email).one();
 
-
-        if (user == null) {
-            // 不存在则新建用户
-            Long userId = snowflake.nextId();
-            user = createUser(userId, phone);
+        if (BeanUtil.isNotEmpty(one)) {
+            throw new BusinessException(ResponseStatus.FAIL, "用户已经注册");
         }
 
-        return user;
+        Long id = snowflake.nextId();
+
+        createUser(id, email, password);
     }
 
 
@@ -109,8 +109,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return User
      */
     @Override
-    public User loginByPassword(PasswordLoginFormDTO loginFormDTO) {
-        String phone = loginFormDTO.getPhone();
+    public User loginByPassword(LoginFormDTO loginFormDTO) {
+        String email = loginFormDTO.getEmail();
         String password;
         try {
             password = rsa.decryptStr(loginFormDTO.getPassword(), KeyType.PrivateKey);
@@ -119,8 +119,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
 
-        // 根据手机号查询用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("phone", phone));
+        // 根据邮箱查询用户
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("email", email));
 
         if (user == null) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
@@ -197,9 +197,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
         }
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        // 手机号脱敏
-        String mobilePhone = DesensitizedUtil.mobilePhone(userDTO.getPhone());
-        userDTO.setPhone(mobilePhone);
+
+        // 邮箱脱敏
+        String mobileEmail = DesensitizedUtil.email(userDTO.getEmail());
+        userDTO.setEmail(mobileEmail);
 
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userDTO), USER_BASE_INFO_TTL, TimeUnit.MINUTES);
 
@@ -214,10 +215,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void updatePassword(UpdateUserPasswordDTO userPasswordDTO) {
-        String phone = userPasswordDTO.getPhone();
+        String email = userPasswordDTO.getEmail();
         Long id = userPasswordDTO.getUserId();
 
-        if (!verifyPhone(phone, userPasswordDTO.getVerifyCode(), LOGIN_CODE_KEY)) {
+        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), LOGIN_CODE_KEY)) {
             // 验证码错误
             throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
@@ -231,8 +232,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 验证手机号是否一致
-        if (!StrUtil.equals(user.getPhone(), phone)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该手机号不属于该账号");
+        if (!StrUtil.equals(user.getEmail(), email)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该邮箱不属于该账号");
         }
 
 
@@ -246,7 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         newPassword = SmUtil.sm3(userPasswordDTO.getUserId() + newPassword);
 
-        if (StrUtil.isNotEmpty(user.getPassword())) {
+        if (StrUtil.equals(user.getPassword(), newPassword)) {
             // 如果新旧密码一致，则返回错误结果
             throw new BusinessException(ResponseStatus.FAIL, "新旧密码不能一致");
         }
@@ -265,28 +266,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
+
     /**
-     * 实现更新用户手机号
+     * 实现更新用户邮箱
      *
-     * @param userPhoneDTO userPhoneDTO
+     * @param userEmailDTO userEmailDTO
      */
     @Override
-    public void updatePhone(UpdateUserPhoneDTO userPhoneDTO) {
-        Long id = userPhoneDTO.getUserId();
-        String oldPhone = userPhoneDTO.getOldPhone();
-        String newPhone = userPhoneDTO.getNewPhone();
+    public void updateEmail(UpdateUserEmailDTO userEmailDTO) {
+        Long id = userEmailDTO.getUserId();
+        String oldEmail = userEmailDTO.getOldEmail();
+        String newEmail = userEmailDTO.getNewEmail();
 
-        // 验证新旧手机号的验证码
-        if (!verifyPhone(oldPhone, userPhoneDTO.getOldCode(), USER_UPDATE_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldPhone + "-验证码错误");
+        // 验证新旧邮箱的验证码
+        if (!verifyEmail(oldEmail, userEmailDTO.getOldCode(), UPDATE_CODE_KEY)) {
+            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "-验证码错误");
         }
-        if (!verifyPhone(newPhone, userPhoneDTO.getNewCode(), USER_UPDATE_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldPhone + "-验证码错误");
+        if (!verifyEmail(newEmail, userEmailDTO.getNewCode(), UPDATE_CODE_KEY)) {
+            throw new BusinessException(ResponseStatus.FAIL, newEmail + "-验证码错误");
         }
 
-        // 不允许新旧手机号相同
-        if (StrUtil.equals(oldPhone, newPhone)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldPhone + "新旧手机号不允许一致");
+        // 不允许新旧邮箱相同
+        if (StrUtil.equals(oldEmail, newEmail)) {
+            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "新旧手机号不允许一致");
         }
 
 
@@ -295,13 +297,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
         }
-        // 验证手机号是否一致
-        if (!StrUtil.equals(user.getPhone(), oldPhone)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该手机号不属于该账号");
+
+        // 验证邮箱是否一致
+        if (!StrUtil.equals(user.getEmail(), oldEmail)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该邮箱不属于该账号");
         }
 
         boolean b = update(new UpdateWrapper<User>()
-                .set("phone", newPhone)
+                .set("email", newEmail)
                 .set("update_time", LocalDateTime.now())
                 .eq("id", id));
 
@@ -382,17 +385,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     /**
-     * 实现根据id和手机号创建新用户
+     * 实现根据id，邮件，密码创建新用户
      *
-     * @param id    id
-     * @param phone 用户手机号
+     * @param id       id
+     * @param email    邮件
+     * @param password 密码
      * @return user
      */
     @Override
-    public User createUser(Long id, String phone) {
+    public User createUser(Long id, String email, String password) {
         User user = new User();
         user.setId(id);
-        user.setPhone(phone);
+        user.setEmail(email);
+        user.setPassword(password);
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
         user.setRole(ROLE_USER);
         user.setCreateTime(LocalDateTime.now());
@@ -417,15 +422,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现验证 验证码和手机号是否匹配
      *
-     * @param phone phone
+     * @param email email
      * @param code  验证码
      * @param key   redis存储对应验证码的前缀
      * @return 是否匹配
      */
     @Override
-    public Boolean verifyPhone(String phone, String code, String key) {
+    public Boolean verifyEmail(String email, String code, String key) {
 
-        String cacheCode = stringRedisTemplate.opsForValue().get(key + phone);
+        String cacheCode = stringRedisTemplate.opsForValue().get(key + email);
 
 //        // 验证验证码
 //        if (!StrUtil.equals(code, cacheCode)) {

@@ -36,9 +36,9 @@ public class User implements Serializable {
     private Long id;
 
     /**
-     * 用户手机号
+     * 邮箱
      */
-    private String phone;
+    private String email;
 
     /**
      * 密码（加密方式：SM3 盐值：id）

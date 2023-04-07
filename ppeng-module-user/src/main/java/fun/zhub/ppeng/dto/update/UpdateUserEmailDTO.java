@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @since 2023-04-05
  **/
 @Data
-public class UpdateUserPhoneDTO implements Serializable {
+public class UpdateUserEmailDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 3191241716373120793L;
 
@@ -29,27 +29,27 @@ public class UpdateUserPhoneDTO implements Serializable {
     private Long userId;
 
     /**
-     * 旧手机号
+     * 旧邮箱
      */
-    @NotEmpty(message = "手机号不能为空")
-    @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", message = "手机号格式错误")
-    private String oldPhone;
+    @NotEmpty(message = "邮箱不能为空")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$", message = "邮箱格式错误")
+    private String oldEmail;
 
     /**
-     * 旧手机验证码
+     * 旧验证码
      */
     @NotEmpty(message = "验证码不能为空")
     private String oldCode;
 
     /**
-     * 新手机号
+     * 新邮箱
      */
-    @NotEmpty(message = "手机号不能为空")
-    @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", message = "手机号格式错误")
-    private String newPhone;
+    @NotEmpty(message = "邮箱不能为空")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$", message = "邮箱格式错误")
+    private String newEmail;
 
     /**
-     * 新手机验证码
+     * 新验证码
      */
     @NotEmpty(message = "验证码不能为空")
     private String newCode;
