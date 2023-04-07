@@ -123,7 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("phone", phone));
 
         if (user == null) {
-            throw new BusinessException(ResponseStatus.FAIL, "用户尚未注册");
+            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
         // 验证密码

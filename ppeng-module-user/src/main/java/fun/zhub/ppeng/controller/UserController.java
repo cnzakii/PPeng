@@ -85,12 +85,16 @@ public class UserController {
     /**
      * 用户登出
      *
-     * @param token authentication
      * @return success
      */
     @PostMapping("/logout")
-    public ResponseResult<String> logout(@RequestHeader("authentication") String token) {
-        StpUtil.logoutByTokenValue(token);
+    public ResponseResult<String> logout() {
+        StpUtil.logout();
+        /*
+         * TODO 异步删除用户其他缓存信息，如角色信息，具体粉丝等
+         */
+
+
         return ResponseResult.success();
     }
 
@@ -102,7 +106,7 @@ public class UserController {
      */
     @PostMapping("/current")
     public ResponseResult<UserDTO> getCurrentInfo() {
-        Long id = (Long) StpUtil.getLoginId();
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
         // 获取经过脱敏处理后的userInfo
         UserDTO userDTO = userService.getUserBaseInfoById(id);
 
