@@ -18,7 +18,7 @@ public interface RedisConstants {
     /**
      * 验证码更新过期时间
      */
-    Long REGISTER_CODE_TTL = 1L;
+    Long REGISTER_CODE_TTL = 2L;
 
     /**
      * 验证码登录前缀

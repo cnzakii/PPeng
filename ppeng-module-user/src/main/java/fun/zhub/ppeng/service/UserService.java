@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * <p>
  * UserService interface
- * 对用户的基本信息操作的接口类，包括：用户id，手机号，昵称，头像地址等
+ * 对用户的基本信息操作的接口类，包括：用户id，email，昵称，头像地址等
  * </p>
  *
  * @author Zaki
@@ -106,7 +106,7 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * 匹配 验证码和手机号
+     * 匹配 验证码和email
      *
      * @param email email
      * @param code  验证码

@@ -3,7 +3,6 @@ package fun.zhub.ppeng;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * <p>
@@ -14,7 +13,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @version 1.0
  * @since 2023-03-17
  **/
-@EnableFeignClients
+
 @EnableDiscoveryClient
 @SpringBootApplication
 public class PPengOtherApiApplication {

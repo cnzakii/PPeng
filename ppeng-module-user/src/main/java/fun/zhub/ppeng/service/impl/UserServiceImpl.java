@@ -231,7 +231,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
         }
 
-        // 验证手机号是否一致
+        // 验证email是否一致
         if (!StrUtil.equals(user.getEmail(), email)) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该邮箱不属于该账号");
         }
@@ -288,7 +288,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 不允许新旧邮箱相同
         if (StrUtil.equals(oldEmail, newEmail)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "新旧手机号不允许一致");
+            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "新旧邮箱不允许一致");
         }
 
 
@@ -420,7 +420,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     /**
-     * 实现验证 验证码和手机号是否匹配
+     * 实现验证 验证码和email是否匹配
      *
      * @param email email
      * @param code  验证码
