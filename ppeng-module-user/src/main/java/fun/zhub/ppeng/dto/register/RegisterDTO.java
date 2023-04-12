@@ -29,9 +29,8 @@ public class RegisterDTO implements Serializable {
 
     @NotEmpty(message = "验证码不能为空")
     @Pattern(regexp = "^\\d{6}$", message = "验证码无效")
-    private String Code;
+    private String code;
 
     @NotEmpty(message = "密码不能为空")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "密码太弱")
     private String password;
 }

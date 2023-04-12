@@ -12,7 +12,7 @@ package com.zhub.ppeng.constant;
 public interface RabbitConstants {
     /**
      * user模块交换机名称
-      */
+     */
     String USER_EXCHANGE_NAME = "user.direct.exchange";
 
     /**
@@ -20,13 +20,22 @@ public interface RabbitConstants {
      */
     String USER_CACHE_QUEUE_NAME = "user.cache.queue";
 
+
     /**
-     * user模块的routingKey
+     * user信息缓存删除队列
+     */
+    String USER_CACHE_DELETE_QUEUE_NAME = "user.cache.delete.queue";
+
+
+    /**
+     * routingKey 添加用户缓存
      */
     String ROUTING_USER_CACHE = "user.cache";
 
+    /**
+     * routingKey: 删除用户缓存
+     */
     String ROUTING_USER_CACHE_DEL = "user.cache.delete";
-
 
 
 }

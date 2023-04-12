@@ -1,7 +1,6 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-
 import cn.hutool.crypto.asymmetric.RSA;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.UserDTO;
@@ -18,6 +17,9 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE_DEL;
+import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
 
 
 /**
@@ -89,10 +91,13 @@ public class UserController {
      */
     @PostMapping("/logout")
     public ResponseResult<String> logout() {
-        StpUtil.logout();
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        StpUtil.logout(id);
+
         /*
-         * TODO 异步删除用户其他缓存信息，如角色信息，具体粉丝等
+         * 异步删除用户其他缓存信息，如角色信息，具体粉丝等
          */
+        rabbitTemplate.convertAndSend(USER_EXCHANGE_NAME, ROUTING_USER_CACHE_DEL, id);
 
         return ResponseResult.success();
     }

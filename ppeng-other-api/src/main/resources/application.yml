@@ -36,3 +36,7 @@ spring:
           ssl:
             enable: true
 
+management:
+  health:
+    redis:
+      enabled: false

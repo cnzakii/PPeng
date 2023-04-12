@@ -15,12 +15,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
-import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
-import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
-import static com.zhub.ppeng.constant.RedisConstants.*;
-import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
@@ -40,6 +34,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
+
+import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
+import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
+import static com.zhub.ppeng.constant.RedisConstants.*;
+import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
+import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 
 /**
  * <p>
@@ -84,21 +85,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String code = registerDTO.getCode();
         String password = registerDTO.getPassword();
 
+        try {
+            password = rsa.decryptStr(password, KeyType.PrivateKey);
+        } catch (Exception e) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
+        }
+
         // 验证验证码和邮箱
         if (!verifyEmail(email, code, REGISTER_CODE_KEY)) {
             throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
 
         // 查询email是否已经注册
-        User one = query().eq("email", email).one();
+        User one = userMapper.selectOne(new QueryWrapper<User>().eq("email", email));
+
 
         if (BeanUtil.isNotEmpty(one)) {
             throw new BusinessException(ResponseStatus.FAIL, "用户已经注册");
         }
 
+
         Long id = snowflake.nextId();
 
-        createUser(id, email, password);
+        String newPassword = SmUtil.sm3(id + password);
+
+        createUser(id, email, newPassword);
     }
 
 
@@ -401,6 +412,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
         user.setRole(ROLE_USER);
         user.setCreateTime(LocalDateTime.now());
+        user.setIsDeleted((byte) 0);
 
 
         int i = userMapper.insert(user);
@@ -432,13 +444,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         String cacheCode = stringRedisTemplate.opsForValue().get(key + email);
 
-//        // 验证验证码
-//        if (!StrUtil.equals(code, cacheCode)) {
-//            // 不一致，抛出异常
-//           return false
-//        }
-
-        return true;
+        // 验证验证码
+        // 不一致，抛出异常
+        return StrUtil.equals(code, cacheCode);
     }
 
 }

@@ -25,10 +25,7 @@ public interface RedisConstants {
      */
     String LOGIN_CODE_KEY = "login:code:";
 
-    /**
-     * 验证码登录过期时间
-     */
-    Long LOGIN_CODE_TTL = 2L;
+
 
     /**
      * 验证码更新前缀
@@ -65,7 +62,7 @@ public interface RedisConstants {
     /**
      * 用户详细信息
      */
-    String USER_DETAIL_INFO = "user:info:detail";
+    String USER_DETAIL_INFO = "user:info:detail:";
 
     /**
      * 用户详细信息过期时间

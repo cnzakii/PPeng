@@ -5,12 +5,13 @@ import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseResult;
-import static com.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_400;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static com.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_401;
+import static com.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
+import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 
 /**
  * <p>
@@ -31,7 +32,7 @@ public class SaTokenConfigure {
                 // 拦截地址
                 .addInclude("/**")    // 拦截全部path
                 // 开放地址
-                .addExclude("/user/login/**","/user/rsa")
+                .addExclude("/user/login/**","/user/rsa","/user/register")
                 // 鉴权方法：每次访问进入
                 .setAuth(obj -> {
                     // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录
@@ -47,7 +48,7 @@ public class SaTokenConfigure {
                 // 异常处理方法：每次setAuth函数出现异常时进入
                 .setError(e -> {
                     log.warn(e.getMessage());
-                    return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_400, null, e.getMessage()));
+                    return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, e.getMessage()));
                 })
                 ;
     }

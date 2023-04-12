@@ -1,11 +1,12 @@
 package fun.zhub.ppeng.config;
 
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static com.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
  * <p>
@@ -18,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
  **/
 @Configuration
 public class RabbitDirectConfig {
-
 
 
     /**
@@ -34,14 +34,26 @@ public class RabbitDirectConfig {
 
 
     /**
-     * 配置队列
+     * 配置用户缓存队列
      *
      * @return userQueue
      */
     @Bean("userCacheQueue")
-    public Queue userQueue() {
+    public Queue userCacheQueue() {
 
         return QueueBuilder.durable(USER_CACHE_QUEUE_NAME).build();
+    }
+
+
+    /**
+     * 配置用户缓存删除队列
+     *
+     * @return userCacheDeleteQueue
+     */
+    @Bean("userCacheDeleteQueue")
+    public Queue userCacheDeleteQueue() {
+
+        return QueueBuilder.durable(USER_CACHE_DELETE_QUEUE_NAME).build();
     }
 
 
@@ -53,9 +65,23 @@ public class RabbitDirectConfig {
      * @return getBinding
      */
     @Bean
-    public Binding bindingQueue(@Qualifier("userCacheQueue") Queue queue, @Qualifier("userDirectExchange") Exchange exchange) {
+    public Binding userCacheQueueBinding(@Qualifier("userCacheQueue") Queue queue, @Qualifier("userDirectExchange") Exchange exchange) {
 
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE).noargs();
     }
+
+    /**
+     * 队列和交换机绑定关系
+     *
+     * @param queue    队列
+     * @param exchange 交换机
+     * @return getBinding
+     */
+    @Bean
+    public Binding userCacheDeleteQueueBinding(@Qualifier("userCacheDeleteQueue") Queue queue, @Qualifier("userDirectExchange") Exchange exchange) {
+
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DEL).noargs();
+    }
+
 
 }
