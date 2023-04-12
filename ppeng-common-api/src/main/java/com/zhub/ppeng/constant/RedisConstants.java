@@ -26,7 +26,6 @@ public interface RedisConstants {
     String LOGIN_CODE_KEY = "login:code:";
 
 
-
     /**
      * 验证码更新前缀
      */
@@ -90,6 +89,16 @@ public interface RedisConstants {
      * 用户粉丝数据过期时间
      */
     Long USER_FANS_TTL = 30L;
+
+    /**
+     * 用户点赞菜谱数据前缀
+     */
+    String USER_LIKE_KEY = "user:like:";
+
+    /**
+     * 用户点赞菜谱数据过期时间
+     */
+    Long USER_LIKE_TTL = 30L;
 
 
 }
