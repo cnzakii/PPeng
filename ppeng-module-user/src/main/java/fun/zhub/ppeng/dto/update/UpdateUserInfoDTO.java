@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.dto.update;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.io.Serializable;

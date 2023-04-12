@@ -3,7 +3,6 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import static com.zhub.ppeng.constant.RedisConstants.*;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.mapper.FollowMapper;
 import fun.zhub.ppeng.service.FollowService;
@@ -15,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.zhub.ppeng.constant.RedisConstants.*;
 
 /**
  * <p>

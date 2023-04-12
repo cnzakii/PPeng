@@ -7,8 +7,6 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
-import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO;
-import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
 import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.dto.update.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;
@@ -21,6 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
+
+import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO;
+import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
 
 /**
  * <p>

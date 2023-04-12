@@ -2,10 +2,11 @@ package fun.zhub.ppeng.util;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import static com.zhub.ppeng.constant.SystemConstants.DATACENTER_ID;
-import static com.zhub.ppeng.constant.SystemConstants.WORK_ID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import static com.zhub.ppeng.constant.SystemConstants.DATACENTER_ID;
+import static com.zhub.ppeng.constant.SystemConstants.WORK_ID;
 
 /**
  * <p>

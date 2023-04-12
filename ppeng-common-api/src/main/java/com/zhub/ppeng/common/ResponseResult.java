@@ -1,11 +1,12 @@
 package com.zhub.ppeng.common;
 
-import static com.zhub.ppeng.common.ResponseStatus.FAIL;
-import static com.zhub.ppeng.common.ResponseStatus.SUCCESS;
 import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
+
+import static com.zhub.ppeng.common.ResponseStatus.FAIL;
+import static com.zhub.ppeng.common.ResponseStatus.SUCCESS;
 
 /**
  * <p>
