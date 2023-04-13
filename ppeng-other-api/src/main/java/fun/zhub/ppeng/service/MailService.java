@@ -11,15 +11,22 @@ package fun.zhub.ppeng.service;
  **/
 public interface MailService {
 
+
     /**
-     * 发送简单文字邮件
+     * 发送注册邮件
      *
-     * @param mailFrom     发件人邮箱
-     * @param mailFromNick 发件人昵称
-     * @param mailTo       收件人邮箱
-     * @param cc           抄送人邮箱(可为空，方法内部处理)
-     * @param subject      主题
-     * @param content      内容
+     * @param mail mail
      */
-    void sendSimpleMail(String mailFrom, String mailFromNick, String mailTo, String cc, String subject, String content);
+    void sendRegisterEmail(String mail);
+
+
+    /**
+     * 发送修改信息的验证码邮件
+     *
+     * @param mail mail
+     */
+    void sendUpdateEmail(String mail);
+
+
+    void sendEmailVerificationCode(String mailFrom, String toAddress, String verifyCode, String type);
 }

@@ -27,6 +27,7 @@ spring:
             - Path=/user/**
 
 
+
 management:
   health:
     redis:
