@@ -26,6 +26,7 @@ public interface LikeService extends IService<Like> {
 
     /**
      * 查询该用户所点赞的菜谱列表
+     *
      * @param userId userId
      * @return Set
      */
@@ -33,8 +34,18 @@ public interface LikeService extends IService<Like> {
 
 
     /**
+     * 删除点赞的菜谱
+     *
+     * @param userId   用户id
+     * @param recipeId 菜谱id
+     */
+    void deleteLikedRecipe(Long userId, Long recipeId);
+
+
+    /**
      * 查询是否已经被点赞
-     * @param userId 用户id
+     *
+     * @param userId   用户id
      * @param recipeId 菜谱
      * @return true or false
      */

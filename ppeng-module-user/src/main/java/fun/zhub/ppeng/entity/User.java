@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,6 +34,7 @@ public class User implements Serializable {
      * 微信登录用户：openid
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @Id
     private Long id;
 
     /**

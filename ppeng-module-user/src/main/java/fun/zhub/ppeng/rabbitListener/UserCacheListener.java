@@ -1,9 +1,12 @@
 package fun.zhub.ppeng.rabbitListener;
 
+
 import fun.zhub.ppeng.service.FollowService;
+import fun.zhub.ppeng.service.LikeService;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
@@ -25,7 +28,7 @@ import static com.zhub.ppeng.constant.RedisConstants.*;
  **/
 @Component
 @Slf4j
-public class DoUserCacheInfo {
+public class UserCacheListener {
 
     @Resource
     private UserInfoService userInfoService;
@@ -34,15 +37,18 @@ public class DoUserCacheInfo {
     private FollowService followService;
 
     @Resource
+    private LikeService likeService;
+
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 监听用户缓存队列(user.cacheQueue)，加载用户信息到缓存中
+     * 监听用户缓存队列(user.cache.queue)，加载用户信息到缓存中
      */
 
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = USER_CACHE_QUEUE_NAME),
-            exchange = @Exchange(name = USER_EXCHANGE_NAME),
+            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE
     ))
     public void ListenUserCacheQueue(Long id) {
@@ -59,9 +65,9 @@ public class DoUserCacheInfo {
         // 缓存具体粉丝数
         followService.queryFansById(id);
 
-        /*
-         * TODO 缓存点赞的菜谱
-         */
+
+        // 缓存点赞的菜谱
+        likeService.queryLikedRecipeSet(id);
 
     }
 
@@ -70,7 +76,7 @@ public class DoUserCacheInfo {
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = USER_CACHE_DELETE_QUEUE_NAME),
-            exchange = @Exchange(name = USER_EXCHANGE_NAME),
+            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE_DEL
     ))
     public void ListenUserCacheDeleteQueue(Long id) {
@@ -85,15 +91,15 @@ public class DoUserCacheInfo {
         stringRedisTemplate.delete(USER_DETAIL_INFO + id);
 
         // 删除具体关注
-        stringRedisTemplate.delete(USER_FOLLOWS + id);
+        stringRedisTemplate.delete(USER_FOLLOWS_KEY + id);
 
         // 删除具体粉丝
-        stringRedisTemplate.delete(USER_FANS + id);
+        stringRedisTemplate.delete(USER_FANS_KEY + id);
 
-
-        /*
-         * TODO 删除缓存点赞的菜谱
-         */
+        // 删除缓存点赞的菜谱
+        stringRedisTemplate.delete(USER_LIKE_KEY + id);
 
     }
+
+
 }

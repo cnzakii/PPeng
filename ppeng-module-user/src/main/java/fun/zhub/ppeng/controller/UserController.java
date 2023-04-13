@@ -18,8 +18,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
 import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE_DEL;
-import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
 
 
 /**
@@ -97,7 +97,7 @@ public class UserController {
         /*
          * 异步删除用户其他缓存信息，如角色信息，具体粉丝等
          */
-        rabbitTemplate.convertAndSend(USER_EXCHANGE_NAME, ROUTING_USER_CACHE_DEL, id);
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE_DEL, id);
 
         return ResponseResult.success();
     }
@@ -128,7 +128,6 @@ public class UserController {
 
         userService.updatePassword(userPasswordDTO);
 
-        StpUtil.logout();
 
         return ResponseResult.success();
     }
@@ -142,8 +141,6 @@ public class UserController {
     public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
 
         userService.updateEmail(userEmailDTO);
-
-        StpUtil.logout();
 
         return ResponseResult.success();
     }

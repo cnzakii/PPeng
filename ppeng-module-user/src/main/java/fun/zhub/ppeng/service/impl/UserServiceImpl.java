@@ -4,6 +4,7 @@ import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -35,8 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
+import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
 import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
-import static com.zhub.ppeng.constant.RabbitConstants.USER_EXCHANGE_NAME;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
@@ -89,6 +90,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             password = rsa.decryptStr(password, KeyType.PrivateKey);
         } catch (Exception e) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
+        }
+
+        // 检查密码强度
+        boolean matches = password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$");
+        if (BooleanUtil.isFalse(matches)) {
+            throw new BusinessException(ResponseStatus.FAIL, "密码太弱");
         }
 
         // 验证验证码和邮箱
@@ -178,7 +185,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
-        rabbitTemplate.convertAndSend(USER_EXCHANGE_NAME, ROUTING_USER_CACHE, user.getId());
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE, user.getId());
 
         return StpUtil.getTokenValue();
     }
@@ -345,6 +352,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
          * TODO 使用MQ将昵称传个第三方审核接口进行审核。
          */
 
+
     }
 
     /**
@@ -418,7 +426,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         int i = userMapper.insert(user);
         if (i == 0) {
             log.error("创建用户{}失败", user.getId());
-            throw new BusinessException(ResponseStatus.FAIL, "新建用户失败");
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "新建用户失败");
         }
 
         log.info("创建用户{}成功,创建时间：{}", user.getId(), user.getCreateTime());

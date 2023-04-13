@@ -18,6 +18,15 @@ import java.util.concurrent.TimeUnit;
 public interface FollowService extends IService<Follow> {
 
     /**
+     * 添加关注
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     */
+    void addFollow(Long userId, Long followId);
+
+
+    /**
      * 根据id查询用户的所有关注
      *
      * @return 关注列表
@@ -32,6 +41,14 @@ public interface FollowService extends IService<Follow> {
      */
     Set<String> queryFansById(Long id);
 
+    /**
+     * 删除关注
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     */
+    void deleteFollow(Long userId, Long followId);
+
 
     /**
      * 根据id查询用户粉丝或者关注
@@ -44,6 +61,16 @@ public interface FollowService extends IService<Follow> {
      * @return 关注列表或者粉丝列表
      */
     Set<String> queryById(String prefixKey, Long TTL, TimeUnit timeUnit, String name, Long id);
+
+
+    /**
+     * 判断该用户是否关注过
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     * @return true or false
+     */
+    Boolean isFollow(Long userId, Long followId);
 
 
 }

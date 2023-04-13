@@ -4,10 +4,9 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.service.LikeService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 /**
  * <p>
@@ -26,19 +25,65 @@ public class LikeController {
 
     /**
      * 添加喜欢的菜谱
+     *
      * @param recipeId 菜谱id
      * @return success
      */
     @PostMapping("/add/{recipeId}")
-    public ResponseResult<String> AddFavoriteRecipe(@PathVariable("recipeId")Long recipeId ){
+    public ResponseResult<String> addLikedRecipe(@PathVariable("recipeId") Long recipeId) {
         Long userId = Long.valueOf((String) StpUtil.getLoginId());
 
-        likeService.addLikedRecipe(userId,recipeId);
+        likeService.addLikedRecipe(userId, recipeId);
 
 
         return ResponseResult.success();
     }
 
+
+    /**
+     * 列出该用户点赞菜谱的id列表
+     *
+     * @return set
+     */
+    @GetMapping("/list")
+    public ResponseResult<Set<String>> queryMyLikedSet() {
+        Long userId = Long.valueOf((String) StpUtil.getLoginId());
+
+        Set<String> set = likeService.queryLikedRecipeSet(userId);
+
+        return ResponseResult.success(set);
+    }
+
+    /**
+     * 查看该用户是否点赞该菜谱
+     *
+     * @param recipeId 菜谱id
+     * @return true or false
+     */
+    @PostMapping("/{recipeId}")
+    public ResponseResult<Boolean> isLike(@PathVariable("recipeId") Long recipeId) {
+        Long userId = Long.valueOf((String) StpUtil.getLoginId());
+
+        Boolean liked = likeService.isLiked(userId, recipeId);
+
+        return ResponseResult.success(liked);
+    }
+
+
+    /**
+     * 取消点赞菜谱
+     *
+     * @param recipeId 菜谱id
+     * @return success
+     */
+    @DeleteMapping("/delete/{recipeId}")
+    public ResponseResult<String> DeleteLikedRecipe(@PathVariable("recipeId") Long recipeId) {
+        Long userId = Long.valueOf((String) StpUtil.getLoginId());
+
+        likeService.deleteLikedRecipe(userId, recipeId);
+
+        return ResponseResult.success();
+    }
 
 
 }

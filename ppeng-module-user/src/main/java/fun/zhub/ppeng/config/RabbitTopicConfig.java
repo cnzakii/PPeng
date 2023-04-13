@@ -18,7 +18,7 @@ import static com.zhub.ppeng.constant.RabbitConstants.*;
  * @since 2023-03-21
  **/
 @Configuration
-public class RabbitDirectConfig {
+public class RabbitTopicConfig {
 
 
     /**
@@ -26,10 +26,10 @@ public class RabbitDirectConfig {
      *
      * @return userDirectExchange
      */
-    @Bean("userDirectExchange")
-    public Exchange userDirectExchange() {
+    @Bean("ppengTopicExchange")
+    public TopicExchange ppengTopicExchange() {
 
-        return ExchangeBuilder.directExchange(USER_EXCHANGE_NAME).durable(true).build();
+        return ExchangeBuilder.topicExchange(PPENG_EXCHANGE_NAME).durable(true).build();
     }
 
 
@@ -40,6 +40,7 @@ public class RabbitDirectConfig {
      */
     @Bean("userCacheQueue")
     public Queue userCacheQueue() {
+
 
         return QueueBuilder.durable(USER_CACHE_QUEUE_NAME).build();
     }
@@ -56,6 +57,18 @@ public class RabbitDirectConfig {
         return QueueBuilder.durable(USER_CACHE_DELETE_QUEUE_NAME).build();
     }
 
+    /**
+     * 配置用户缓存更新队列队列
+     *
+     * @return userCacheUpdateQueue
+     */
+    @Bean("userCacheUpdateQueue")
+    public Queue userCacheUpdateQueue() {
+
+        return QueueBuilder.durable(USER_CACHE_UPDATE_QUEUE_NAME).build();
+    }
+
+
 
     /**
      * 队列和交换机绑定关系
@@ -65,9 +78,9 @@ public class RabbitDirectConfig {
      * @return getBinding
      */
     @Bean
-    public Binding userCacheQueueBinding(@Qualifier("userCacheQueue") Queue queue, @Qualifier("userDirectExchange") Exchange exchange) {
+    public Binding userCacheQueueBinding(@Qualifier("userCacheQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE).noargs();
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE);
     }
 
     /**
@@ -78,10 +91,26 @@ public class RabbitDirectConfig {
      * @return getBinding
      */
     @Bean
-    public Binding userCacheDeleteQueueBinding(@Qualifier("userCacheDeleteQueue") Queue queue, @Qualifier("userDirectExchange") Exchange exchange) {
+    public Binding userCacheDeleteQueueBinding(@Qualifier("userCacheDeleteQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DEL).noargs();
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DEL);
     }
+
+
+    /**
+     * 队列和交换机绑定关系
+     *
+     * @param queue    队列
+     * @param exchange 交换机
+     * @return getBinding
+     */
+    @Bean
+    public Binding userCacheUpdateQueueBinding(@Qualifier("userCacheUpdateQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_UPDATE);
+    }
+
+
 
 
 }

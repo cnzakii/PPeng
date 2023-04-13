@@ -72,7 +72,7 @@ public interface RedisConstants {
     /**
      * 用户关注数据前缀
      */
-    String USER_FOLLOWS = "user:follows:";
+    String USER_FOLLOWS_KEY = "user:follows:";
 
     /**
      * 用户关注数据过期时间
@@ -83,7 +83,7 @@ public interface RedisConstants {
     /**
      * 用户粉丝数据前缀
      */
-    String USER_FANS = "user:fans:";
+    String USER_FANS_KEY = "user:fans:";
 
     /**
      * 用户粉丝数据过期时间

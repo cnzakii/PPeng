@@ -1,17 +1,23 @@
 package fun.zhub.ppeng.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+
+import cn.hutool.core.util.BooleanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhub.ppeng.common.ResponseStatus;
+import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.mapper.FollowMapper;
 import fun.zhub.ppeng.service.FollowService;
+import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +40,51 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Resource
     private FollowMapper followMapper;
 
+    @Resource
+    private UserInfoService userInfoService;
+
+    /**
+     * 实现添加关注
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     */
+    @Override
+    public void addFollow(Long userId, Long followId) {
+        String key = USER_FOLLOWS_KEY + userId;
+        Boolean isFollow = isFollow(userId, followId);
+
+        if (BooleanUtil.isTrue(isFollow)) {
+            throw new BusinessException(ResponseStatus.FAIL, "已经关注过该用户");
+        }
+
+        // 写入数据库，存入redis
+        Follow follow = new Follow();
+        follow.setUserId(userId);
+        follow.setFollowId(followId);
+        follow.setCreateTime(LocalDateTime.now());
+        int i = followMapper.insert(follow);
+        if (i == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加失败");
+        }
+
+        // 累加粉丝数和关注数
+        userInfoService.updateFollowOrFans("follows", userId, "insert");
+        userInfoService.updateFollowOrFans("fans", followId, "insert");
+
+
+        // 查看是否有-1元素，有则清除
+        Boolean b = stringRedisTemplate.opsForSet().isMember(key, "-1");
+        if (BooleanUtil.isTrue(b)) {
+            stringRedisTemplate.opsForSet().remove(key, "-1");
+        }
+
+        stringRedisTemplate.opsForSet().add(key, String.valueOf(followId));
+        stringRedisTemplate.expire(key, USER_FOLLOWS_TTL, TimeUnit.MINUTES);
+
+    }
+
+
     /**
      * 实现根据id查询用户的所有关注
      *
@@ -43,7 +94,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Override
     public Set<String> queryFollowById(Long id) {
 
-        return queryById(USER_FOLLOWS, USER_FOLLOWS_TTL, TimeUnit.MINUTES, "user_id", id);
+        return queryById(USER_FOLLOWS_KEY, USER_FOLLOWS_TTL, TimeUnit.MINUTES, "user_id", id);
     }
 
 
@@ -57,8 +108,40 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     public Set<String> queryFansById(Long id) {
 
 
-        return queryById(USER_FANS, USER_FANS_TTL, TimeUnit.MINUTES, "follow_id", id);
+        return queryById(USER_FANS_KEY, USER_FANS_TTL, TimeUnit.MINUTES, "follow_id", id);
     }
+
+    /**
+     * 实现删除关注功能
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     */
+    @Override
+    public void deleteFollow(Long userId, Long followId) {
+        String key = USER_FOLLOWS_KEY + userId;
+        Boolean isFollow = isFollow(userId, followId);
+        if (BooleanUtil.isFalse(isFollow)) {
+            throw new BusinessException(ResponseStatus.FAIL, "尚未关注该用户");
+        }
+
+        int i = followMapper.delete(new QueryWrapper<Follow>().eq("user_id", userId).eq("follow_id", followId));
+
+        if (i == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "删除失败");
+        }
+
+        // 减少粉丝数和关注数
+        userInfoService.updateFollowOrFans("follows", userId, "delete");
+        userInfoService.updateFollowOrFans("fans", followId, "delete");
+
+
+        // 删除redis缓存并刷新过期时间
+        stringRedisTemplate.opsForSet().remove(key, String.valueOf(followId));
+        stringRedisTemplate.expire(key, USER_FOLLOWS_TTL, TimeUnit.MINUTES);
+
+    }
+
 
     /**
      * 实现根据id查询用户粉丝或者关注
@@ -72,7 +155,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
      */
     @Override
     public Set<String> queryById(String prefixKey, Long TTL, TimeUnit timeUnit, String name, Long id) {
-        Set<String> set = new HashSet<>();
+
 
         String key = prefixKey + id;
         // 先从redis中查询
@@ -80,24 +163,69 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
 
 
         // 如果不为空,刷新缓存
-        if (!CollUtil.isEmpty(members)) {
-            stringRedisTemplate.expire(key, TTL, timeUnit);
-            return set;
+        if (members != null && !members.isEmpty()) {
+            // 查看是否包含-1，也就是说该用户当前没有关注
+            boolean b = members.contains(String.valueOf(-1));
+            if (b && members.size() == 1) {
+                return null;
+            } else {
+                return members;
+            }
         }
 
         // 没有再从数据库查询
         List<Follow> list = followMapper.selectList(new QueryWrapper<Follow>().eq(name, id));
 
-
-
-        for (Follow follow : list) {
-            String followId = String.valueOf(follow.getFollowId());
-            set.add(followId);
-            stringRedisTemplate.opsForSet().add(key, followId);
+        if (list == null || list.isEmpty()) {
+            // 如果没有，这插入一条为-1的数据，然后存入Redis
+            stringRedisTemplate.opsForSet().add(key, "-1");
+            return null;
         }
 
+        String[] followArray = new String[list.size()];
+        Set<String> set = new HashSet<>();
+
+        if (Objects.equals(name, "follow_id")) {
+            for (int i = 0; i < followArray.length; i++) {
+                followArray[i] = String.valueOf(list.get(i).getFollowId());
+                set.add(followArray[i]);
+            }
+        } else {
+            for (int i = 0; i < followArray.length; i++) {
+                followArray[i] = String.valueOf(list.get(i).getUserId());
+                set.add(followArray[i]);
+            }
+        }
+
+        stringRedisTemplate.opsForSet().add(key, followArray);
         stringRedisTemplate.expire(key, TTL, timeUnit);
 
         return set;
+    }
+
+    /**
+     * 实现判断是否关注
+     *
+     * @param userId   用户id
+     * @param followId 关注id
+     * @return true or false
+     */
+    @Override
+    public Boolean isFollow(Long userId, Long followId) {
+        String key = USER_FOLLOWS_KEY + userId;
+
+        // 先从Redis里面查询
+        Set<String> members = stringRedisTemplate.opsForSet().members(key);
+
+        if (members != null && !members.isEmpty()) {
+            // 刷新过期时间
+            stringRedisTemplate.expire(key, USER_FOLLOWS_TTL, TimeUnit.MINUTES);
+            return members.contains(String.valueOf(followId));
+        }
+
+        // 没有则查询数据库
+        Set<String> set = queryFollowById(userId);
+
+        return set.contains(String.valueOf(followId));
     }
 }

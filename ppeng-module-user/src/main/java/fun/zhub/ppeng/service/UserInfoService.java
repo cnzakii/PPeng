@@ -30,6 +30,16 @@ public interface UserInfoService extends IService<UserInfo> {
      */
     void updateUserInfo(UpdateUserInfoDTO userInfo);
 
+
+    /**
+     * 更新单条信息
+     *
+     * @param name   字段名
+     * @param userId id
+     * @param type   类型
+     */
+    void updateFollowOrFans(String name, Long userId, String type);
+
     /**
      * 根据用户id删除用户具体信息
      *

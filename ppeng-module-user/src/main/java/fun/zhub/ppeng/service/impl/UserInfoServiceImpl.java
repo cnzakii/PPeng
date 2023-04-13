@@ -5,6 +5,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
@@ -83,6 +84,37 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
         log.info("更新用户具体信息{}成功,更新时间：{}", userInfo.getUserId(), userInfo.getUpdateTime());
+    }
+
+    /**
+     * 实现更新粉丝或者关注
+     *
+     * @param name   字段名
+     * @param userId id
+     * @param type   添加或删除
+     */
+    @Override
+    public void updateFollowOrFans(String name, Long userId, String type) {
+        String sql;
+        if (StrUtil.equals(type, "insert")) {
+            sql = name + "=" + name + "+1";
+        } else if (StrUtil.equals(type, "delete")) {
+            sql = name + "=" + name + "-1";
+        } else {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数失败");
+        }
+
+
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+
+        updateWrapper.eq("user_id", userId).setSql(sql);
+
+        boolean b = update(updateWrapper);
+        if (!b) {
+            log.error("更新用户具体信息{}失败", userId);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+        }
+
     }
 
     /**
