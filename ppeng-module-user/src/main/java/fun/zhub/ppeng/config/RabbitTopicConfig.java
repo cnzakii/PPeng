@@ -10,7 +10,7 @@ import static com.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
  * <p>
- * RabbitMQ配置类-DirectExchange模式
+ * RabbitMQ配置类-TopicExchange模式
  * <p>
  *
  * @author Zaki
@@ -22,9 +22,9 @@ public class RabbitTopicConfig {
 
 
     /**
-     * 配置交换机-DirectExchange
+     * 配置交换机-TopicExchange
      *
-     * @return userDirectExchange
+     * @return ppengTopicExchange
      */
     @Bean("ppengTopicExchange")
     public TopicExchange ppengTopicExchange() {
@@ -70,6 +70,7 @@ public class RabbitTopicConfig {
 
 
 
+
     /**
      * 队列和交换机绑定关系
      *
@@ -95,7 +96,6 @@ public class RabbitTopicConfig {
 
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DEL);
     }
-
 
     /**
      * 队列和交换机绑定关系

@@ -2,7 +2,9 @@ package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.asymmetric.RSA;
+import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseResult;
+import com.zhub.ppeng.dto.TextContentCensorDTO;
 import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
@@ -18,8 +20,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
-import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE_DEL;
+import static com.zhub.ppeng.constant.RabbitConstants.*;
 
 
 /**
@@ -157,6 +158,13 @@ public class UserController {
         Long id = (Long) StpUtil.getLoginId();
 
         userService.updateNickNameById(id, nickName);
+
+        /*
+         * 使用MQ将昵称传个第三方审核接口进行审核。
+         */
+        TextContentCensorDTO censorDTO = new TextContentCensorDTO("nickName", id, nickName);
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_TEXT_CENSOR, JSONUtil.toJsonStr(censorDTO));
+
 
         return ResponseResult.success();
     }

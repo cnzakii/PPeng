@@ -344,13 +344,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void updateNickNameById(Long id, String nickName) {
         boolean b = update(new UpdateWrapper<User>().set("nick_name", nickName).set("update_time", LocalDateTime.now()).eq("id", id));
-        if (!b) {
-            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
-        }
 
-        /*
-         * TODO 使用MQ将昵称传个第三方审核接口进行审核。
-         */
+        if (!b) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+        }
 
 
     }
