@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
                     .forEach(a -> exceptionMsg.add(a.getDefaultMessage()));
         } else if (e instanceof ConstraintViolationException) {
             if (e.getMessage() != null) {
-                exceptionMsg.add(e.getMessage());
+                exceptionMsg.add(e.getLocalizedMessage());
             }
         } else {
             exceptionMsg.add("invalid parameter");
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public ResponseResult<Exception> processException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
+        log.error("Exception: {}", exception.getLocalizedMessage());
         // 这里可以屏蔽掉后台的异常栈信息，直接返回"server error"
         return ResponseResult.fail(exception.getLocalizedMessage());
     }

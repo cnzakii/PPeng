@@ -4,7 +4,10 @@ import cn.hutool.core.util.RandomUtil;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.zhub.ppeng.constant.RoleConstants.BAD_NICK_NAME_PREFIX;
 

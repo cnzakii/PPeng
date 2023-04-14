@@ -2,7 +2,7 @@ package com.zhub.ppeng.constant;
 
 /**
  * <p>
- *  和用户或者管理员相关的常量
+ * 和用户或者管理员相关的常量
  * <p>
  *
  * @author Zaki
@@ -11,6 +11,8 @@ package com.zhub.ppeng.constant;
  **/
 public interface RoleConstants {
     String DEFAULT_NICK_NAME_PREFIX = "PPeng_";
+
+    String BAD_NICK_NAME_PREFIX = "违规昵称_";
 
     String ROLE_USER = "user";
 

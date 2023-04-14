@@ -30,10 +30,6 @@ public class MailController {
     @PostMapping("/register/{mail}")
     public ResponseResult<String> sendRegisterMail(@PathVariable("mail") String mail) {
 
-        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
-        if (!b) {
-            return ResponseResult.fail("邮件格式错误");
-        }
 
         mailService.sendRegisterEmail(mail);
 
@@ -43,10 +39,6 @@ public class MailController {
     @PostMapping("/update/{mail}")
     public ResponseResult<String> sendUpdateMail(@PathVariable("mail") String mail) {
 
-        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
-        if (!b) {
-            return ResponseResult.fail("邮件格式错误");
-        }
 
         mailService.sendUpdateEmail(mail);
 

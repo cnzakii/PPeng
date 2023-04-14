@@ -20,12 +20,11 @@ spring:
         dashboard: ****:8976  # 配置Sentinel dashboard地址
         port: 8719                 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
   mail:
-    host: smtp.qq.com
-    username: ****@qq.com
+    host: smtp.office365.com
+    username: PPeng@****
     password: **confidential**
     default-encoding: UTF-8
-    port: 465
-    protocol: smtp
+    port: 587
     properties:
       mail:
         smtp:
@@ -33,8 +32,6 @@ spring:
           starttls:
             enable: true
             required: true
-          ssl:
-            enable: true
 
 management:
   health:

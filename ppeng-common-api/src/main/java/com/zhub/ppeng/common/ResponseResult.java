@@ -1,7 +1,9 @@
 package com.zhub.ppeng.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -20,8 +22,10 @@ import static com.zhub.ppeng.common.ResponseStatus.SUCCESS;
 
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class ResponseResult<T> {
+public class ResponseResult<T> implements Serializable {
     /**
      * 时间戳
      */

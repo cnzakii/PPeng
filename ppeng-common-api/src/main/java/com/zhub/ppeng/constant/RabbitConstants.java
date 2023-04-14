@@ -27,9 +27,19 @@ public interface RabbitConstants {
     String USER_CACHE_DELETE_QUEUE_NAME = "user.cache.delete.queue";
 
     /*
-     * user信息更新缓存
+     * user信息更新缓存队列
      */
     String USER_CACHE_UPDATE_QUEUE_NAME = "user.cache.update.queue";
+
+    /*
+     * 发送邮件队列
+     */
+    String MAIL_SEND_QUEUE_NAME = "mail.send.queue";
+
+    /**
+     * 文本内容审核队列
+     */
+    String TEXT_CONTENT_CENSOR_QUEUE = "text.content.censor.queue";
 
 
     /**
@@ -46,6 +56,16 @@ public interface RabbitConstants {
      * routingKey: 更新用户缓存
      */
     String ROUTING_USER_CACHE_UPDATE = "user.cache.update";
+
+    /**
+     * routingKey: 发送邮件
+     */
+    String ROUTING_MAIL_SEND = "mail.send";
+
+    /**
+     * routingKey: 审核文本
+     */
+    String ROUTING_TEXT_CENSOR = "text.censor";
 
 
 }

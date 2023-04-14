@@ -3,13 +3,16 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.dto.VerifyMailDTO;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,8 +23,9 @@ import org.thymeleaf.context.Context;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
+import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_MAIL_SEND;
 import static com.zhub.ppeng.constant.RedisConstants.*;
-import static com.zhub.ppeng.constant.RedisConstants.UPDATE_CODE_TTL;
 import static fun.zhub.ppeng.constants.MailConstants.*;
 
 /**
@@ -41,6 +45,9 @@ public class MailServiceImpl implements MailService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    @Resource
     private JavaMailSender mailSender;
 
     @Resource
@@ -54,6 +61,10 @@ public class MailServiceImpl implements MailService {
      */
     @Override
     public void sendRegisterEmail(String mail) {
+        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        if (!b) {
+            throw new BusinessException(ResponseStatus.FAIL, "邮件格式错误");
+        }
         // 先查询redis中是否存在该信息
         String key = REGISTER_CODE_KEY + mail;
 
@@ -66,11 +77,13 @@ public class MailServiceImpl implements MailService {
         // 生成6位长度的验证码，发送邮件并写入Redis
         String code = RandomUtil.randomNumbers(6);
 
-        /*
-         * TODO MQ异步处理
-         */
+        VerifyMailDTO mailDTO = new VerifyMailDTO(MAIL_FROM, MAIL_FROM_NICK, mail, REGISTER_SUBJECT, REGISTER_TYPE, code);
 
-        sendEmailVerificationCode(MAIL_FROM, mail, code, "修改账号");
+        /*
+         * MQ异步处理
+         */
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
+
 
         stringRedisTemplate.opsForValue().set(key, code, REGISTER_CODE_TTL, TimeUnit.MINUTES);
 
@@ -83,6 +96,10 @@ public class MailServiceImpl implements MailService {
      */
     @Override
     public void sendUpdateEmail(String mail) {
+        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        if (!b) {
+            throw new BusinessException(ResponseStatus.FAIL, "邮件格式错误");
+        }
         // 先查询redis中是否存在该信息
         String key = UPDATE_CODE_KEY + mail;
 
@@ -95,21 +112,30 @@ public class MailServiceImpl implements MailService {
         // 生成6位长度的验证码，发送邮件并写入Redis
         String code = RandomUtil.randomNumbers(6);
 
-        /*
-         * TODO MQ异步处理
-         */
+        VerifyMailDTO mailDTO = new VerifyMailDTO(MAIL_FROM, MAIL_FROM_NICK, mail, UPDATE_SUBJECT, UPDATE_TYPE, code);
 
-        sendEmailVerificationCode(MAIL_FROM, mail, code, "修改账号");
+        /*
+         * MQ异步处理
+         */
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
+
 
         stringRedisTemplate.opsForValue().set(key, code, UPDATE_CODE_TTL, TimeUnit.MINUTES);
 
     }
 
-    /*
-     * TODO 修改传递参数
+    /**
+     * 实现发送模版邮件
+     *
+     * @param mailFrom     发件人邮箱
+     * @param mailFromNick 发件人昵称
+     * @param mailTo       收件人邮箱
+     * @param subject      主题
+     * @param type         操作类型：注册账号 or 修改账号
+     * @param verifyCode   验证码
      */
     @Override
-    public void sendEmailVerificationCode(String mailFrom, String toAddress, String verifyCode, String type) {
+    public void sendEmailVerificationCode(String mailFrom, String mailFromNick, String mailTo, String subject, String type, String verifyCode) {
 
         //创建邮件正文
         Context context = new Context();
@@ -120,10 +146,15 @@ public class MailServiceImpl implements MailService {
         String emailContent = templateEngine.process("EmailVerificationCode", context);
         MimeMessage message = mailSender.createMimeMessage();
         try {
+
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setFrom(mailFrom);
-            helper.setTo(toAddress);
-            helper.setSubject("注册验证码");
+            // 昵称
+            helper.setFrom(mailFromNick + " <" + mailFrom + ">");
+            // 收件人
+            helper.setTo(mailTo);
+            // 主题
+            helper.setSubject(subject);
+
             helper.setText(emailContent, true);
             mailSender.send(message);
         } catch (MessagingException e) {

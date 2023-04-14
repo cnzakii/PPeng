@@ -28,5 +28,15 @@ public interface MailService {
     void sendUpdateEmail(String mail);
 
 
-    void sendEmailVerificationCode(String mailFrom, String toAddress, String verifyCode, String type);
+    /**
+     * 发送模版邮件
+     *
+     * @param mailFrom     发件人邮箱
+     * @param mailFromNick 发件人昵称
+     * @param mailTo       收件人邮箱
+     * @param subject      主题
+     * @param type         操作类型：注册账号 or 修改账号
+     * @param verifyCode   验证码
+     */
+    void sendEmailVerificationCode(String mailFrom, String mailFromNick, String mailTo, String subject, String type, String verifyCode);
 }

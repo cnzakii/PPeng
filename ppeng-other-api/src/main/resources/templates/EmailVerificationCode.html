@@ -141,7 +141,7 @@
                 <div id="content_top">
                     <strong>尊敬的用户：您好！</strong>
                     <strong>
-                        您正在进行<span th:text="${type}" ></span>操作，请在验证码中输入以下验证码完成操作：
+                        您正在进行<span th:text="${type}" ></span>操作，请输入以下验证码完成相关操作：
                     </strong>
                     <div id="verificationCode">
                         <button class="button" th:each="a:${verifyCode}">[[${a}]]</button>
