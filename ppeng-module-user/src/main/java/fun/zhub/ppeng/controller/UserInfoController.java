@@ -7,10 +7,7 @@ import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -21,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-03-17
  */
 @RestController
-@RequestMapping("/userInfo")
+@RequestMapping("/user/info")
 public class UserInfoController {
     @Resource
     private UserInfoService userInfoService;
@@ -33,7 +30,8 @@ public class UserInfoController {
      */
     @PostMapping("/current")
     public ResponseResult<UserInfo> getUserInfo() {
-        Long id = (Long) StpUtil.getLoginId();
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+
 
         UserInfo userInfo = userInfoService.getUserInfoById(id);
 
@@ -48,7 +46,7 @@ public class UserInfoController {
      * @return success
      */
     @PutMapping("/current")
-    public ResponseResult<String> updateUserInfo(@Valid UpdateUserInfoDTO userInfo) {
+    public ResponseResult<String> updateUserInfo(@RequestBody @Valid UpdateUserInfoDTO userInfo) {
         userInfoService.updateUserInfo(userInfo);
         return ResponseResult.success();
     }

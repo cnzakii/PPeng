@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.dto.update;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -31,22 +32,20 @@ public class UpdateUserPasswordDTO implements Serializable {
     /**
      * 邮箱
      */
-    @NotEmpty(message = "邮箱不能为空")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$", message = "邮箱格式错误")
+    @Email( message = "邮箱格式错误")
     private String email;
 
 
     /**
      * 手机验证码
      */
-    @NotEmpty(message = "验证码不能为空")
+    @Pattern(regexp = "^\\d{6}$", message = "验证码无效")
     private String verifyCode;
 
     /**
      * 新密码
      */
     @NotEmpty(message = "新密码不能为空")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "密码太弱")
     private String newPassword;
 
 }

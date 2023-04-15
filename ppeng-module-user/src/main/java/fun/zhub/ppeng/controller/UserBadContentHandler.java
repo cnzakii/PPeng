@@ -1,7 +1,9 @@
 package fun.zhub.ppeng.controller;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,20 +24,20 @@ import static com.zhub.ppeng.constant.RoleConstants.BAD_NICK_NAME_PREFIX;
  **/
 @RestController
 @RequestMapping("/handle/user")
-public class UserBadContentController {
+public class UserBadContentHandler {
 
     @Resource
     private UserService userService;
 
 
     @PostMapping("/nick/name/{id}")
-    public ResponseResult<String> handleBadNickName(@PathVariable("id")Long id) {
+    @SentinelResource(value = "handleBadNickName", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
+    public ResponseResult<String> handleBadNickName(@PathVariable("id") Long id) {
         String newNickName = BAD_NICK_NAME_PREFIX + RandomUtil.randomString(10);
         userService.updateNickNameById(id, newNickName);
 
         return ResponseResult.success();
     }
-
 
 
 }

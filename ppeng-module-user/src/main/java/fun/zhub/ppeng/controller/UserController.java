@@ -53,6 +53,9 @@ public class UserController {
      */
     @GetMapping("/rsa")
     public ResponseResult<String> getPublicKey() {
+        /*
+         * TODO 写入JVM缓存
+         */
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
@@ -154,13 +157,13 @@ public class UserController {
      * @return success
      */
     @PutMapping("update/nick/name")
-    public ResponseResult<String> updateUserNickName(@RequestParam(value = "nickName") @NotNull(message = "新昵称不能为空") @Max(20) String nickName) {
-        Long id = (Long) StpUtil.getLoginId();
+    public ResponseResult<String> updateUserNickName(@RequestParam(value = "nickName") String nickName) {
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         userService.updateNickNameById(id, nickName);
 
         /*
-         * 使用MQ将昵称传个第三方审核接口进行审核。
+         * 使用MQ将昵称传给第三方审核接口进行审核。
          */
         TextContentCensorDTO censorDTO = new TextContentCensorDTO("nickName", id, nickName);
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_TEXT_CENSOR, JSONUtil.toJsonStr(censorDTO));
@@ -178,7 +181,7 @@ public class UserController {
      */
     @PutMapping("update/icon")
     public ResponseResult<String> updateUserIcon(@RequestParam(value = "icon") @NotNull(message = "新头像不能为空") MultipartFile icon) {
-        Long id = (Long) StpUtil.getLoginId();
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         String path = userService.updateIconById(id, icon);
 
@@ -197,7 +200,7 @@ public class UserController {
          * TODO 可能需要进行二次认证
          */
 
-        Long id = (Long) StpUtil.getLoginId();
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         userService.deleteUserById(id);
 

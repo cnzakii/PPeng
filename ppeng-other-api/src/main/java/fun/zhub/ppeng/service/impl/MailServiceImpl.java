@@ -157,6 +157,7 @@ public class MailServiceImpl implements MailService {
 
             helper.setText(emailContent, true);
             mailSender.send(message);
+            log.info("{} 邮件发送成功===》{}-->{}", subject, mailFrom, mailTo);
         } catch (MessagingException e) {
             log.error(e.getMessage());
         }

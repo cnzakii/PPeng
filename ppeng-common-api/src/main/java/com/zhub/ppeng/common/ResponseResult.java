@@ -117,4 +117,33 @@ public class ResponseResult<T> implements Serializable {
     }
 
 
+    /**
+     * 自定义返回结果
+     *
+     * @param status ResponseStatus
+     * @param <T>T
+     * @return ResponseResult
+     */
+    public static <T> ResponseResult<T> base(ResponseStatus status) {
+        return base(status, null, success().getMessage());
+    }
+
+    /**
+     * 自定义返回结果
+     *
+     * @param code    状态码
+     * @param data    数据
+     * @param message 信息
+     * @param <T>     T
+     * @return ResponseResult
+     */
+    public static <T> ResponseResult<T> base(String code, T data, String message) {
+        return ResponseResult.<T>builder().data(data)
+                .message(message)
+                .status(code)
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+
 }

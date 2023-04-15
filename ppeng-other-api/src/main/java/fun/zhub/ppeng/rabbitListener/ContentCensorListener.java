@@ -39,6 +39,8 @@ public class ContentCensorListener {
     public void ListenTextContentCensorQueue(String json) {
         TextContentCensorDTO censorDTO = JSONUtil.toBean(json, TextContentCensorDTO.class);
 
+        log.debug("text.content.censor.queue队列监听到消息====》{}",censorDTO);
+
         String type = censorDTO.getType();
         Long id = censorDTO.getId();
         String content = censorDTO.getContent();

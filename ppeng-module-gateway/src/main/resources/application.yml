@@ -24,7 +24,11 @@ spring:
         - id: user_route
           uri: lb://ppeng-module-user
           predicates:
-            - Path=/user/**
+            - Path=/user/**,/follow/**,/like/**
+        - id: other_api_route
+          uri: lb://ppeng-other-api
+          predicates:
+            - Path=/mail/**
 
 
 

@@ -38,7 +38,7 @@ public class MailListener {
     public void ListenSendMailQueue(String json) {
         VerifyMailDTO mailDTO = JSONUtil.toBean(json, VerifyMailDTO.class);
 
-        log.info(mailDTO.toString());
+        log.debug("mail.send.queue队列监听到消息===>{}", mailDTO);
         mailService.sendEmailVerificationCode(
                 mailDTO.getMailFrom(),
                 mailDTO.getMailFromNick(),

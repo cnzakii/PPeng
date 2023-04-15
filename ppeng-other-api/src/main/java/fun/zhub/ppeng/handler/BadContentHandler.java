@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.service;
+package fun.zhub.ppeng.handler;
 
 import com.zhub.ppeng.common.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @version 1.0
  * @since 2023-04-14
  **/
-@FeignClient(value = "ppeng-module-user")
+@FeignClient(value = "ppeng-module-user", fallback = BadContentFallbackHandler.class)
 @Component
 public interface BadContentHandler {
 
