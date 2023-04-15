@@ -43,6 +43,11 @@ public class User implements Serializable {
     private String email;
 
     /**
+     * 微信用户唯一id
+     */
+    private String openId;
+
+    /**
      * 密码（加密方式：SM3 盐值：id）
      */
     private String password;

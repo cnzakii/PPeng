@@ -1,10 +1,13 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseResult;
+import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.dto.TextContentCensorDTO;
+import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
@@ -14,11 +17,14 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.zhub.ppeng.constant.RabbitConstants.*;
 
@@ -35,6 +41,7 @@ import static com.zhub.ppeng.constant.RabbitConstants.*;
 
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
     @Resource
     private RSA rsa;
@@ -53,9 +60,6 @@ public class UserController {
      */
     @GetMapping("/rsa")
     public ResponseResult<String> getPublicKey() {
-        /*
-         * TODO 写入JVM缓存
-         */
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
@@ -86,6 +90,33 @@ public class UserController {
 
         return ResponseResult.success(token);
     }
+
+    /**
+     * 微信一键登录
+     *
+     * @param code code
+     * @return p-token
+     */
+    @PostMapping("/login/by/wx/{code}")
+    public ResponseResult<Map<String, Object>> loginByWeChat(@PathVariable("code") String code) {
+
+        Map<String, Object> map = userService.loginByWeChat(code);
+        User user = BeanUtil.toBean(map.get("user"), User.class);
+
+        String token = userService.afterLogin(user);
+
+        /*
+         * {"token": "", "isFirst": true}
+         */
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("isFirst", map.get("isFirst"));
+        return ResponseResult.success(result);
+    }
+
+    /*
+     * TODO 接受微信 用户信息 更新进数据库
+     */
 
 
     /**
@@ -158,6 +189,9 @@ public class UserController {
      */
     @PutMapping("update/nick/name")
     public ResponseResult<String> updateUserNickName(@RequestParam(value = "nickName") String nickName) {
+        if (nickName.length() > 20) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数过长");
+        }
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         userService.updateNickNameById(id, nickName);

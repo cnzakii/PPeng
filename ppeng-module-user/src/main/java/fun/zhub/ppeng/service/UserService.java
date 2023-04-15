@@ -9,6 +9,8 @@ import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 /**
  * <p>
  * UserService interface
@@ -32,6 +34,15 @@ public interface UserService extends IService<User> {
      * @return User
      */
     User loginByPassword(LoginFormDTO loginFormDTO);
+
+
+    /**
+     * 微信登录
+     *
+     * @param code 临时凭证
+     * @return user 用户 ， Boolean 是否登录
+     */
+    Map<String, Object> loginByWeChat(String code);
 
 
     /**
@@ -95,14 +106,12 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * 根据id，邮件，密码创建新用户
+     * 根据user创建新用户
      *
-     * @param id       id
-     * @param email    邮件
-     * @param password 密码
+     * @param user user
      * @return user
      */
-    User createUser(Long id, String email, String password);
+    User createUser(User user);
 
 
     /**

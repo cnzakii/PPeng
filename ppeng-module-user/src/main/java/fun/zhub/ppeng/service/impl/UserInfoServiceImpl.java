@@ -145,12 +145,17 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         userInfo.setUserId(id);
         userInfo.setCreateTime(LocalDateTime.now());
+        userInfo.setFans(0);
+        userInfo.setFollows(0);
+        userInfo.setGender((byte) 0);
+
 
         boolean b = save(userInfo);
         if (!b) {
             log.error("用户{}详细信息创建错误", id);
             throw new BusinessException(ResponseStatus.FAIL, "初始化用户信息错误");
         }
+        log.info("用户{}详细信息创建成功", id);
     }
 }
 

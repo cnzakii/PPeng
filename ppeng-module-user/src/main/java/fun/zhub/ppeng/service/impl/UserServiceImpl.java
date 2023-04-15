@@ -11,6 +11,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -26,6 +27,7 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
+import fun.zhub.ppeng.service.WeChatService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -34,6 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
@@ -42,6 +46,7 @@ import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
+import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**
  * <p>
@@ -73,6 +78,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserInfoService userInfoService;
+
+    @Resource
+    private WeChatService weChatService;
 
 
     /**
@@ -116,7 +124,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         String newPassword = SmUtil.sm3(id + password);
 
-        createUser(id, email, newPassword);
+        User user = new User();
+        user.setId(id);
+        user.setPassword(newPassword);
+        user.setEmail(email);
+
+        createUser(user);
     }
 
 
@@ -152,6 +165,52 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
         return user;
+    }
+
+    /**
+     * 实现微信登录功能
+     *
+     * @param code code
+     * @return user
+     */
+    @Override
+    public Map<String, Object> loginByWeChat(String code) {
+        Map<String, Object> map = new HashMap<>();
+        // 使用OpenFeign调用微信登录接口，获取该用户的唯一openId
+        String json = weChatService.loginByWeChat(APP_ID, SECRET, code, GRANT_TYPE);
+
+        JSONObject jsonObject = JSONUtil.parseObj(json);
+
+        String openId = (String) jsonObject.get("openid");
+
+        if (StrUtil.isEmpty(openId)) {
+            log.info(json);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, jsonObject.get("errmsg", String.class));
+        }
+
+        // 查看该用户是否已经注册
+        User one = userMapper.selectOne(new QueryWrapper<User>().eq("open_id", openId));
+
+        // 如果存在，则直接返回
+        if (BeanUtil.isNotEmpty(one)) {
+            map.put("user", one);
+            map.put("isFirst", false);
+            return map;
+        }
+
+        // 如果不不存在，则创建
+        Long id = snowflake.nextId();
+
+        User user = new User();
+        user.setId(id);
+        user.setOpenId(openId);
+
+        User newUser = createUser(user);
+        map.put("user", newUser);
+        map.put("isFirst", true);
+
+
+        return map;
     }
 
 
@@ -262,6 +321,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } catch (Exception e) {
             throw new BusinessException(ResponseStatus.FAIL, "密码未加密");
         }
+
+        // 检查密码强度
+        boolean matches = newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*()_+-=;:'\",.<>/?\\[\\]{}|`~]{8,20}?$");
+        if (!matches) {
+            throw new BusinessException(ResponseStatus.FAIL, "密码太弱");
+        }
+
 
         newPassword = SmUtil.sm3(userPasswordDTO.getUserId() + newPassword);
 
@@ -401,19 +467,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     /**
-     * 实现根据id，邮件，密码创建新用户
+     * 实现根据user创建新用户
      *
-     * @param id       id
-     * @param email    邮件
-     * @param password 密码
+     * @param user user
      * @return user
      */
     @Override
-    public User createUser(Long id, String email, String password) {
-        User user = new User();
-        user.setId(id);
-        user.setEmail(email);
-        user.setPassword(password);
+    public User createUser(User user) {
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
         user.setRole(ROLE_USER);
         user.setCreateTime(LocalDateTime.now());
@@ -430,7 +490,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
         // 创建用户的具体信息
-        userInfoService.createUserInfoById(id);
+        userInfoService.createUserInfoById(user.getId());
 
         return user;
     }

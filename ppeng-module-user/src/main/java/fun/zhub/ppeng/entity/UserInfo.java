@@ -56,7 +56,7 @@ public class UserInfo implements Serializable {
     private Integer follows;
 
     /**
-     * 用户性别，0：女，1：男
+     * 用户性别，0：未指定，1：女，3：男
      */
     private Byte gender;
 

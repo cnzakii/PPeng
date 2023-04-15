@@ -40,6 +40,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
 
     /**
      * 实现点赞菜谱
+     *
      * @param userId   用户id
      * @param recipeId 菜谱id
      */
