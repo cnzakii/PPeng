@@ -1,11 +1,9 @@
 package fun.zhub.ppeng.service.impl;
 
-import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
@@ -18,12 +16,13 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -45,7 +43,6 @@ import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**
@@ -70,17 +67,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private UserMapper userMapper;
 
+
     @Resource
     private Snowflake snowflake;
 
     @Resource
     private RSA rsa;
 
-    @Resource
-    private UserInfoService userInfoService;
 
     @Resource
     private WeChatService weChatService;
+
+    @Resource
+    private UserInfoService userInfoService;
 
 
     /**
@@ -137,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 实现通过密码登录
      *
      * @param loginFormDTO 用户密码登录结构体
-     * @return User
+     * @return id
      */
     @Override
     public User loginByPassword(LoginFormDTO loginFormDTO) {
@@ -205,10 +204,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(id);
         user.setOpenId(openId);
 
-        User newUser = createUser(user);
-        map.put("user", newUser);
+        createUser(user);
+        map.put("user", user);
         map.put("isFirst", true);
-
 
         return map;
     }
@@ -217,71 +215,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现验证登录信息之后的操作
      *
-     * @param user 用户
+     * @param user user
      * @return authentication
      */
     @Override
     public String afterLogin(User user) {
-
+        Long userId = user.getId();
         // 登录
-        StpUtil.login(user.getId());
+        StpUtil.login(userId);
 
+        // 先完成一遍查询用户操作，写入本地缓存
+        UserInfoDTO userInfo = getUserInfoById(userId);
 
-        // 将user的用户信息存入redis
-        stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.DAYS);
-
-
-        SaSession session = StpUtil.getSession();
-
-        // 查询session是否存在user角色等信息
-        if (session.get(SESSION_USER) == null) {
-            // 将用户基本信息和角色信息保存进session中
-            session.set(SESSION_USER, user);
-            // 将user的用户信息存入redis
-            stringRedisTemplate.opsForValue().set(USER_ROLE + user.getId(), user.getRole(), USER_ROLE_TTL, TimeUnit.MINUTES);
-        }
+        /*
+         * TODO 写入本地缓存
+         */
+        // 将用户角色信息插入redis
+        stringRedisTemplate.opsForSet().add(USER_ROLE + userId, user.getRole());
 
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE, user.getId());
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE, userId);
 
         return StpUtil.getTokenValue();
     }
 
 
     /**
-     * 实现根据id获取用户基本信息
+     * 实现根据id获取用户信息
      *
      * @param id id
-     * @return userDTO
+     * @return user
      */
     @Override
-    public UserDTO getUserBaseInfoById(Long id) {
-        String key = USER_BASE_INFO + id;
+    public UserInfoDTO getUserInfoById(Long id) {
+        String key = USER_INFO + id;
         // 先查询redis
-        String baseInfo = stringRedisTemplate.opsForValue().get(key);
+        String json = stringRedisTemplate.opsForValue().get(key);
 
-        // 有则直接返回并刷新过期时间
-        if (StrUtil.isNotEmpty(baseInfo)) {
-            stringRedisTemplate.expire(key, USER_BASE_INFO_TTL, TimeUnit.MINUTES);
-            return JSONUtil.toBean(baseInfo, UserDTO.class);
+
+        // redis中存在 则返回
+        if (StrUtil.isNotEmpty(json)) {
+
+            return JSONUtil.toBean(json, UserInfoDTO.class);
         }
 
-        // 没有则查询数据库并写入redis
-        User user = query().eq("id", id).one();
+        // redis中不存在，则查询数据库
+        // 查询user表
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
         if (BeanUtil.isEmpty(user)) {
-            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
+            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
-        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
 
-        // 邮箱脱敏
-        String mobileEmail = DesensitizedUtil.email(userDTO.getEmail());
-        userDTO.setEmail(mobileEmail);
+        // 查询UserInfo表
 
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userDTO), USER_BASE_INFO_TTL, TimeUnit.MINUTES);
+        UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id", id));
+        if (BeanUtil.isEmpty(userInfo)) {
+            // 不存在，则创建
+            userInfo = userInfoService.createUserInfoById(id);
+        }
 
-        return userDTO;
+        UserInfoDTO userInfoDTO = BeanUtil.copyProperties(user, UserInfoDTO.class);
+        BeanUtil.copyProperties(userInfo, userInfoDTO);
+
+        log.info(userInfoDTO.toString());
+
+        // 写入redis
+        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
+
+        return userInfoDTO;
     }
 
 
@@ -400,50 +403,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
-
     /**
-     * 实现根据用户id更新昵称
+     * 实现更新用户昵称和头像操作
      *
-     * @param id       id
+     * @param userId   userId
      * @param nickName 昵称
+     * @param icon     头像url
      */
     @Override
-    public void updateNickNameById(Long id, String nickName) {
-        boolean b = update(new UpdateWrapper<User>().set("nick_name", nickName).set("update_time", LocalDateTime.now()).eq("id", id));
+    public void updateNickNameAndIcon(Long userId, String nickName, String icon) {
+        // 根据Id获取当前用户
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", userId));
 
-        if (!b) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+
+        // 用于判断是否需要更新
+        boolean b = false;
+
+        if (StrUtil.isNotEmpty(nickName)) {
+            b = true;
+            user.setNickName(nickName);
+        }
+
+        if (StrUtil.isNotEmpty(icon)) {
+            b = true;
+            user.setIcon(icon);
+        }
+
+        if (b) {
+            user.setUpdateTime(LocalDateTime.now());
+            int i = userMapper.updateById(user);
+            if (i == 0) {
+                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+            }
+            log.info("更新用户信息{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
         }
 
 
     }
 
-    /**
-     * 实现根据id更新头像
-     *
-     * @param id   id
-     * @param icon 头像
-     * @return 路径
-     */
-    @Override
-    public String updateIconById(Long id, MultipartFile icon) {
-        /*
-         * TODO 保存文件到OSS或者本地,得到存储路径
-         */
-        String path = "";
-
-        boolean b = update(new UpdateWrapper<User>().set("icon", icon).set("update_time", LocalDateTime.now()).eq("id", id));
-
-        if (!b) {
-            /*
-             * TODO 删除文件
-             */
-            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
-        }
-
-
-        return path;
-    }
 
     /**
      * 实现根据id删除用户
@@ -453,15 +450,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void deleteUserById(Long id) {
         // 删除当前用户的基本信息
-        boolean b = removeById(id);
+        int c = userMapper.deleteById(id);
 
-        if (!b) {
+        if (c == 0) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
         // 删除用户的具体信息
         userInfoService.deleteUserInfoById(id);
-
 
     }
 
@@ -470,10 +466,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 实现根据user创建新用户
      *
      * @param user user
-     * @return user
+     * @return UserInfoDTO
      */
     @Override
-    public User createUser(User user) {
+    public UserInfoDTO createUser(User user) {
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
         user.setRole(ROLE_USER);
         user.setCreateTime(LocalDateTime.now());
@@ -490,9 +486,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
         // 创建用户的具体信息
-        userInfoService.createUserInfoById(user.getId());
+        UserInfo userInfo = userInfoService.createUserInfoById(user.getId());
 
-        return user;
+        UserInfoDTO userInfoDTO = BeanUtil.copyProperties(user, UserInfoDTO.class);
+        BeanUtil.copyProperties(userInfo, userInfoDTO);
+
+        return userInfoDTO;
     }
 
 

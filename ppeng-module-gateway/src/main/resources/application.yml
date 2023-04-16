@@ -28,7 +28,7 @@ spring:
         - id: other_api_route
           uri: lb://ppeng-other-api
           predicates:
-            - Path=/mail/**
+            - Path=/mail/**,/file/**
 
 
 

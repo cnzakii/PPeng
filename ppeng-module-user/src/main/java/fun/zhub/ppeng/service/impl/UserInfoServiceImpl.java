@@ -1,28 +1,23 @@
 package fun.zhub.ppeng.service.impl;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.update.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserInfoMapper;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO;
-import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
+
 
 /**
  * <p>
@@ -37,54 +32,50 @@ import static com.zhub.ppeng.constant.RedisConstants.USER_DETAIL_INFO_TTL;
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
     @Resource
     private UserInfoMapper userInfoMapper;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * 实现根据用户id查询用户具体信息
-     *
-     * @param userId 用户id
-     * @return UserInfo
-     */
+
+
+
     @Override
-    public UserInfo getUserInfoById(Long userId) {
-        String key = USER_DETAIL_INFO + userId;
-        // 先查询redis
-        String info = stringRedisTemplate.opsForValue().get(key);
+    public void updateUserInfo(Long id, String address,String introduce, Byte gender, LocalDate birthday) {
+        UserInfo userInfo = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("user_id", id));
 
-        if (StrUtil.isNotEmpty(info)) {
-            stringRedisTemplate.expire(key, USER_DETAIL_INFO_TTL, TimeUnit.MINUTES);
-            return JSONUtil.toBean(info, UserInfo.class);
+
+        boolean b = false;
+
+        if(StrUtil.isNotEmpty(address)){
+            b = true;
+         userInfo.setAddress(address);
         }
 
-        // 查询数据库
-        UserInfo userInfo = query().eq("user_id", userId).one();
 
-        // 写入redis
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfo), USER_DETAIL_INFO_TTL, TimeUnit.MINUTES);
+        if(StrUtil.isNotEmpty(introduce)){
+            b = true;
+            userInfo.setIntroduce(introduce);
+        }
 
-        return userInfo;
+        if(gender!=null){
+            b = true;
+            userInfo.setGender(gender);
+        }
+
+        if(birthday!=null){
+            b = true;
+            userInfo.setBirthday(birthday);
+        }
+
+        if(b){
+            userInfo.setUpdateTime(LocalDateTime.now());
+            int i = userInfoMapper.updateById(userInfo);
+            if (i == 0) {
+                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+            }
+            log.info("更新用户具体信息{}成功,更新时间：{}", userInfo.getUserId(), userInfo.getUpdateTime());
+        }
+
     }
 
 
-    /**
-     * 实现根据用户id更新用户具体信息
-     *
-     * @param userInfoDTO 用户具体信息
-     */
-    @Override
-    public void updateUserInfo(UpdateUserInfoDTO userInfoDTO) {
-        UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO, UserInfo.class);
-        userInfo.setUpdateTime(LocalDateTime.now());
-
-        int i = userInfoMapper.updateById(userInfo);
-        if (i == 0) {
-            log.error("更新用户具体信息{}失败", userInfo.getUserId());
-            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
-        }
-
-        log.info("更新用户具体信息{}成功,更新时间：{}", userInfo.getUserId(), userInfo.getUpdateTime());
-    }
 
     /**
      * 实现更新粉丝或者关注
@@ -138,9 +129,10 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      * 实现根据id创建用户详细信息
      *
      * @param id id
+     * @return userInfo
      */
     @Override
-    public void createUserInfoById(Long id) {
+    public UserInfo createUserInfoById(Long id) {
         UserInfo userInfo = new UserInfo();
 
         userInfo.setUserId(id);
@@ -156,6 +148,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             throw new BusinessException(ResponseStatus.FAIL, "初始化用户信息错误");
         }
         log.info("用户{}详细信息创建成功", id);
+
+        return userInfo;
     }
 }
 

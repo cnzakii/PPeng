@@ -1,8 +1,9 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import fun.zhub.ppeng.dto.update.UpdateUserInfoDTO;
 import fun.zhub.ppeng.entity.UserInfo;
+
+import java.time.LocalDate;
 
 /**
  * <p>
@@ -15,24 +16,21 @@ import fun.zhub.ppeng.entity.UserInfo;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+
+
     /**
-     * 根据用户id查询用户具体信息
+     * 更新除了粉丝数，关注数以外的信息
      *
-     * @param userId 用户id
-     * @return UserInfo
+     * @param id        用户Id
+     * @param address   地址
+     * @param introduce 自我介绍
+     * @param gender    性别
+     * @param birthday  生日
      */
-    UserInfo getUserInfoById(Long userId);
+    void updateUserInfo(Long id, String address, String introduce, Byte gender, LocalDate birthday);
 
     /**
-     * 根据用户id更新用户具体信息
-     *
-     * @param userInfo user
-     */
-    void updateUserInfo(UpdateUserInfoDTO userInfo);
-
-
-    /**
-     * 更新单条信息
+     * 更新粉丝或者关注数
      *
      * @param name   字段名
      * @param userId id
@@ -52,6 +50,9 @@ public interface UserInfoService extends IService<UserInfo> {
      * 根据id创建用户详细信息
      *
      * @param id id
+     * @return userinfo
      */
-    void createUserInfoById(Long id);
+    UserInfo createUserInfoById(Long id);
+
+
 }

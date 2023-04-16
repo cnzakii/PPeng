@@ -2,29 +2,30 @@ package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseResult;
-import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.dto.TextContentCensorDTO;
-import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
+import fun.zhub.ppeng.dto.update.UserInfoUpdateDTO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.zhub.ppeng.constant.RabbitConstants.*;
 
@@ -51,6 +52,9 @@ public class UserController {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private UserInfoService userInfoService;
 
 
     /**
@@ -114,10 +118,6 @@ public class UserController {
         return ResponseResult.success(result);
     }
 
-    /*
-     * TODO 接受微信 用户信息 更新进数据库
-     */
-
 
     /**
      * 用户登出
@@ -139,17 +139,21 @@ public class UserController {
 
 
     /**
-     * 获取当前用户基本信息
+     * 获取当前用户信息
      *
      * @return userBaseInfo
      */
     @PostMapping("/current")
-    public ResponseResult<UserDTO> getCurrentInfo() {
+    public ResponseResult<UserInfoDTO> getCurrentInfo() {
         Long id = Long.valueOf((String) StpUtil.getLoginId());
-        // 获取经过脱敏处理后的userInfo
-        UserDTO userDTO = userService.getUserBaseInfoById(id);
 
-        return ResponseResult.success(userDTO);
+
+        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
+
+        // email脱敏
+        userInfoDTO.setEmail(DesensitizedUtil.email(userInfoDTO.getEmail()));
+
+        return ResponseResult.success(userInfoDTO);
     }
 
 
@@ -182,23 +186,33 @@ public class UserController {
 
 
     /**
-     * 更新用户昵称
+     * 修改用户信息
      *
-     * @param nickName 昵称
+     * @param userInfoUpdateDTO userInfoUpdateDTO
      * @return success
      */
-    @PutMapping("update/nick/name")
-    public ResponseResult<String> updateUserNickName(@RequestParam(value = "nickName") String nickName) {
-        if (nickName.length() > 20) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数过长");
-        }
+    @PutMapping("/current")
+    public ResponseResult<String> updateUserInfo(@RequestBody @Valid UserInfoUpdateDTO userInfoUpdateDTO) {
         Long id = Long.valueOf((String) StpUtil.getLoginId());
+        Long userId = userInfoUpdateDTO.getUserId();
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
 
-        userService.updateNickNameById(id, nickName);
+        // 更新user表
+        String nickName = userInfoUpdateDTO.getNickName();
+        String icon = userInfoUpdateDTO.getIcon();
+        userService.updateNickNameAndIcon(userId, nickName, icon);
 
-        /*
-         * 使用MQ将昵称传给第三方审核接口进行审核。
-         */
+        // 更新userInfo表
+        String address = userInfoUpdateDTO.getAddress();
+        String introduce = userInfoUpdateDTO.getIntroduce();
+        Byte gender = userInfoUpdateDTO.getGender();
+        LocalDate birthday = userInfoUpdateDTO.getBirthday();
+        userInfoService.updateUserInfo(id, address, introduce, gender, birthday);
+
+
+        // 使用MQ将昵称传给第三方审核接口进行审核。
         TextContentCensorDTO censorDTO = new TextContentCensorDTO("nickName", id, nickName);
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_TEXT_CENSOR, JSONUtil.toJsonStr(censorDTO));
 
@@ -208,31 +222,12 @@ public class UserController {
 
 
     /**
-     * 更新用户头像
-     *
-     * @param icon 头像
-     * @return path
-     */
-    @PutMapping("update/icon")
-    public ResponseResult<String> updateUserIcon(@RequestParam(value = "icon") @NotNull(message = "新头像不能为空") MultipartFile icon) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-
-        String path = userService.updateIconById(id, icon);
-
-        return ResponseResult.success(path);
-    }
-
-
-    /**
      * 删除当前用户
      *
      * @return success
      */
     @DeleteMapping("/current")
-    public ResponseResult<String> DeleteUser() {
-        /*
-         * TODO 可能需要进行二次认证
-         */
+    public ResponseResult<String> deleteUser() {
 
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 

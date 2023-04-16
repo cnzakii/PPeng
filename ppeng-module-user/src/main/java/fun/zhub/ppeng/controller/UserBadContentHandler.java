@@ -34,7 +34,7 @@ public class UserBadContentHandler {
     @SentinelResource(value = "handleBadNickName", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> handleBadNickName(@PathVariable("id") Long id) {
         String newNickName = BAD_NICK_NAME_PREFIX + RandomUtil.randomString(10);
-        userService.updateNickNameById(id, newNickName);
+        userService.updateNickNameAndIcon(id, newNickName, null);
 
         return ResponseResult.success();
     }

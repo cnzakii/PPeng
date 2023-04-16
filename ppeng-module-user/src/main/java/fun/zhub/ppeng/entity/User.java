@@ -27,8 +27,7 @@ import java.time.LocalDateTime;
 public class User implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
-
+    private static final long serialVersionUID = 4339224709741456224L;
     /**
      * 手机号登录用户：雪花算法唯一ID
      * 微信登录用户：openid

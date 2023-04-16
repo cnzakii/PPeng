@@ -1,6 +1,5 @@
 package fun.zhub.ppeng.rabbitListener;
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -17,7 +16,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import static com.zhub.ppeng.constant.RabbitConstants.*;
-import static com.zhub.ppeng.constant.SaTokenConstants.SESSION_USER;
 
 /**
  * <p>
@@ -41,7 +39,7 @@ public class UserCacheUpdateListener {
             exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE_UPDATE
     ))
-    public void ListenCanalQueue(String s) {
+    public void listenCanalQueue(String s) {
         JSONObject object = new JSONObject(s);
 
         String table = object.get("table").toString();
@@ -51,14 +49,11 @@ public class UserCacheUpdateListener {
         switch (table) {
             case "t_user" -> {
                 User user = BeanUtil.toBean(one, User.class);
-                // 更新session
-                StpUtil.getSessionByLoginId(user.getId()).set(SESSION_USER, user);
                 // 更新Redis
                 redisHandler.updateUser(user);
             }
             case "t_user_info" -> {
                 UserInfo userInfo = BeanUtil.toBean(one, UserInfo.class);
-
                 redisHandler.updateUserInfo(userInfo);
             }
             case "t_follow" -> {

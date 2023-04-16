@@ -147,14 +147,14 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
      * 实现根据id查询用户粉丝或者关注
      *
      * @param prefixKey redis Key前缀
-     * @param TTL       redis Key的过期时间
+     * @param ttl       redis Key的过期时间
      * @param timeUnit  时间单位
      * @param name      数据库中的id字段名
      * @param id        id
      * @return set
      */
     @Override
-    public Set<String> queryById(String prefixKey, Long TTL, TimeUnit timeUnit, String name, Long id) {
+    public Set<String> queryById(String prefixKey, Long ttl, TimeUnit timeUnit, String name, Long id) {
 
 
         String key = prefixKey + id;
@@ -198,7 +198,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
 
         stringRedisTemplate.opsForSet().add(key, followArray);
-        stringRedisTemplate.expire(key, TTL, timeUnit);
+        stringRedisTemplate.expire(key, ttl, timeUnit);
 
         return set;
     }

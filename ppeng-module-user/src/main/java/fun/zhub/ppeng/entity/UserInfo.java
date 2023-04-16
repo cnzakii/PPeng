@@ -26,8 +26,10 @@ import java.time.LocalDateTime;
 @TableName("t_user_info")
 public class UserInfo implements Serializable {
 
+
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7928590243743698030L;
+
 
     /**
      * 用户id
@@ -36,9 +38,9 @@ public class UserInfo implements Serializable {
     private Long userId;
 
     /**
-     * 用户所在城市
+     * 用户所在地区
      */
-    private String city;
+    private String address;
 
     /**
      * 用户简介，不超过128个字符

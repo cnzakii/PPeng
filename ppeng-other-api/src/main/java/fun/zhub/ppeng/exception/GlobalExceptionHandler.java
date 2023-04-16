@@ -3,8 +3,8 @@ package fun.zhub.ppeng.exception;
 
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.exception.BusinessException;
-import io.micrometer.core.instrument.config.validate.ValidationException;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
                     .forEach(a -> exceptionMsg.add(a.getDefaultMessage()));
         } else if (e instanceof ConstraintViolationException) {
             if (e.getMessage() != null) {
-                exceptionMsg.add(e.getLocalizedMessage());
+                exceptionMsg.add(e.getMessage());
             }
         } else {
             exceptionMsg.add("invalid parameter");
@@ -85,8 +85,7 @@ public class GlobalExceptionHandler {
     public ResponseResult<BusinessException> processBusinessException(BusinessException businessException) {
 
         log.error("ResponseCode：{},Exception: {}", businessException.getCode(), businessException.getDescription());
-        businessException.printStackTrace();
-        return ResponseResult.fail(businessException.getDescription());
+        return ResponseResult.base(businessException.getCode(), null, businessException.getDescription());
     }
 
 
@@ -99,7 +98,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public ResponseResult<Exception> processException(Exception exception) {
-        log.error("Exception: {}", exception.getLocalizedMessage());
+        log.error("Exception: {}", exception.getMessage());
         // 这里可以屏蔽掉后台的异常栈信息，直接返回"server error"
         return ResponseResult.fail(exception.getLocalizedMessage());
     }

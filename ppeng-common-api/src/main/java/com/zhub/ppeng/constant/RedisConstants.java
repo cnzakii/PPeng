@@ -34,7 +34,7 @@ public interface RedisConstants {
     /**
      * 验证码更新过期时间
      */
-    Long UPDATE_CODE_TTL = 1L;
+    Long UPDATE_CODE_TTL = 2L;
 
 
     /**
@@ -42,31 +42,25 @@ public interface RedisConstants {
      */
     String USER_ROLE = "user:role:";
 
-    /**
-     * 用户角色信息过期时间
-     */
-    Long USER_ROLE_TTL = 30L;
+
 
     /**
-     * 用户基本信息
+     * 用户信息
      */
-    String USER_BASE_INFO = "user:info:base:";
+    String USER_INFO = "user:info:";
 
     /**
      * 用户基本信息过期时间
      */
-    Long USER_BASE_INFO_TTL = 30L;
+    Long USER_INFO_TTL = 12L;
 
 
     /**
-     * 用户详细信息
+     * 用户角色信息过期时间
      */
-    String USER_DETAIL_INFO = "user:info:detail:";
 
-    /**
-     * 用户详细信息过期时间
-     */
-    Long USER_DETAIL_INFO_TTL = 30L;
+    Long ROLE_USER_TTL = 12L;
+
 
 
     /**

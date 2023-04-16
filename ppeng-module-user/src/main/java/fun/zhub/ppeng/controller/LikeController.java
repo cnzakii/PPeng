@@ -17,7 +17,7 @@ import java.util.Set;
  * @since 2023-03-17
  */
 @RestController
-@RequestMapping("/like")
+@RequestMapping("/user/like")
 public class LikeController {
 
     @Resource
@@ -77,7 +77,7 @@ public class LikeController {
      * @return success
      */
     @DeleteMapping("/delete/{recipeId}")
-    public ResponseResult<String> DeleteLikedRecipe(@PathVariable("recipeId") Long recipeId) {
+    public ResponseResult<String> deleteLikedRecipe(@PathVariable("recipeId") Long recipeId) {
         Long userId = Long.valueOf((String) StpUtil.getLoginId());
 
         likeService.deleteLikedRecipe(userId, recipeId);

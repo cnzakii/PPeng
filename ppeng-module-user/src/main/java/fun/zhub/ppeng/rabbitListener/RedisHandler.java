@@ -1,13 +1,12 @@
 package fun.zhub.ppeng.rabbitListener;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.DesensitizedUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.entity.UserInfo;
+import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -33,6 +32,9 @@ public class RedisHandler {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    private UserService userService;
+
 
     /**
      * 更新用户基本信息
@@ -41,15 +43,12 @@ public class RedisHandler {
      */
     public void updateUser(User newUser) {
         Long id = newUser.getId();
+        // 根据UserId 查询用户数据
+        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
 
+        BeanUtil.copyProperties(newUser, userInfoDTO);
 
-        UserDTO userDTO = BeanUtil.copyProperties(newUser, UserDTO.class);
-
-        // 邮箱脱敏
-        String mobileEmail = DesensitizedUtil.email(userDTO.getEmail());
-        userDTO.setEmail(mobileEmail);
-
-        stringRedisTemplate.opsForValue().set(USER_BASE_INFO + id, JSONUtil.toJsonStr(userDTO), USER_BASE_INFO_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(USER_INFO + id, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
 
     }
 
@@ -60,20 +59,19 @@ public class RedisHandler {
      * @param newUserInfo newUserInfo
      */
     public void updateUserInfo(UserInfo newUserInfo) {
-        Long userId = newUserInfo.getUserId();
-        String key = USER_DETAIL_INFO + userId;
+        Long id = newUserInfo.getUserId();
+        // 根据UserId 查询用户数据
+        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
 
-        // 检查是否存在
-        String s = stringRedisTemplate.opsForValue().get(key);
-        if (StrUtil.isNotEmpty(s)) {
-            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newUserInfo), USER_DETAIL_INFO_TTL, TimeUnit.MINUTES);
-        }
+        BeanUtil.copyProperties(newUserInfo, userInfoDTO);
+
+        stringRedisTemplate.opsForValue().set(USER_INFO + id, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
 
     }
 
 
     /**
-     * 更新用户粉丝
+     * 更新用户关注和粉丝
      *
      * @param follow follow
      */

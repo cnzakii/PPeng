@@ -17,7 +17,7 @@ import java.util.Set;
  * @since 2023-03-17
  */
 @RestController
-@RequestMapping("/follow")
+@RequestMapping("/user/follow")
 public class FollowController {
 
     @Resource

@@ -1,13 +1,12 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import fun.zhub.ppeng.dto.UserDTO;
+import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public interface UserService extends IService<User> {
      * 通过密码登录
      *
      * @param loginFormDTO 用户密码登录结构体
-     * @return User
+     * @return user
      */
     User loginByPassword(LoginFormDTO loginFormDTO);
 
@@ -48,7 +47,7 @@ public interface UserService extends IService<User> {
     /**
      * 在验证登录信息成功之后做的事情
      *
-     * @param user 用户
+     * @param user user
      * @return authentication
      */
     String afterLogin(User user);
@@ -58,9 +57,9 @@ public interface UserService extends IService<User> {
      * 根据id获取用户信息
      *
      * @param id id
-     * @return userDTO
+     * @return UserInfoDTO
      */
-    UserDTO getUserBaseInfoById(Long id);
+    UserInfoDTO getUserInfoById(Long id);
 
 
     /**
@@ -80,22 +79,14 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * 更新用户昵称
+     * 更新用户的昵称和头像
      *
-     * @param id       id
+     * @param userId   userId
      * @param nickName 昵称
+     * @param icon     头像url
      */
-    void updateNickNameById(Long id, String nickName);
+    void updateNickNameAndIcon(Long userId, String nickName, String icon);
 
-
-    /**
-     * 更新用户头像
-     *
-     * @param id   id
-     * @param icon 头像
-     * @return 头像存储路径
-     */
-    String updateIconById(Long id, MultipartFile icon);
 
     /**
      * 根据id删除用户
@@ -109,9 +100,9 @@ public interface UserService extends IService<User> {
      * 根据user创建新用户
      *
      * @param user user
-     * @return user
+     * @return UserInfoDTO
      */
-    User createUser(User user);
+    UserInfoDTO createUser(User user);
 
 
     /**

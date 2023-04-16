@@ -3,7 +3,6 @@ package fun.zhub.ppeng.rabbitListener;
 
 import fun.zhub.ppeng.service.FollowService;
 import fun.zhub.ppeng.service.LikeService;
-import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -30,8 +29,6 @@ import static com.zhub.ppeng.constant.RedisConstants.*;
 @Slf4j
 public class UserCacheListener {
 
-    @Resource
-    private UserInfoService userInfoService;
 
     @Resource
     private FollowService followService;
@@ -51,13 +48,11 @@ public class UserCacheListener {
             exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE
     ))
-    public void ListenUserCacheQueue(Long id) {
+    public void listenUserCacheQueue(Long id) {
         log.info("开始缓存用户{}的数据", id);
         /*
          * 加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
-        // 缓存用户基本信息
-        userInfoService.getUserInfoById(id);
 
         // 缓存具体关注
         followService.queryFollowById(id);
@@ -79,16 +74,15 @@ public class UserCacheListener {
             exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE_DEL
     ))
-    public void ListenUserCacheDeleteQueue(Long id) {
+    public void listenUserCacheDeleteQueue(Long id) {
         log.info("开始删除用户{}的缓存数据", id);
         /*
          * 删除用户缓存信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
-        // 删除用户角色信息
-        stringRedisTemplate.delete(USER_ROLE + id);
 
-        // 删除用户基本信息
-        stringRedisTemplate.delete(USER_DETAIL_INFO + id);
+
+        // 删除用户信息
+        stringRedisTemplate.delete(USER_INFO + id);
 
         // 删除具体关注
         stringRedisTemplate.delete(USER_FOLLOWS_KEY + id);

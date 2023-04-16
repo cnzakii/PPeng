@@ -26,7 +26,8 @@ import java.time.LocalDateTime;
 public class Like implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -7655313164446469685L;
+
 
     /**
      * 自增id

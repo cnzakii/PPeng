@@ -2,7 +2,7 @@ package com.zhub.ppeng.constant;
 
 /**
  * <p>
- *  系统常量
+ * 系统常量
  * <p>
  *
  * @author Zaki
@@ -19,4 +19,19 @@ public interface SystemConstants {
      * 数据中心Id
      */
     Integer DATACENTER_ID = 1;
+
+
+    /**
+     * 文件存储根路径
+     */
+    String FILE_ROOT_PATH = "/Users/zaki/Desktop";
+
+    /**
+     * 用户头像存储子路径
+     */
+    String FILE_ICON_SUB_PATH = "/icon/";
+
+
+
+
 }

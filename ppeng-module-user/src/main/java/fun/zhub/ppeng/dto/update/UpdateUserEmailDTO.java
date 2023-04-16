@@ -20,8 +20,10 @@ import java.io.Serializable;
  **/
 @Data
 public class UpdateUserEmailDTO implements Serializable {
+
+
     @Serial
-    private static final long serialVersionUID = 3191241716373120793L;
+    private static final long serialVersionUID = 2732738044211974759L;
 
     /**
      * 用户id
