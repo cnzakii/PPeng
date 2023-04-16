@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
-
 /**
  * <p>
  * UserInfoServiceImpl, UserInfoService interface 实现类
@@ -34,37 +33,35 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private UserInfoMapper userInfoMapper;
 
 
-
-
     @Override
-    public void updateUserInfo(Long id, String address,String introduce, Byte gender, LocalDate birthday) {
+    public void updateUserInfo(Long id, String address, String introduce, Byte gender, LocalDate birthday) {
         UserInfo userInfo = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("user_id", id));
 
 
         boolean b = false;
 
-        if(StrUtil.isNotEmpty(address)){
+        if (StrUtil.isNotEmpty(address)) {
             b = true;
-         userInfo.setAddress(address);
+            userInfo.setAddress(address);
         }
 
 
-        if(StrUtil.isNotEmpty(introduce)){
+        if (StrUtil.isNotEmpty(introduce)) {
             b = true;
             userInfo.setIntroduce(introduce);
         }
 
-        if(gender!=null){
+        if (gender != null) {
             b = true;
             userInfo.setGender(gender);
         }
 
-        if(birthday!=null){
+        if (birthday != null) {
             b = true;
             userInfo.setBirthday(birthday);
         }
 
-        if(b){
+        if (b) {
             userInfo.setUpdateTime(LocalDateTime.now());
             int i = userInfoMapper.updateById(userInfo);
             if (i == 0) {
@@ -74,7 +71,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
     }
-
 
 
     /**

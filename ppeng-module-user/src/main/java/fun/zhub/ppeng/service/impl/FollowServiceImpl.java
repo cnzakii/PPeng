@@ -15,11 +15,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.zhub.ppeng.constant.RedisConstants.*;
 
@@ -179,23 +179,18 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         if (list == null || list.isEmpty()) {
             // 如果没有，这插入一条为-1的数据，然后存入Redis
             stringRedisTemplate.opsForSet().add(key, "-1");
+            stringRedisTemplate.expire(key, ttl, timeUnit);
             return null;
         }
 
-        String[] followArray = new String[list.size()];
-        Set<String> set = new HashSet<>();
+        Set<String> set = list.stream()
+                .map(obj -> Objects.equals(name, "follow_id") ? String.valueOf(obj.getFollowId()) : String.valueOf(obj.getUserId()))
+                .collect(Collectors.toSet());
 
-        if (Objects.equals(name, "follow_id")) {
-            for (int i = 0; i < followArray.length; i++) {
-                followArray[i] = String.valueOf(list.get(i).getFollowId());
-                set.add(followArray[i]);
-            }
-        } else {
-            for (int i = 0; i < followArray.length; i++) {
-                followArray[i] = String.valueOf(list.get(i).getUserId());
-                set.add(followArray[i]);
-            }
-        }
+        String[] followArray = list.stream()
+                .map(obj -> Objects.equals(name, "follow_id") ? String.valueOf(obj.getFollowId()) : String.valueOf(obj.getUserId()))
+                .toArray(String[]::new);
+
 
         stringRedisTemplate.opsForSet().add(key, followArray);
         stringRedisTemplate.expire(key, ttl, timeUnit);

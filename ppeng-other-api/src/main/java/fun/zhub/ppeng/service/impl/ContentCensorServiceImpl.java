@@ -2,6 +2,7 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baidu.aip.contentcensor.AipContentCensor;
+import com.baidu.aip.contentcensor.EImgType;
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
@@ -12,6 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import static com.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
 
 
 /**
@@ -41,15 +47,21 @@ public class ContentCensorServiceImpl implements ContentCensorService {
      */
     @Override
     public void censorNickName(Long userId, String nickName) {
-        JSONObject jsonObject = client.textCensorUserDefined(nickName);
+        JSONObject response = client.textCensorUserDefined(nickName);
 
         // 判断是否合规
-        String conclusion = jsonObject.get("conclusion").toString();
+        String conclusion = response.getString("conclusion");
+        if (StrUtil.isEmpty(conclusion)) {
+            log.error("调用百度内容审核接口失败===>{}", response);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "调用接口失败");
+        }
 
-        log.debug("昵称内容审核结果===》{}", jsonObject);
+
+        log.debug("昵称内容审核结果===》{}", response);
+
 
         if (StrUtil.equals(conclusion, "不合规")) {
-            JSONArray jsonArray = jsonObject.getJSONArray("data");
+            JSONArray jsonArray = response.getJSONArray("data");
             JSONObject one = jsonArray.getJSONObject(0);
             String msg = one.get("msg").toString();
 
@@ -59,7 +71,6 @@ public class ContentCensorServiceImpl implements ContentCensorService {
              *TODO 可以调用信息模块，告知用户违规原因
              */
 
-
             // 利用OpenFeign调用修改昵称接口，修改昵称为： 违规昵称_5fsdfsfdf
             ResponseResult<String> result = badContentHandler.handleBadNickName(userId);
 
@@ -68,15 +79,9 @@ public class ContentCensorServiceImpl implements ContentCensorService {
                 log.error("修改{}违规昵称失败", userId);
                 throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规昵称失败");
             }
-
         } else {
-            if (!StrUtil.equals(conclusion, "合规")) {
-                log.error("调用百度内容审核接口失败===>{}", jsonObject);
-                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "调用接口失败");
-            }
             log.info("{}昵称({})审核通过", userId, nickName);
         }
-
     }
 
     /**
@@ -90,6 +95,44 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         /*
          * TODO 实现菜谱内容的审核的业务逻辑
          */
+
+    }
+
+    /**
+     * 实现用户头像审核
+     *
+     * @param userId  用户id
+     * @param content 内容
+     */
+    @Override
+    public void censorUserIcon(Long userId, String content) {
+        String path = FILE_ROOT_PATH + content;
+        JSONObject response = client.imageCensorUserDefined(path, EImgType.FILE, null);
+
+        log.info(response.toString());
+
+        // 判断是否合规
+        String conclusion = response.getString("conclusion");
+        if (StrUtil.isEmpty(conclusion)) {
+            log.error("调用百度内容审核接口失败===>{}", response);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "调用接口失败");
+        }
+
+        if (StrUtil.equals(conclusion, "不合规")) {
+            JSONArray jsonArray = response.getJSONArray("data");
+
+            List<String> msg = Stream.iterate(0, i -> i < jsonArray.length(), i -> i + 1)
+                    .map(i -> jsonArray.getJSONObject(i).getString("msg"))
+                    .toList();
+
+            log.info("用户({})头像违规===》{}", userId, msg);
+
+            /*
+             * TODO 服务调用，将icon转换成特定头像
+             */
+        } else {
+            log.info("{}头像审核通过", userId);
+        }
 
     }
 }

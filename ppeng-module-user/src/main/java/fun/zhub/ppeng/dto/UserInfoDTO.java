@@ -47,7 +47,7 @@ public class UserInfoDTO implements Serializable {
     /**
      * 用户地址
      */
-    private String address;
+    private String[] address;
 
 
     /**

@@ -14,10 +14,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.zhub.ppeng.constant.RedisConstants.USER_LIKE_KEY;
 import static com.zhub.ppeng.constant.RedisConstants.USER_LIKE_TTL;
@@ -106,12 +107,15 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
         }
 
         // 如果有，则存入Redis并返回
-        String[] likeArray = new String[likeList.size()];
-        Set<String> set = new HashSet<>();
-        for (int i = 0; i < likeArray.length; i++) {
-            likeArray[i] = String.valueOf(likeList.get(i).getRecipeId());
-            set.add(likeArray[i]);
-        }
+        String[] likeArray = likeList.stream()
+                .map(like -> String.valueOf(like.getRecipeId()))
+                .toArray(String[]::new);
+
+
+        Set<String> set = Stream.iterate(0, i -> i < likeArray.length, i -> i + 1)
+                .map(i -> likeArray[i])
+                .collect(Collectors.toSet());
+
 
         stringRedisTemplate.opsForSet().add(key, likeArray);
         stringRedisTemplate.expire(key, USER_LIKE_TTL, TimeUnit.MINUTES);

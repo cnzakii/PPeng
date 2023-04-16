@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TextContentCensorDTO {
+public class ContentCensorDTO {
 
     /**
      * 审核类型：昵称，菜谱内容....

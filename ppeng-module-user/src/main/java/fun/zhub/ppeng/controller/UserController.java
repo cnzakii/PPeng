@@ -3,10 +3,11 @@ package fun.zhub.ppeng.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.zhub.ppeng.common.ResponseResult;
-import com.zhub.ppeng.dto.TextContentCensorDTO;
+import com.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
@@ -23,11 +24,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.zhub.ppeng.constant.RabbitConstants.*;
+import static com.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 
 /**
@@ -132,7 +135,7 @@ public class UserController {
         /*
          * 异步删除用户其他缓存信息，如角色信息，具体粉丝等
          */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE_DEL, id);
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_USER_CACHE_DELETE, id);
 
         return ResponseResult.success();
     }
@@ -205,16 +208,22 @@ public class UserController {
         userService.updateNickNameAndIcon(userId, nickName, icon);
 
         // 更新userInfo表
-        String address = userInfoUpdateDTO.getAddress();
+        String[] address = userInfoUpdateDTO.getAddress();
         String introduce = userInfoUpdateDTO.getIntroduce();
         Byte gender = userInfoUpdateDTO.getGender();
         LocalDate birthday = userInfoUpdateDTO.getBirthday();
-        userInfoService.updateUserInfo(id, address, introduce, gender, birthday);
+        userInfoService.updateUserInfo(id, Arrays.toString(address), introduce, gender, birthday);
 
 
-        // 使用MQ将昵称传给第三方审核接口进行审核。
-        TextContentCensorDTO censorDTO = new TextContentCensorDTO("nickName", id, nickName);
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_TEXT_CENSOR, JSONUtil.toJsonStr(censorDTO));
+        // 异步审核昵称
+        if (StrUtil.isNotEmpty(nickName)) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("nickName", id, nickName)));
+        }
+
+        // 异步审核图片
+        if (StrUtil.isNotEmpty(icon)) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL,""))));
+        }
 
 
         return ResponseResult.success();

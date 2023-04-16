@@ -3,8 +3,10 @@ package fun.zhub.ppeng.controller;
 import com.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.service.FileService;
 import jakarta.annotation.Resource;
-import jakarta.websocket.server.PathParam;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -48,16 +50,4 @@ public class FileController {
         return ResponseResult.success(url);
     }
 
-    /**
-     * 文件删除功能
-     *
-     * @param filePath 文件路径(不包含根路径，包含文件名)
-     * @return true or false
-     */
-    @DeleteMapping("/delete")
-    public ResponseResult<Boolean> deleteFile(@PathParam("filePath") String filePath) {
-        fileService.deleteFile(filePath);
-
-        return ResponseResult.success();
-    }
 }

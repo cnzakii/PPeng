@@ -45,7 +45,7 @@ public class UserInfoUpdateDTO implements Serializable {
     /**
      * 用户地址
      */
-    private String address;
+    private String[] address;
 
     @Length(max = 128, message = "超出字数限制")
     private String introduce;

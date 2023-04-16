@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.rabbitListener;
 
 import cn.hutool.json.JSONUtil;
-import com.zhub.ppeng.dto.TextContentCensorDTO;
+import com.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,15 +31,20 @@ public class ContentCensorListener {
     private ContentCensorService censorService;
 
 
+    /**
+     * 监听内容审核队列
+     *
+     * @param json TextContentCensorDTO
+     */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = TEXT_CONTENT_CENSOR_QUEUE),
-            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
-            key = ROUTING_TEXT_CENSOR
+            value = @Queue(name = CONTENT_CENSOR_QUEUE),
+            exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = ROUTING_CONTENT_CENSOR
     ))
-    public void ListenTextContentCensorQueue(String json) {
-        TextContentCensorDTO censorDTO = JSONUtil.toBean(json, TextContentCensorDTO.class);
+    public void listenTextContentCensorQueue(String json) {
+        ContentCensorDTO censorDTO = JSONUtil.toBean(json, ContentCensorDTO.class);
 
-        log.debug("text.content.censor.queue队列监听到消息====》{}",censorDTO);
+        log.debug("content.censor.queue队列监听到消息====》{}", censorDTO);
 
         String type = censorDTO.getType();
         Long id = censorDTO.getId();
@@ -47,6 +52,7 @@ public class ContentCensorListener {
 
         switch (type) {
             case "nickName" -> censorService.censorNickName(id, content);
+            case "icon" -> censorService.censorUserIcon(id, content);
             case "recipe" -> censorService.censorRecipeText(id, content);
         }
     }

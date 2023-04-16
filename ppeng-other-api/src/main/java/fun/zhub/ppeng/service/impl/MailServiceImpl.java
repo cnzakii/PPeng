@@ -23,7 +23,7 @@ import org.thymeleaf.context.Context;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
+import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
 import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_MAIL_SEND;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constants.MailConstants.*;
@@ -82,7 +82,7 @@ public class MailServiceImpl implements MailService {
         /*
          * MQ异步处理
          */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
 
 
         stringRedisTemplate.opsForValue().set(key, code, REGISTER_CODE_TTL, TimeUnit.MINUTES);
@@ -117,7 +117,7 @@ public class MailServiceImpl implements MailService {
         /*
          * MQ异步处理
          */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
 
 
         stringRedisTemplate.opsForValue().set(key, code, UPDATE_CODE_TTL, TimeUnit.MINUTES);

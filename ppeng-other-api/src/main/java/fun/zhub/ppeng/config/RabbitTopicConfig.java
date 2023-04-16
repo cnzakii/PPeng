@@ -29,7 +29,7 @@ public class RabbitTopicConfig {
     @Bean("ppengTopicExchange")
     public TopicExchange ppengTopicExchange() {
 
-        return ExchangeBuilder.topicExchange(PPENG_EXCHANGE_NAME).durable(true).build();
+        return ExchangeBuilder.topicExchange(PPENG_EXCHANGE).durable(true).build();
     }
 
 
@@ -41,7 +41,7 @@ public class RabbitTopicConfig {
     @Bean("sendMailQueue")
     public Queue sendMailQueue() {
 
-        return QueueBuilder.durable(MAIL_SEND_QUEUE_NAME).build();
+        return QueueBuilder.durable(MAIL_SEND_QUEUE).build();
     }
 
 
@@ -53,7 +53,7 @@ public class RabbitTopicConfig {
     @Bean("textContentCensorQueue")
     public Queue textContentCensorQueue() {
 
-        return QueueBuilder.durable(TEXT_CONTENT_CENSOR_QUEUE).build();
+        return QueueBuilder.durable(CONTENT_CENSOR_QUEUE).build();
     }
 
     /**
@@ -79,7 +79,7 @@ public class RabbitTopicConfig {
     @Bean
     public Binding textContentCensorQueueBinding(@Qualifier("textContentCensorQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_TEXT_CENSOR);
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CONTENT_CENSOR);
     }
 
 

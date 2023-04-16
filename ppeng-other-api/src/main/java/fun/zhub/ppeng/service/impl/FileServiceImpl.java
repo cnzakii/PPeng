@@ -13,8 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 
-import static com.zhub.ppeng.constant.SystemConstants.FILE_ICON_SUB_PATH;
-import static com.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
+import static com.zhub.ppeng.constant.SystemConstants.*;
 
 /**
  * <p>
@@ -43,7 +42,7 @@ public class FileServiceImpl implements FileService {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "头像保存失败");
         }
 
-        return path;
+        return PPENG_URL + path;
     }
 
 
@@ -97,15 +96,20 @@ public class FileServiceImpl implements FileService {
     public void deleteFile(String filePath) {
         String path = FILE_ROOT_PATH + filePath;
         File file = new File(path);
-        if (file.exists()) {
-            boolean deleted = file.delete();
-            if (BooleanUtil.isFalse(deleted)) {
-                log.error("文件删除失败，filePath===》{}", path);
-                throw new BusinessException(ResponseStatus.HTTP_STATUS_500,"文件删除失败");
-            }
+
+        if (!file.exists()) {
+            log.warn("文件不存在");
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "文件不存在");
         }
-        log.warn("文件不存在");
-        throw new BusinessException(ResponseStatus.HTTP_STATUS_400,"文件不存在");
+
+
+        boolean deleted = file.delete();
+        if (BooleanUtil.isFalse(deleted)) {
+            log.error("文件删除失败，filePath===》{}", path);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "文件删除失败");
+        }
+
+
     }
 
 

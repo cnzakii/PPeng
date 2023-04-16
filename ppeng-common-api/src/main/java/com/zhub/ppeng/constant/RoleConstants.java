@@ -18,7 +18,4 @@ public interface RoleConstants {
 
 
 
-    String ROLE_ADMIN = "admin";
-
-
 }

@@ -44,8 +44,8 @@ public class UserCacheListener {
      */
 
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = USER_CACHE_QUEUE_NAME),
-            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
+            value = @Queue(name = USER_CACHE_QUEUE),
+            exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = ROUTING_USER_CACHE
     ))
     public void listenUserCacheQueue(Long id) {
@@ -70,9 +70,9 @@ public class UserCacheListener {
      * 监听用户缓存队列(user.cache.delete.queue)，从缓存中删除用户信息
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = USER_CACHE_DELETE_QUEUE_NAME),
-            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
-            key = ROUTING_USER_CACHE_DEL
+            value = @Queue(name = USER_CACHE_DELETE_QUEUE),
+            exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = ROUTING_USER_CACHE_DELETE
     ))
     public void listenUserCacheDeleteQueue(Long id) {
         log.info("开始删除用户{}的缓存数据", id);

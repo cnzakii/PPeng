@@ -30,12 +30,18 @@ public class MailListener {
     @Resource
     private MailService mailService;
 
+
+    /**
+     * 监听邮件发送队列
+     *
+     * @param json VerifyMailDTO
+     */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = MAIL_SEND_QUEUE_NAME),
-            exchange = @Exchange(name = PPENG_EXCHANGE_NAME, type = ExchangeTypes.TOPIC),
+            value = @Queue(name = MAIL_SEND_QUEUE),
+            exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = ROUTING_MAIL_SEND
     ))
-    public void ListenSendMailQueue(String json) {
+    public void listenSendMailQueue(String json) {
         VerifyMailDTO mailDTO = JSONUtil.toBean(json, VerifyMailDTO.class);
 
         log.debug("mail.send.queue队列监听到消息===>{}", mailDTO);

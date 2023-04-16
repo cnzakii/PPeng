@@ -32,6 +32,10 @@ public interface SystemConstants {
     String FILE_ICON_SUB_PATH = "/icon/";
 
 
+    /**
+     * url
+     */
+    String PPENG_URL = "https://ppeng.zhub.fun";
 
 
 }

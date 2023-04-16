@@ -38,11 +38,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE_NAME;
-import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_USER_CACHE;
+import static com.zhub.ppeng.constant.RabbitConstants.*;
 import static com.zhub.ppeng.constant.RedisConstants.*;
 import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static com.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**
@@ -236,7 +236,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         /*
          * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE_NAME, ROUTING_USER_CACHE, userId);
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_USER_CACHE, userId);
 
         return StpUtil.getTokenValue();
     }
@@ -425,6 +425,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         if (StrUtil.isNotEmpty(icon)) {
+            if (StrUtil.isNotEmpty(user.getIcon())) {
+                // 异步删除旧的icon
+                String oldIcon = user.getIcon().replace(PPENG_URL, "");
+                rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_FILE_DELETE, oldIcon);
+            }
             b = true;
             user.setIcon(icon);
         }

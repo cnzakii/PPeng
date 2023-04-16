@@ -29,7 +29,7 @@ public class RabbitTopicConfig {
     @Bean("ppengTopicExchange")
     public TopicExchange ppengTopicExchange() {
 
-        return ExchangeBuilder.topicExchange(PPENG_EXCHANGE_NAME).durable(true).build();
+        return ExchangeBuilder.topicExchange(PPENG_EXCHANGE).durable(true).build();
     }
 
 
@@ -42,7 +42,7 @@ public class RabbitTopicConfig {
     public Queue userCacheQueue() {
 
 
-        return QueueBuilder.durable(USER_CACHE_QUEUE_NAME).build();
+        return QueueBuilder.durable(USER_CACHE_QUEUE).build();
     }
 
 
@@ -54,21 +54,30 @@ public class RabbitTopicConfig {
     @Bean("userCacheDeleteQueue")
     public Queue userCacheDeleteQueue() {
 
-        return QueueBuilder.durable(USER_CACHE_DELETE_QUEUE_NAME).build();
+        return QueueBuilder.durable(USER_CACHE_DELETE_QUEUE).build();
     }
 
     /**
-     * 配置用户缓存更新队列队列
+     * 配置用户缓存更新队列
      *
      * @return userCacheUpdateQueue
      */
     @Bean("userCacheUpdateQueue")
     public Queue userCacheUpdateQueue() {
 
-        return QueueBuilder.durable(USER_CACHE_UPDATE_QUEUE_NAME).build();
+        return QueueBuilder.durable(USER_CACHE_UPDATE_QUEUE).build();
     }
 
+    /**
+     * 配置文件删除队列
+     *
+     * @return fileDeleteQueue
+     */
+    @Bean("fileDeleteQueue")
+    public Queue fileDeleteQueue() {
 
+        return QueueBuilder.durable(FILE_DELETE_QUEUE).build();
+    }
 
 
     /**
@@ -94,7 +103,7 @@ public class RabbitTopicConfig {
     @Bean
     public Binding userCacheDeleteQueueBinding(@Qualifier("userCacheDeleteQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DEL);
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_DELETE);
     }
 
     /**
@@ -111,6 +120,18 @@ public class RabbitTopicConfig {
     }
 
 
+    /**
+     * 队列和交换机绑定关系
+     *
+     * @param queue    队列
+     * @param exchange 交换机
+     * @return getBinding
+     */
+    @Bean
+    public Binding fileDeleteQueueBinding(@Qualifier("fileDeleteQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_FILE_DELETE);
+    }
 
 
 }
