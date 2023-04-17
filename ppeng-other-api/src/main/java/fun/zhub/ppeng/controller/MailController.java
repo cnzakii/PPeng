@@ -1,6 +1,8 @@
 package fun.zhub.ppeng.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +30,7 @@ public class MailController {
     private MailService mailService;
 
     @PostMapping("/register/{mail}")
+    @SentinelResource(value = "sendRegisterMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> sendRegisterMail(@PathVariable("mail") String mail) {
 
 
@@ -37,6 +40,7 @@ public class MailController {
     }
 
     @PostMapping("/update/{mail}")
+    @SentinelResource(value = "sendUpdateMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> sendUpdateMail(@PathVariable("mail") String mail) {
 
 

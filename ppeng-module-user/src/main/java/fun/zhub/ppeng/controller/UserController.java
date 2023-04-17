@@ -6,6 +6,7 @@ import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.UserInfoDTO;
@@ -15,6 +16,7 @@ import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UserInfoUpdateDTO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
@@ -66,6 +68,7 @@ public class UserController {
      * @return RSA公钥
      */
     @GetMapping("/rsa")
+    @SentinelResource(value = "getPublicKey", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> getPublicKey() {
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
@@ -222,7 +225,7 @@ public class UserController {
 
         // 异步审核图片
         if (StrUtil.isNotEmpty(icon)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL,""))));
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL, ""))));
         }
 
 

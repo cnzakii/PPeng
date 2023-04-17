@@ -12,6 +12,7 @@ import fun.zhub.ppeng.mapper.UserInfoMapper;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,14 +34,24 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private UserInfoMapper userInfoMapper;
 
 
+    /**
+     * 实现更新
+     *
+     * @param id        用户Id
+     * @param address   地址
+     * @param introduce 自我介绍
+     * @param gender    性别
+     * @param birthday  生日
+     */
     @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#id")
     public void updateUserInfo(Long id, String address, String introduce, Byte gender, LocalDate birthday) {
         UserInfo userInfo = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("user_id", id));
 
 
         boolean b = false;
 
-        if (StrUtil.isNotEmpty(address)) {
+        if (!StrUtil.equals("null",address)) {
             b = true;
             userInfo.setAddress(address);
         }
@@ -81,6 +92,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      * @param type   添加或删除
      */
     @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public void updateFollowOrFans(String name, Long userId, String type) {
         String sql;
         if (StrUtil.equals(type, "insert")) {

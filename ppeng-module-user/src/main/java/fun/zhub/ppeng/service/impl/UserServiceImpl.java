@@ -30,6 +30,8 @@ import fun.zhub.ppeng.service.WeChatService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -224,12 +226,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 登录
         StpUtil.login(userId);
 
-        // 先完成一遍查询用户操作，写入本地缓存
-        UserInfoDTO userInfo = getUserInfoById(userId);
+        // 先完成一遍查询用户操作，写入本地缓存,和redis缓存
+        getUserInfoById(userId);
 
-        /*
-         * TODO 写入本地缓存
-         */
         // 将用户角色信息插入redis
         stringRedisTemplate.opsForSet().add(USER_ROLE + userId, user.getRole());
 
@@ -249,6 +248,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return user
      */
     @Override
+    @Cacheable(cacheNames = "userInfo", key = "#id", sync = true)
     public UserInfoDTO getUserInfoById(Long id) {
         String key = USER_INFO + id;
         // 先查询redis
@@ -257,7 +257,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // redis中存在 则返回
         if (StrUtil.isNotEmpty(json)) {
-
             return JSONUtil.toBean(json, UserInfoDTO.class);
         }
 
@@ -360,6 +359,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param userEmailDTO userEmailDTO
      */
     @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#userEmailDTO.userId")
     public void updateEmail(UpdateUserEmailDTO userEmailDTO) {
         Long id = userEmailDTO.getUserId();
         String oldEmail = userEmailDTO.getOldEmail();
@@ -411,6 +411,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param icon     头像url
      */
     @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public void updateNickNameAndIcon(Long userId, String nickName, String icon) {
         // 根据Id获取当前用户
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", userId));
@@ -453,6 +454,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param id id
      */
     @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#id")
     public void deleteUserById(Long id) {
         // 删除当前用户的基本信息
         int c = userMapper.deleteById(id);

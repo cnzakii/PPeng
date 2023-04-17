@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.service;
 
+import fun.zhub.ppeng.service.impl.WeChatFallbackServiceImpl;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2023-04-15
  **/
 
-@FeignClient(url = "https://api.weixin.qq.com", name = "WeChatService")
+@FeignClient(url = "https://api.weixin.qq.com", name = "WeChatService",fallback = WeChatFallbackServiceImpl.class)
 @Component
 public interface WeChatService {
 
