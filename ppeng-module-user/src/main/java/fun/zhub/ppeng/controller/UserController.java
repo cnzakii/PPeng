@@ -26,7 +26,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -211,11 +210,11 @@ public class UserController {
         userService.updateNickNameAndIcon(userId, nickName, icon);
 
         // 更新userInfo表
-        String[] address = userInfoUpdateDTO.getAddress();
+        String address = String.join(",", userInfoUpdateDTO.getAddress());
         String introduce = userInfoUpdateDTO.getIntroduce();
         Byte gender = userInfoUpdateDTO.getGender();
         LocalDate birthday = userInfoUpdateDTO.getBirthday();
-        userInfoService.updateUserInfo(id, Arrays.toString(address), introduce, gender, birthday);
+        userInfoService.updateUserInfo(id, address, introduce, gender, birthday);
 
 
         // 异步审核昵称
@@ -245,7 +244,12 @@ public class UserController {
 
         userService.deleteUserById(id);
 
+
+
         StpUtil.logout();
+
+        // 异步删除缓存
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_USER_CACHE_DELETE, id);
 
         return ResponseResult.success();
     }

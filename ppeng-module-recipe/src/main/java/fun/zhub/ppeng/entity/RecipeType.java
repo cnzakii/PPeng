@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -23,7 +24,8 @@ import java.io.Serializable;
 @TableName("t_recipe_type")
 public class RecipeType implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 7164947606062946355L;
 
     /**
      * 自增id

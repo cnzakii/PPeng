@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -24,7 +25,9 @@ import java.time.LocalDateTime;
 @TableName("t_recipe")
 public class Recipe implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+
+    @Serial
+    private static final long serialVersionUID = -1966291447312406958L;
 
     /**
      * 菜谱id

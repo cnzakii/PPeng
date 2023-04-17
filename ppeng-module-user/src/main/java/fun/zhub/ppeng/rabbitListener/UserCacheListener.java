@@ -80,9 +80,12 @@ public class UserCacheListener {
          * 删除用户缓存信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
          */
 
+        // 删除角色信息
+        stringRedisTemplate.delete(USER_ROLE + id);
 
         // 删除用户信息
         stringRedisTemplate.delete(USER_INFO + id);
+
 
         // 删除具体关注
         stringRedisTemplate.delete(USER_FOLLOWS_KEY + id);

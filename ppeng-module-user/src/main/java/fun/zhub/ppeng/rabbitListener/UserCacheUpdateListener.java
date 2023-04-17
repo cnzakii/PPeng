@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.rabbitListener;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import fun.zhub.ppeng.entity.Follow;
@@ -42,23 +43,28 @@ public class UserCacheUpdateListener {
     public void listenCanalQueue(String s) {
         JSONObject object = new JSONObject(s);
 
+        log.info(s);
+
+        String type = object.getStr("type");
         String table = object.getStr("table");
         JSONArray data = object.getJSONArray("data");
         Object one = data.get(0);
 
-        switch (table) {
-            case "t_user" -> {
-                User user = BeanUtil.toBean(one, User.class);
-                // 更新Redis
-                redisHandler.updateUser(user);
-            }
-            case "t_user_info" -> {
-                UserInfo userInfo = BeanUtil.toBean(one, UserInfo.class);
-                redisHandler.updateUserInfo(userInfo);
-            }
-            case "t_follow" -> {
-                Follow follow = BeanUtil.toBean(one, Follow.class);
-                redisHandler.updateFan(follow);
+        if (StrUtil.equals(type, "UPDATE")) {
+            switch (table) {
+                case "t_user" -> {
+                    User user = BeanUtil.toBean(one, User.class);
+                    // 更新Redis
+                    redisHandler.updateUser(user);
+                }
+                case "t_user_info" -> {
+                    UserInfo userInfo = BeanUtil.toBean(one, UserInfo.class);
+                    redisHandler.updateUserInfo(userInfo);
+                }
+                case "t_follow" -> {
+                    Follow follow = BeanUtil.toBean(one, Follow.class);
+                    redisHandler.updateFan(follow);
+                }
             }
         }
 

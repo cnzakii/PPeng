@@ -297,7 +297,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String email = userPasswordDTO.getEmail();
         Long id = userPasswordDTO.getUserId();
 
-        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), LOGIN_CODE_KEY)) {
+        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), UPDATE_CODE_KEY)) {
             // 验证码错误
             throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
@@ -465,6 +465,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 删除用户的具体信息
         userInfoService.deleteUserInfoById(id);
+
 
     }
 

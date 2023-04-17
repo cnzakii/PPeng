@@ -39,7 +39,7 @@ public class UpdateUserPasswordDTO implements Serializable {
 
 
     /**
-     * 手机验证码
+     * 验证码
      */
     @Pattern(regexp = "^\\d{6}$", message = "验证码无效")
     private String verifyCode;

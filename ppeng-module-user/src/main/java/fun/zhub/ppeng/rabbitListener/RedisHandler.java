@@ -43,12 +43,17 @@ public class RedisHandler {
      */
     public void updateUser(User newUser) {
         Long id = newUser.getId();
-        // 根据UserId 查询用户数据
-        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
 
-        BeanUtil.copyProperties(newUser, userInfoDTO);
+        if(newUser.getIsDeleted()==1){
+            stringRedisTemplate.delete(USER_INFO + id);
+        }else {
+            // 根据UserId 查询用户数据
+            UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
 
-        stringRedisTemplate.opsForValue().set(USER_INFO + id, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
+            BeanUtil.copyProperties(newUser, userInfoDTO);
+
+            stringRedisTemplate.opsForValue().set(USER_INFO + id, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
+        }
 
     }
 
