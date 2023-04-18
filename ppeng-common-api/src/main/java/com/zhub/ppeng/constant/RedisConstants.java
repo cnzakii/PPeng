@@ -94,5 +94,16 @@ public interface RedisConstants {
      */
     Long USER_LIKE_TTL = 30L;
 
+    /**
+     * 用户收藏菜谱数据前缀
+     */
+    String USER_COLLECT_KEY = "user:collect:";
+
+    /**
+     * 用户收藏菜谱数据过期时间
+     */
+    Long USER_COLLECT_TTL = 30L;
+
+
 
 }
