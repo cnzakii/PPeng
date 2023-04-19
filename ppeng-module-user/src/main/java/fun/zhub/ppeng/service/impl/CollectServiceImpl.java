@@ -13,12 +13,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.zhub.ppeng.constant.RedisConstants.*;
+import static com.zhub.ppeng.constant.RedisConstants.USER_COLLECT_KEY;
+import static com.zhub.ppeng.constant.RedisConstants.USER_COLLECT_TTL;
 
 /**
  * <p>
@@ -46,9 +48,10 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
     @Override
     public void addCollectedRecipe(Long userId, Long recipeId) {
         String key = USER_COLLECT_KEY + userId;
+
         // 查询是否已经收藏
-        Boolean Collected = isCollected(userId, recipeId);
-        if (BooleanUtil.isTrue(Collected)) {
+        Boolean collected = isCollected(userId, recipeId);
+        if (BooleanUtil.isTrue(collected)) {
             throw new BusinessException(ResponseStatus.FAIL, "已经收藏了");
         }
 
@@ -83,6 +86,7 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         String key = USER_COLLECT_KEY + userId;
         // 先从Redis里面查询
         Set<String> members = stringRedisTemplate.opsForSet().members(key);
+
         if (members != null && !members.isEmpty()) {
             // 查看是否包含-1，也就是说该用户当前没有关注
             boolean b = members.contains(String.valueOf(-1));
@@ -101,12 +105,13 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         }
 
         // 如果有，则存入Redis并返回
-        String[] collectArray = new String[collectList.size()];
-        Set<String> set = new HashSet<>();
-        for (int i = 0; i < collectArray.length; i++) {
-            collectArray[i] = String.valueOf(collectList.get(i).getRecipeId());
-            set.add(collectArray[i]);
-        }
+        String[] collectArray = collectList.stream()
+                .map(collect -> String.valueOf(collect.getRecipeId()))
+                .toArray(String[]::new);
+
+        Set<String> set = Stream.iterate(0, i -> i < collectArray.length, i -> i + 1)
+                .map(i -> collectArray[i])
+                .collect(Collectors.toSet());
 
         stringRedisTemplate.opsForSet().add(key, collectArray);
         stringRedisTemplate.expire(key, USER_COLLECT_TTL, TimeUnit.MINUTES);
@@ -122,7 +127,7 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
      */
     @Override
     public void deleteCollectedRecipe(Long userId, Long recipeId) {
-// 查询是否已经点赞
+        // 查询是否已经点赞
         Boolean collected = isCollected(userId, recipeId);
         if (BooleanUtil.isFalse(collected)) {
             throw new BusinessException(ResponseStatus.FAIL, "尚未收藏");

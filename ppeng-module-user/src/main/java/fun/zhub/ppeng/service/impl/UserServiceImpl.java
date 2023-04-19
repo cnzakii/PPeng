@@ -297,7 +297,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String email = userPasswordDTO.getEmail();
         Long id = userPasswordDTO.getUserId();
 
-        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), UPDATE_CODE_KEY)) {
+        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), UPDATE_PASSWORD_CODE_KEY)) {
             // 验证码错误
             throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
@@ -362,33 +362,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @CacheEvict(cacheNames = "userInfo", key = "#userEmailDTO.userId")
     public void updateEmail(UpdateUserEmailDTO userEmailDTO) {
         Long id = userEmailDTO.getUserId();
-        String oldEmail = userEmailDTO.getOldEmail();
-        String newEmail = userEmailDTO.getNewEmail();
+        String newEmail = userEmailDTO.getEmail();
 
-        // 验证新旧邮箱的验证码
-        if (!verifyEmail(oldEmail, userEmailDTO.getOldCode(), UPDATE_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "-验证码错误");
-        }
-        if (!verifyEmail(newEmail, userEmailDTO.getNewCode(), UPDATE_CODE_KEY)) {
+        // 验证邮箱
+        if (!verifyEmail(newEmail, userEmailDTO.getCode(), UPDATE_EMAIL_CODE_KEY)) {
             throw new BusinessException(ResponseStatus.FAIL, newEmail + "-验证码错误");
-        }
-
-        // 不允许新旧邮箱相同
-        if (StrUtil.equals(oldEmail, newEmail)) {
-            throw new BusinessException(ResponseStatus.FAIL, oldEmail + "新旧邮箱不允许一致");
         }
 
 
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
-
+        String oldEmail = user.getEmail();
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
         }
 
-        // 验证邮箱是否一致
-        if (!StrUtil.equals(user.getEmail(), oldEmail)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该邮箱不属于该账号");
+        // 不允许新旧邮箱相同
+        if (StrUtil.equals(newEmail, oldEmail)) {
+            throw new BusinessException(ResponseStatus.FAIL, "新旧邮箱不允许一致");
         }
+
 
         boolean b = update(new UpdateWrapper<User>()
                 .set("email", newEmail)
@@ -520,5 +512,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 不一致，抛出异常
         return StrUtil.equals(code, cacheCode);
     }
+
 
 }

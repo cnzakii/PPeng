@@ -11,7 +11,6 @@ import fun.zhub.ppeng.mapper.FollowMapper;
 import fun.zhub.ppeng.service.FollowService;
 import fun.zhub.ppeng.service.UserInfoService;
 import jakarta.annotation.Resource;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -94,7 +93,6 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
      * @return 关注列表
      */
     @Override
-    @Cacheable(cacheNames = "userFollow", key = "#id")
     public Set<String> queryFollowById(Long id) {
         return queryById(USER_FOLLOWS_KEY, USER_FOLLOWS_TTL, TimeUnit.MINUTES, "user_id", id);
     }
@@ -119,7 +117,6 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
      * @param followId 关注id
      */
     @Override
-    @CacheEvict(cacheNames = "userFollow", key = "#userId")
     public void deleteFollow(Long userId, Long followId) {
         String key = USER_FOLLOWS_KEY + userId;
         Boolean isFollow = isFollow(userId, followId);

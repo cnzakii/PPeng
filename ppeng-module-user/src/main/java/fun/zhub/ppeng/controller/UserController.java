@@ -1,7 +1,9 @@
 package fun.zhub.ppeng.controller;
 
+import cn.dev33.satoken.annotation.SaCheckSafe;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.RSA;
@@ -10,6 +12,7 @@ import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.UserInfoDTO;
+import fun.zhub.ppeng.dto.VerifyEmailDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
@@ -31,6 +34,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.zhub.ppeng.constant.RabbitConstants.*;
+import static com.zhub.ppeng.constant.RedisConstants.*;
+import static com.zhub.ppeng.constant.SaTokenConstants.*;
 import static com.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 
@@ -72,6 +77,7 @@ public class UserController {
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
+
     /**
      * 通过邮箱和密码注册
      *
@@ -83,7 +89,6 @@ public class UserController {
         userService.register(registerDTO);
         return ResponseResult.success();
     }
-
 
     /**
      * 通过邮箱和密码登录
@@ -146,7 +151,7 @@ public class UserController {
     /**
      * 获取当前用户信息
      *
-     * @return userBaseInfo
+     * @return userInfo
      */
     @PostMapping("/current")
     public ResponseResult<UserInfoDTO> getCurrentInfo() {
@@ -161,13 +166,85 @@ public class UserController {
         return ResponseResult.success(userInfoDTO);
     }
 
+    /**
+     * 根据id获取用户信息 ----》 不对外开放，仅用于服务之间的调用
+     *
+     * @return userInfo
+     */
+    @GetMapping("/info/{userId}")
+    public ResponseResult<UserInfoDTO> getUserInfo(@PathVariable("userId") Long userId) {
+        UserInfoDTO userInfoDTO = userService.getUserInfoById(userId);
+        return ResponseResult.success(userInfoDTO);
+    }
 
     /**
-     * 更新用户密码
+     * 用户身份二次认证
+     *
+     * @param verifyEmailDTO verifyEmailDTO
+     * @return success
+     */
+    @PostMapping("/safe/verify")
+    public ResponseResult<String> verifyIdentity(@RequestBody @Valid VerifyEmailDTO verifyEmailDTO) {
+        // 验证id是否和token对应的id一致
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        Long userId = verifyEmailDTO.getUserId();
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
+
+        // 验证email是否一致
+        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
+
+        if (!StrUtil.equals(verifyEmailDTO.getEmail(), userInfoDTO.getEmail())) {
+            return ResponseResult.fail("邮箱错误");
+        }
+
+        Integer type = verifyEmailDTO.getType();
+        String userEmail = userInfoDTO.getEmail();
+        String code = verifyEmailDTO.getCode();
+
+        Boolean b;
+
+        /*
+         * 0 更新密码 1 更新邮箱  2 删除账号
+         */
+        switch (type) {
+            case 0 -> {
+                b = userService.verifyEmail(userEmail, code, UPDATE_PASSWORD_CODE_KEY);
+                if (BooleanUtil.isTrue(b)) {
+                    StpUtil.openSafe(SAFE_UPDATE_PASSWORD, SAFE_TIME);
+                }
+            }
+            case 1 -> {
+                b = userService.verifyEmail(userEmail, code, UPDATE_EMAIL_CODE_KEY);
+                if (BooleanUtil.isTrue(b)) {
+                    StpUtil.openSafe(SAFE_UPDATE_EMAIL, SAFE_TIME);
+                }
+            }
+            case 2 -> {
+                b = userService.verifyEmail(userEmail, code, DELETE_USER_CODE_KEY);
+                if (BooleanUtil.isTrue(b)) {
+                    StpUtil.openSafe(SAFE_DELETE_USER, SAFE_TIME);
+                }
+            }
+            default -> b = false;
+        }
+
+        if (BooleanUtil.isFalse(b)) {
+            return ResponseResult.fail("用户身份验证失败");
+        }
+
+        return ResponseResult.success();
+    }
+
+
+    /**
+     * 更新用户密码--需要二次认证
      *
      * @return success
      */
     @PutMapping("update/password")
+    @SaCheckSafe(SAFE_UPDATE_PASSWORD)
     public ResponseResult<String> updateUserPassword(@RequestBody @Valid UpdateUserPasswordDTO userPasswordDTO) {
 
         userService.updatePassword(userPasswordDTO);
@@ -177,11 +254,12 @@ public class UserController {
     }
 
     /**
-     * 更新用户邮箱
+     * 更新用户邮箱--需要二次认证
      *
      * @return success
      */
     @PutMapping("update/email")
+    @SaCheckSafe(SAFE_UPDATE_EMAIL)
     public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
 
         userService.updateEmail(userEmailDTO);
@@ -233,17 +311,17 @@ public class UserController {
 
 
     /**
-     * 删除当前用户
+     * 删除当前用户--需要二次认证
      *
      * @return success
      */
     @DeleteMapping("/current")
+    @SaCheckSafe(SAFE_DELETE_USER)
     public ResponseResult<String> deleteUser() {
 
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         userService.deleteUserById(id);
-
 
 
         StpUtil.logout();

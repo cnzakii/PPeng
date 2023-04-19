@@ -116,7 +116,7 @@ public class RabbitTopicConfig {
     @Bean
     public Binding userCacheUpdateQueueBinding(@Qualifier("userCacheUpdateQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_USER_CACHE_UPDATE);
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CACHE_UPDATE);
     }
 
 

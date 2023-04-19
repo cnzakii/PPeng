@@ -8,6 +8,7 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ import static com.zhub.ppeng.constant.RedisConstants.*;
  **/
 
 @Component
+@Slf4j
 public class RedisHandler {
 
     @Resource
@@ -43,6 +45,8 @@ public class RedisHandler {
      */
     public void updateUser(User newUser) {
         Long id = newUser.getId();
+
+        log.info("更新用户({})信息缓存",id);
 
         if(newUser.getIsDeleted()==1){
             stringRedisTemplate.delete(USER_INFO + id);

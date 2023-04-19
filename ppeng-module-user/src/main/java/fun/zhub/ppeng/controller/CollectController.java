@@ -74,7 +74,7 @@ public class CollectController {
      * @return success
      */
     @DeleteMapping("/delete/{recipeId}")
-    public ResponseResult<String> DeletecollectedRecipe(@PathVariable("recipeId") Long recipeId) {
+    public ResponseResult<String> deletecollectedRecipe(@PathVariable("recipeId") Long recipeId) {
         Long userId = Long.valueOf((String) StpUtil.getLoginId());
 
         collectService.deleteCollectedRecipe(userId, recipeId);

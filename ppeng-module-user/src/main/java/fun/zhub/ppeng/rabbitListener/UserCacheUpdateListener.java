@@ -38,7 +38,7 @@ public class UserCacheUpdateListener {
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = USER_CACHE_UPDATE_QUEUE),
             exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
-            key = ROUTING_USER_CACHE_UPDATE
+            key = ROUTING_CACHE_UPDATE
     ))
     public void listenCanalQueue(String s) {
         JSONObject object = new JSONObject(s);

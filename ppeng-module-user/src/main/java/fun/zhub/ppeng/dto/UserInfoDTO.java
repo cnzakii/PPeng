@@ -27,7 +27,7 @@ public class UserInfoDTO implements Serializable {
     /**
      * 用户id
      */
-    private Long id;
+    private String id;
 
     /**
      * 邮箱
