@@ -1,6 +1,5 @@
 package fun.zhub.ppeng.controller;
 
-import cn.dev33.satoken.annotation.SaCheckSafe;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -11,7 +10,7 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.dto.ContentCensorDTO;
-import fun.zhub.ppeng.dto.UserInfoDTO;
+import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.VerifyEmailDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
@@ -20,7 +19,6 @@ import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UserInfoUpdateDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
-import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -61,9 +59,6 @@ public class UserController {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
-
-    @Resource
-    private UserInfoService userInfoService;
 
 
     /**
@@ -154,27 +149,29 @@ public class UserController {
      * @return userInfo
      */
     @PostMapping("/current")
-    public ResponseResult<UserInfoDTO> getCurrentInfo() {
+    public ResponseResult<UserDTO> getCurrentInfo() {
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 
 
-        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
+        User userInfo = userService.getUserInfoById(id);
+
+        UserDTO userDTO = BeanUtil.copyProperties(userInfo, UserDTO.class);
 
         // email脱敏
-        userInfoDTO.setEmail(DesensitizedUtil.email(userInfoDTO.getEmail()));
+        userDTO.setEmail(DesensitizedUtil.email(userDTO.getEmail()));
 
-        return ResponseResult.success(userInfoDTO);
+        return ResponseResult.success(userDTO);
     }
 
     /**
-     * 根据id获取用户信息 ----》 不对外开放，仅用于服务之间的调用
+     * 根据id获取用户的完全信息 ----》 不对外开放，仅用于服务之间的调用
      *
      * @return userInfo
      */
     @GetMapping("/info/{userId}")
-    public ResponseResult<UserInfoDTO> getUserInfo(@PathVariable("userId") Long userId) {
-        UserInfoDTO userInfoDTO = userService.getUserInfoById(userId);
-        return ResponseResult.success(userInfoDTO);
+    public ResponseResult<User> getUserInfo(@PathVariable("userId") Long userId) {
+        User user = userService.getUserInfoById(userId);
+        return ResponseResult.success(user);
     }
 
     /**
@@ -193,14 +190,14 @@ public class UserController {
         }
 
         // 验证email是否一致
-        UserInfoDTO userInfoDTO = userService.getUserInfoById(id);
+        User user = userService.getUserInfoById(id);
 
-        if (!StrUtil.equals(verifyEmailDTO.getEmail(), userInfoDTO.getEmail())) {
+        if (!StrUtil.equals(verifyEmailDTO.getEmail(), user.getEmail())) {
             return ResponseResult.fail("邮箱错误");
         }
 
         Integer type = verifyEmailDTO.getType();
-        String userEmail = userInfoDTO.getEmail();
+        String userEmail = user.getEmail();
         String code = verifyEmailDTO.getCode();
 
         Boolean b;
@@ -243,8 +240,7 @@ public class UserController {
      *
      * @return success
      */
-    @PutMapping("update/password")
-    @SaCheckSafe(SAFE_UPDATE_PASSWORD)
+    @PutMapping("/update/password")
     public ResponseResult<String> updateUserPassword(@RequestBody @Valid UpdateUserPasswordDTO userPasswordDTO) {
 
         userService.updatePassword(userPasswordDTO);
@@ -258,8 +254,7 @@ public class UserController {
      *
      * @return success
      */
-    @PutMapping("update/email")
-    @SaCheckSafe(SAFE_UPDATE_EMAIL)
+    @PutMapping("/update/email")
     public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
 
         userService.updateEmail(userEmailDTO);
@@ -282,18 +277,14 @@ public class UserController {
             return ResponseResult.fail("id错误");
         }
 
-        // 更新user表
         String nickName = userInfoUpdateDTO.getNickName();
         String icon = userInfoUpdateDTO.getIcon();
-        userService.updateNickNameAndIcon(userId, nickName, icon);
-
-        // 更新userInfo表
         String address = String.join(",", userInfoUpdateDTO.getAddress());
         String introduce = userInfoUpdateDTO.getIntroduce();
-        Byte gender = userInfoUpdateDTO.getGender();
+        Integer gender = userInfoUpdateDTO.getGender();
         LocalDate birthday = userInfoUpdateDTO.getBirthday();
-        userInfoService.updateUserInfo(id, address, introduce, gender, birthday);
 
+        userService.updateUserInfo(userId, nickName, icon, address, introduce, gender, birthday);
 
         // 异步审核昵称
         if (StrUtil.isNotEmpty(nickName)) {
@@ -316,13 +307,11 @@ public class UserController {
      * @return success
      */
     @DeleteMapping("/current")
-    @SaCheckSafe(SAFE_DELETE_USER)
     public ResponseResult<String> deleteUser() {
 
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 
         userService.deleteUserById(id);
-
 
         StpUtil.logout();
 

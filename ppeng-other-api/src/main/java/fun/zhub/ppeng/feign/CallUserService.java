@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.feign;
 
 import com.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.user.UserInfoDTO;
+import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.feign.impl.CallUserFallbackServiceImpl;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
@@ -35,6 +35,6 @@ public interface CallUserService {
      * 获取用户信息
      */
     @GetMapping("/info/{userId}")
-    ResponseResult<UserInfoDTO> getUserInfo(@PathVariable("userId") Long userId);
+    ResponseResult<User> getUserInfo(@PathVariable("userId") Long userId);
 
 }

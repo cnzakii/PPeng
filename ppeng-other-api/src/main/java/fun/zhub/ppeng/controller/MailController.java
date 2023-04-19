@@ -4,8 +4,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.user.UserInfoDTO;
 import fun.zhub.ppeng.dto.user.UserVerifyDTO;
+import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.feign.CallUserService;
 import fun.zhub.ppeng.service.MailService;
@@ -69,7 +69,7 @@ public class MailController {
             return ResponseResult.fail("id错误");
         }
         // 服务调用user服务，查询该用户信息
-        ResponseResult<UserInfoDTO> response = userService.getUserInfo(userId);
+        ResponseResult<User> response = userService.getUserInfo(userId);
 
         // 如果调用失败，直接返回
         if (!StrUtil.equals(response.getStatus(), "200")) {

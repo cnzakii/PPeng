@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  * @since 2023-03-18
  **/
 @Data
-public class UserInfoDTO implements Serializable {
+public class UserDTO implements Serializable {
 
 
     @Serial

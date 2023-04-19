@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.service;
 
 import fun.zhub.ppeng.PPengModuleUserApplication;
+import fun.zhub.ppeng.feign.WeChatService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

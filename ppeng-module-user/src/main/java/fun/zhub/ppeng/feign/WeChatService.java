@@ -1,6 +1,6 @@
-package fun.zhub.ppeng.service;
+package fun.zhub.ppeng.feign;
 
-import fun.zhub.ppeng.service.impl.WeChatFallbackServiceImpl;
+import fun.zhub.ppeng.feign.impl.WeChatFallbackServiceImpl;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;

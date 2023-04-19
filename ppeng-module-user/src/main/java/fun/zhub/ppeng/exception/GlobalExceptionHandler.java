@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
             exceptionMsg.add("invalid parameter");
         }
 
-        return ResponseResult.base(HTTP_STATUS_400, null, exceptionMsg.toString());
+        return ResponseResult.base(HTTP_STATUS_400, null, String.join(",",exceptionMsg));
     }
 
 

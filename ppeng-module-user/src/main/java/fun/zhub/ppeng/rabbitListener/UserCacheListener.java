@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.rabbitListener;
 
 
+import fun.zhub.ppeng.service.CollectService;
 import fun.zhub.ppeng.service.FollowService;
 import fun.zhub.ppeng.service.LikeService;
 import jakarta.annotation.Resource;
@@ -37,6 +38,9 @@ public class UserCacheListener {
     private LikeService likeService;
 
     @Resource
+    private CollectService collectService;
+
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     /**
@@ -64,6 +68,10 @@ public class UserCacheListener {
         // 缓存点赞的菜谱
         likeService.queryLikedRecipeSet(id);
 
+        // 缓存收藏的菜谱
+        collectService.queryCollectedRecipeSet(id);
+
+
     }
 
     /**
@@ -77,7 +85,7 @@ public class UserCacheListener {
     public void listenUserCacheDeleteQueue(Long id) {
         log.info("开始删除用户{}的缓存数据", id);
         /*
-         * 删除用户缓存信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
+         * 删除用户缓存信息：具体关注，具体粉丝，具体发布的笔记等
          */
 
         // 删除角色信息
@@ -93,8 +101,11 @@ public class UserCacheListener {
         // 删除具体粉丝
         stringRedisTemplate.delete(USER_FANS_KEY + id);
 
-        // 删除缓存点赞的菜谱
+        // 删除点赞的菜谱
         stringRedisTemplate.delete(USER_LIKE_KEY + id);
+
+        // 删除收藏的菜谱
+        stringRedisTemplate.delete(USER_COLLECT_KEY + id);
 
     }
 

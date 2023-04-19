@@ -16,17 +16,14 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.entity.UserInfo;
 import fun.zhub.ppeng.mapper.UserMapper;
-import fun.zhub.ppeng.service.UserInfoService;
 import fun.zhub.ppeng.service.UserService;
-import fun.zhub.ppeng.service.WeChatService;
+import fun.zhub.ppeng.feign.WeChatService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,6 +32,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,9 +78,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private WeChatService weChatService;
 
-    @Resource
-    private UserInfoService userInfoService;
-
 
     /**
      * 实现用户注册功能
@@ -101,19 +96,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
         }
 
+        // 验证验证码和邮箱
+        if (!verifyEmail(email, code, REGISTER_CODE_KEY)) {
+            throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
+        }
         // 检查密码强度
         boolean matches = password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$");
         if (BooleanUtil.isFalse(matches)) {
             throw new BusinessException(ResponseStatus.FAIL, "密码太弱");
         }
 
-        // 验证验证码和邮箱
-        if (!verifyEmail(email, code, REGISTER_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
-        }
 
-        // 查询email是否已经注册
-        User one = userMapper.selectOne(new QueryWrapper<User>().eq("email", email));
+        // 查询email是否已经注册，包括已经删除的
+        User one = userMapper.selectOne(new QueryWrapper<User>().eq("email", email).in("is_deleted", 0, 1));
 
 
         if (BeanUtil.isNotEmpty(one)) {
@@ -233,7 +228,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         stringRedisTemplate.opsForSet().add(USER_ROLE + userId, user.getRole());
 
         /*
-         * 异步加载用户其他信息：用户具体信息，具体关注，具体粉丝，具体发布的笔记等
+         * 异步加载用户其他信息：具体关注，具体粉丝，具体发布的笔记等
          */
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_USER_CACHE, userId);
 
@@ -249,7 +244,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Cacheable(cacheNames = "userInfo", key = "#id", sync = true)
-    public UserInfoDTO getUserInfoById(Long id) {
+    public User getUserInfoById(Long id) {
         String key = USER_INFO + id;
         // 先查询redis
         String json = stringRedisTemplate.opsForValue().get(key);
@@ -257,33 +252,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // redis中存在 则返回
         if (StrUtil.isNotEmpty(json)) {
-            return JSONUtil.toBean(json, UserInfoDTO.class);
+            return JSONUtil.toBean(json, User.class);
         }
 
         // redis中不存在，则查询数据库
-        // 查询user表
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
-        // 查询UserInfo表
-
-        UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id", id));
-        if (BeanUtil.isEmpty(userInfo)) {
-            // 不存在，则创建
-            userInfo = userInfoService.createUserInfoById(id);
-        }
-
-        UserInfoDTO userInfoDTO = BeanUtil.copyProperties(user, UserInfoDTO.class);
-        BeanUtil.copyProperties(userInfo, userInfoDTO);
-
-        log.info(userInfoDTO.toString());
 
         // 写入redis
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(userInfoDTO), USER_INFO_TTL, TimeUnit.HOURS);
+        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(user), USER_INFO_TTL, TimeUnit.HOURS);
 
-        return userInfoDTO;
+        return user;
     }
 
 
@@ -395,20 +377,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
+
     /**
-     * 实现更新用户昵称和头像操作
+     * 实现更新用户信息
      *
-     * @param userId   userId
-     * @param nickName 昵称
-     * @param icon     头像url
+     * @param userId    userId
+     * @param nickName  昵称
+     * @param icon      头像url
+     * @param address   地址
+     * @param introduce 简介
+     * @param gender    性别
+     * @param birthday  生日
      */
     @Override
     @CacheEvict(cacheNames = "userInfo", key = "#userId")
-    public void updateNickNameAndIcon(Long userId, String nickName, String icon) {
+    public void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce, Integer gender, LocalDate birthday) {
         // 根据Id获取当前用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", userId));
-
-
+        User user = getUserInfoById(userId);
         // 用于判断是否需要更新
         boolean b = false;
 
@@ -427,6 +412,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setIcon(icon);
         }
 
+        if (!StrUtil.equals("null", address)) {
+            b = true;
+            user.setAddress(address);
+        }
+
+
+        if (StrUtil.isNotEmpty(introduce)) {
+            b = true;
+            user.setIntroduce(introduce);
+        }
+
+        if (gender != null) {
+            b = true;
+            user.setGender(gender);
+        }
+
+        if (birthday != null) {
+            b = true;
+            user.setBirthday(birthday);
+        }
+
+
         if (b) {
             user.setUpdateTime(LocalDateTime.now());
             int i = userMapper.updateById(user);
@@ -436,7 +443,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("更新用户信息{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
         }
 
+    }
 
+    /**
+     * 实现更新用户关注或者粉丝
+     * @param name   字段名
+     * @param userId id
+     * @param type   类型
+     */
+    @Override
+    public void updateFollowOrFans(String name, Long userId, String type) {
+        String sql;
+        if (StrUtil.equals(type, "insert")) {
+            sql = name + "=" + name + "+1";
+        } else if (StrUtil.equals(type, "delete")) {
+            sql = name + "=" + name + "-1";
+        } else {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数失败");
+        }
+
+
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+
+        updateWrapper.eq("id", userId).setSql(sql);
+
+        boolean b = update(updateWrapper);
+        if (!b) {
+            log.error("更新用户具体信息{}失败", userId);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+        }
     }
 
 
@@ -455,9 +490,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
-        // 删除用户的具体信息
-        userInfoService.deleteUserInfoById(id);
-
 
     }
 
@@ -466,14 +498,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 实现根据user创建新用户
      *
      * @param user user
-     * @return UserInfoDTO
+     * @return user
      */
     @Override
-    public UserInfoDTO createUser(User user) {
+    public User createUser(User user) {
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
         user.setRole(ROLE_USER);
+
+        user.setGender(0);
+        user.setFans(0);
+        user.setFollows(0);
+
         user.setCreateTime(LocalDateTime.now());
-        user.setIsDeleted((byte) 0);
+        user.setIsDeleted(0);
 
 
         int i = userMapper.insert(user);
@@ -485,13 +522,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("创建用户{}成功,创建时间：{}", user.getId(), user.getCreateTime());
 
 
-        // 创建用户的具体信息
-        UserInfo userInfo = userInfoService.createUserInfoById(user.getId());
-
-        UserInfoDTO userInfoDTO = BeanUtil.copyProperties(user, UserInfoDTO.class);
-        BeanUtil.copyProperties(userInfo, userInfoDTO);
-
-        return userInfoDTO;
+        return user;
     }
 
 

@@ -53,7 +53,8 @@ public class UserInfoUpdateDTO implements Serializable {
     /**
      * 性别
      */
-    private Byte gender;
+
+    private Integer gender;
 
     /**
      * 生日

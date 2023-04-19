@@ -1,13 +1,13 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import fun.zhub.ppeng.dto.UserInfoDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
 import fun.zhub.ppeng.dto.register.RegisterDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -57,9 +57,9 @@ public interface UserService extends IService<User> {
      * 根据id获取用户信息
      *
      * @param id id
-     * @return UserInfoDTO
+     * @return User
      */
-    UserInfoDTO getUserInfoById(Long id);
+    User getUserInfoById(Long id);
 
 
     /**
@@ -78,14 +78,29 @@ public interface UserService extends IService<User> {
     void updateEmail(UpdateUserEmailDTO userEmailDTO);
 
 
+
+
     /**
-     * 更新用户的昵称和头像
+     * 更新用户信息
      *
-     * @param userId   userId
-     * @param nickName 昵称
-     * @param icon     头像url
+     * @param userId    userId
+     * @param nickName  昵称
+     * @param icon      头像url
+     * @param address   地址
+     * @param introduce 简介
+     * @param gender    性别
+     * @param birthday  生日
      */
-    void updateNickNameAndIcon(Long userId, String nickName, String icon);
+    void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce,Integer gender, LocalDate birthday);
+
+    /**
+     * 更新粉丝或者关注数
+     *
+     * @param name   字段名
+     * @param userId id
+     * @param type   类型
+     */
+    void updateFollowOrFans(String name, Long userId, String type);
 
 
     /**
@@ -100,9 +115,9 @@ public interface UserService extends IService<User> {
      * 根据user创建新用户
      *
      * @param user user
-     * @return UserInfoDTO
+     * @return User
      */
-    UserInfoDTO createUser(User user);
+    User createUser(User user);
 
 
     /**

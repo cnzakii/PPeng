@@ -6,7 +6,6 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.entity.UserInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -56,10 +55,6 @@ public class UserCacheUpdateListener {
                     User user = BeanUtil.toBean(one, User.class);
                     // 更新Redis
                     redisHandler.updateUser(user);
-                }
-                case "t_user_info" -> {
-                    UserInfo userInfo = BeanUtil.toBean(one, UserInfo.class);
-                    redisHandler.updateUserInfo(userInfo);
                 }
                 case "t_follow" -> {
                     Follow follow = BeanUtil.toBean(one, Follow.class);

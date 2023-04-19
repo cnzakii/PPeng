@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -33,7 +33,6 @@ public class User implements Serializable {
      * 微信登录用户：openid
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
-    @Id
     private Long id;
 
     /**
@@ -63,6 +62,37 @@ public class User implements Serializable {
     private String icon;
 
     /**
+     * 用户所在地区
+     */
+    private String address;
+
+    /**
+     * 用户简介，不超过128个字符
+     */
+    private String introduce;
+
+    /**
+     * 用户粉丝数
+     */
+    private Integer fans;
+
+    /**
+     * 用户关注数
+     */
+    private Integer follows;
+
+    /**
+     * 用户性别，0：未指定，1：女，3：男
+     */
+    private Integer gender;
+
+    /**
+     * 用户生日
+     */
+    private LocalDate birthday;
+
+
+    /**
      * 用户角色：user
      */
 
@@ -84,5 +114,5 @@ public class User implements Serializable {
      */
     @TableField(fill = FieldFill.INSERT)
     @TableLogic(value = "0", delval = "1")
-    private Byte isDeleted;
+    private Integer isDeleted;
 }

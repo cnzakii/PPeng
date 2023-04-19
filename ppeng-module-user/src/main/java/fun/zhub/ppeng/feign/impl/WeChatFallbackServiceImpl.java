@@ -1,6 +1,6 @@
-package fun.zhub.ppeng.service.impl;
+package fun.zhub.ppeng.feign.impl;
 
-import fun.zhub.ppeng.service.WeChatService;
+import fun.zhub.ppeng.feign.WeChatService;
 import org.springframework.stereotype.Component;
 
 /**

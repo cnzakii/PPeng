@@ -9,7 +9,7 @@ import com.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.mapper.FollowMapper;
 import fun.zhub.ppeng.service.FollowService;
-import fun.zhub.ppeng.service.UserInfoService;
+import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -42,7 +42,9 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     private FollowMapper followMapper;
 
     @Resource
-    private UserInfoService userInfoService;
+    private UserService userService;
+
+
 
     /**
      * 实现添加关注
@@ -70,8 +72,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
 
         // 累加粉丝数和关注数
-        userInfoService.updateFollowOrFans("follows", userId, "insert");
-        userInfoService.updateFollowOrFans("fans", followId, "insert");
+        userService.updateFollowOrFans("follows", userId, "insert");
+        userService.updateFollowOrFans("fans", followId, "insert");
 
 
         // 查看是否有-1元素，有则清除
@@ -131,8 +133,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
 
         // 减少粉丝数和关注数
-        userInfoService.updateFollowOrFans("follows", userId, "delete");
-        userInfoService.updateFollowOrFans("fans", followId, "delete");
+        userService.updateFollowOrFans("follows", userId, "delete");
+        userService.updateFollowOrFans("fans", followId, "delete");
 
 
         // 删除redis缓存并刷新过期时间
