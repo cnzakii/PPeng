@@ -21,11 +21,36 @@ public interface MailService {
 
 
     /**
-     * 发送修改信息的验证码邮件
+     * 发送更新用户密码的邮件
      *
-     * @param mail mail
+     * @param userEmail email
      */
-    void sendUpdateEmail(String mail);
+    void sendUpdatePasswordEmail(String userEmail);
+
+    /**
+     * 发送更新用户邮件的邮件
+     *
+     * @param userEmail email
+     */
+    void sendUpdateEmailEmail(String userEmail);
+
+    /**
+     * 发送删除用户的邮件
+     *
+     * @param userEmail email
+     */
+    void sendDeleteUserEmail(String userEmail);
+
+
+    /**
+     * 发送关于用户的邮件
+     *
+     * @param userEmail    用户邮件
+     * @param redisKey     redis的key前缀
+     * @param emailSubject 邮件主题
+     * @param emailType    邮件类型
+     */
+    void sendEmailAboutUser(String userEmail, String redisKey, String emailSubject, String emailType);
 
 
     /**
@@ -39,4 +64,6 @@ public interface MailService {
      * @param verifyCode   验证码
      */
     void sendEmailVerificationCode(String mailFrom, String mailFromNick, String mailTo, String subject, String type, String verifyCode);
+
+
 }

@@ -60,9 +60,10 @@ public interface RabbitConstants {
     String ROUTING_USER_CACHE_DELETE = "user.cache.delete";
 
     /**
-     * routingKey: 更新用户缓存
+     * routingKey: 更新缓存
      */
-    String ROUTING_USER_CACHE_UPDATE = "user.cache.update";
+    String ROUTING_CACHE_UPDATE = "cache.update";
+
 
     /**
      * routingKey: 发送邮件

@@ -13,28 +13,30 @@ public interface RedisConstants {
     /**
      * 验证码注册前缀
      */
-    String REGISTER_CODE_KEY = "register:code:";
+    String REGISTER_CODE_KEY = "email:register:code:";
 
     /**
-     * 验证码更新过期时间
+     * 验证码更新邮箱前缀
      */
-    Long REGISTER_CODE_TTL = 2L;
+    String UPDATE_EMAIL_CODE_KEY = "email:update:email:code:";
 
     /**
-     * 验证码登录前缀
+     * 验证码更新密码前缀
      */
-    String LOGIN_CODE_KEY = "login:code:";
+    String UPDATE_PASSWORD_CODE_KEY = "email:update:password:code:";
 
 
     /**
-     * 验证码更新前缀
+     * 验证码删除用户前缀
      */
-    String UPDATE_CODE_KEY = "update:code:";
+    String DELETE_USER_CODE_KEY = "email:delete:user:code:";
+
+
 
     /**
-     * 验证码更新过期时间
+     * 邮箱验证码过期时间
      */
-    Long UPDATE_CODE_TTL = 2L;
+    Long EMAIL_CODE_TTL = 2L;
 
 
     /**

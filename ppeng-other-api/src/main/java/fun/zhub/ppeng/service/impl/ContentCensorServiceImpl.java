@@ -6,7 +6,7 @@ import com.baidu.aip.contentcensor.EImgType;
 import com.zhub.ppeng.common.ResponseResult;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.service.BadContentService;
+import fun.zhub.ppeng.feign.CallUserService;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
     private AipContentCensor client;
 
     @Resource
-    private BadContentService badContentService;
+    private CallUserService userService;
 
     /**
      * 实现用户昵称的审核
@@ -72,7 +72,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
              */
 
             // 利用OpenFeign调用修改昵称接口，修改昵称为： 违规昵称_5fsdfsfdf
-            ResponseResult<String> result = badContentService.handleBadNickName(userId);
+            ResponseResult<String> result = userService.handleBadNickName(userId);
 
             // 判断是否调用成功
             if (StrUtil.equals(result.getStatus(), ResponseStatus.HTTP_STATUS_500.getResponseCode())) {

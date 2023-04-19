@@ -1,14 +1,19 @@
 package fun.zhub.ppeng.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.dto.user.UserInfoDTO;
+import fun.zhub.ppeng.dto.user.UserVerifyDTO;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
+import fun.zhub.ppeng.feign.CallUserService;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 
 /**
@@ -29,6 +34,15 @@ public class MailController {
     @Resource
     private MailService mailService;
 
+    @Resource
+    private CallUserService userService;
+
+    /**
+     * 发送注册邮件，无需token
+     *
+     * @param mail mail
+     * @return success
+     */
     @PostMapping("/register/{mail}")
     @SentinelResource(value = "sendRegisterMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> sendRegisterMail(@PathVariable("mail") String mail) {
@@ -39,12 +53,42 @@ public class MailController {
         return ResponseResult.success();
     }
 
-    @PostMapping("/update/{mail}")
+
+    /**
+     * 发送用户更新邮箱操作，需要token
+     *
+     * @param userVerifyDTO userVerifyDTO
+     * @return success
+     */
+    @PostMapping("/verify")
     @SentinelResource(value = "sendUpdateMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
-    public ResponseResult<String> sendUpdateMail(@PathVariable("mail") String mail) {
+    public ResponseResult<String> sendUpdateMail(@RequestBody @Valid UserVerifyDTO userVerifyDTO) {
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        Long userId = userVerifyDTO.getUserId();
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
+        // 服务调用user服务，查询该用户信息
+        ResponseResult<UserInfoDTO> response = userService.getUserInfo(userId);
 
+        // 如果调用失败，直接返回
+        if (!StrUtil.equals(response.getStatus(), "200")) {
+            return ResponseResult.base(response.getStatus(), null, response.getMessage());
+        }
 
-        mailService.sendUpdateEmail(mail);
+        String userEmail = response.getData().getEmail();
+
+        if (!StrUtil.equals(userEmail, userVerifyDTO.getEmail())) {
+            return ResponseResult.fail("邮箱不属于该用户");
+        }
+
+        Integer type = userVerifyDTO.getType();
+
+        switch (type) {
+            case 0 -> mailService.sendUpdatePasswordEmail(userEmail);
+            case 1 -> mailService.sendUpdateEmailEmail(userEmail);
+            case 2 -> mailService.sendDeleteUserEmail(userEmail);
+        }
 
         return ResponseResult.success();
     }

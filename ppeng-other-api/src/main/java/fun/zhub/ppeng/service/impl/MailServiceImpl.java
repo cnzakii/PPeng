@@ -57,51 +57,61 @@ public class MailServiceImpl implements MailService {
     /**
      * 实现发送注册邮件
      *
-     * @param mail mail
+     * @param userEmail userEmail
      */
     @Override
-    public void sendRegisterEmail(String mail) {
-        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
-        if (!b) {
-            throw new BusinessException(ResponseStatus.FAIL, "邮件格式错误");
-        }
-        // 先查询redis中是否存在该信息
-        String key = REGISTER_CODE_KEY + mail;
-
-        String s = stringRedisTemplate.opsForValue().get(key);
-
-        if (StrUtil.isNotEmpty(s)) {
-            throw new BusinessException(ResponseStatus.FAIL, "已向该邮箱发送验证，请勿频繁重试");
-        }
-
-        // 生成6位长度的验证码，发送邮件并写入Redis
-        String code = RandomUtil.randomNumbers(6);
-
-        VerifyMailDTO mailDTO = new VerifyMailDTO(MAIL_FROM, MAIL_FROM_NICK, mail, REGISTER_SUBJECT, REGISTER_TYPE, code);
-
-        /*
-         * MQ异步处理
-         */
-        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
-
-
-        stringRedisTemplate.opsForValue().set(key, code, REGISTER_CODE_TTL, TimeUnit.MINUTES);
-
+    public void sendRegisterEmail(String userEmail) {
+        sendEmailAboutUser(userEmail, REGISTER_CODE_KEY, SUBJECT_REGISTER, TYPE_REGISTER);
     }
 
     /**
-     * 实现发送修改的验证码邮件
+     * 实现发送更新用户密码邮件
      *
-     * @param mail mail
+     * @param userEmail email
      */
     @Override
-    public void sendUpdateEmail(String mail) {
-        boolean b = mail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+    public void sendUpdatePasswordEmail(String userEmail) {
+        sendEmailAboutUser(userEmail, UPDATE_PASSWORD_CODE_KEY, SUBJECT_UPDATE_PASSWORD, TYPE_UPDATE_PASSWORD);
+    }
+
+    /**
+     * 实现发送更新用户邮箱的邮件
+     *
+     * @param userEmail email
+     */
+    @Override
+    public void sendUpdateEmailEmail(String userEmail) {
+        sendEmailAboutUser(userEmail, UPDATE_EMAIL_CODE_KEY, SUBJECT_UPDATE_EMAIL, TYPE_UPDATE_EMAIL);
+    }
+
+    /**
+     * 实现发送删除用户的邮件
+     *
+     * @param userEmail email
+     */
+    @Override
+    public void sendDeleteUserEmail(String userEmail) {
+        sendEmailAboutUser(userEmail, DELETE_USER_CODE_KEY, SUBJECT_DELETE_USER, TYPE_DELETE_USER);
+
+    }
+
+
+    /**
+     * 实现发送关于用户的邮件
+     *
+     * @param userEmail    用户邮件
+     * @param redisKey     redis的key前缀
+     * @param emailSubject 邮件主题
+     * @param emailType    邮件类型
+     */
+    @Override
+    public void sendEmailAboutUser(String userEmail, String redisKey, String emailSubject, String emailType) {
+        boolean b = userEmail.matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
         if (!b) {
             throw new BusinessException(ResponseStatus.FAIL, "邮件格式错误");
         }
         // 先查询redis中是否存在该信息
-        String key = UPDATE_CODE_KEY + mail;
+        String key = redisKey + userEmail;
 
         String s = stringRedisTemplate.opsForValue().get(key);
 
@@ -112,7 +122,7 @@ public class MailServiceImpl implements MailService {
         // 生成6位长度的验证码，发送邮件并写入Redis
         String code = RandomUtil.randomNumbers(6);
 
-        VerifyMailDTO mailDTO = new VerifyMailDTO(MAIL_FROM, MAIL_FROM_NICK, mail, UPDATE_SUBJECT, UPDATE_TYPE, code);
+        VerifyMailDTO mailDTO = new VerifyMailDTO(MAIL_FROM, MAIL_FROM_NICK, userEmail, emailSubject, emailType, code);
 
         /*
          * MQ异步处理
@@ -120,9 +130,10 @@ public class MailServiceImpl implements MailService {
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_MAIL_SEND, JSONUtil.toJsonStr(mailDTO));
 
 
-        stringRedisTemplate.opsForValue().set(key, code, UPDATE_CODE_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(key, code, EMAIL_CODE_TTL, TimeUnit.MINUTES);
 
     }
+
 
     /**
      * 实现发送模版邮件

@@ -15,11 +15,19 @@ public interface MailConstants {
 
     String MAIL_FROM_NICK = "PPeng";
 
-    String REGISTER_SUBJECT = "[烹烹-PPeng]注册验证码";
+    String SUBJECT_REGISTER = "[烹烹-PPeng]<注册>验证码";
 
-    String REGISTER_TYPE = "注册账号";
+    String TYPE_REGISTER = "注册账号";
 
-    String UPDATE_SUBJECT = "[烹烹-PPeng]更新个人信息验证码";
+    String SUBJECT_UPDATE_EMAIL = "[烹烹-PPeng]<更新用户邮箱>验证码";
 
-    String UPDATE_TYPE = "修改账号信息";
+    String TYPE_UPDATE_EMAIL = "更新邮箱";
+
+    String SUBJECT_UPDATE_PASSWORD = "[烹烹-PPeng]<更新用户密码>验证码";
+
+    String TYPE_UPDATE_PASSWORD = "更新密码";
+
+    String SUBJECT_DELETE_USER = "[烹烹-PPeng]<删除用户>验证码";
+
+    String TYPE_DELETE_USER = "删除用户";
 }
