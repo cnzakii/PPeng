@@ -29,4 +29,4 @@ EXPOSE 6378
 # docker build -t ppeng/gateway:1.0 .
 
 # 运行命令
-# docker run -d -p 6378:6378 --network ppeng_net --restart=always --name ppeng-gateway -v /home/ppeng/logs/ppeng-gateway:/root/ppeng-gateway/logs ppeng/gateway:1.0
+# docker run -d -p 6378:6378 --network ppeng_net --restart=always --name ppeng-gateway -v /home/ppeng/logs/ppeng-gateway:/root/logs/ppeng-gateway ppeng/gateway:1.0

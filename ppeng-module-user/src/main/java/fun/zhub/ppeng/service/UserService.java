@@ -1,10 +1,6 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import fun.zhub.ppeng.dto.login.LoginFormDTO;
-import fun.zhub.ppeng.dto.register.RegisterDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
 
 import java.time.LocalDate;
@@ -23,16 +19,23 @@ import java.util.Map;
 public interface UserService extends IService<User> {
 
 
-    void register(RegisterDTO registerDTO);
+    /**
+     * 邮箱注册
+     *
+     * @param email    邮箱
+     * @param password 密码(明文)
+     */
+    void register(String email, String password);
 
 
     /**
      * 通过密码登录
      *
-     * @param loginFormDTO 用户密码登录结构体
+     * @param email    邮件
+     * @param password 密码
      * @return user
      */
-    User loginByPassword(LoginFormDTO loginFormDTO);
+    User loginByPassword(String email, String password);
 
 
     /**
@@ -65,19 +68,19 @@ public interface UserService extends IService<User> {
     /**
      * 更新用户密码
      *
-     * @param userPasswordDTO userPasswordDTO
+     * @param userId      用户id
+     * @param newPassword 新密码(明文)
      */
-    void updatePassword(UpdateUserPasswordDTO userPasswordDTO);
+    void updatePassword(Long userId, String newPassword);
 
 
     /**
      * 更新用户邮箱
      *
-     * @param userEmailDTO 邮箱
+     * @param userId   userId
+     * @param newEmail 邮箱
      */
-    void updateEmail(UpdateUserEmailDTO userEmailDTO);
-
-
+    void updateEmail(Long userId, String newEmail);
 
 
     /**
@@ -91,7 +94,7 @@ public interface UserService extends IService<User> {
      * @param gender    性别
      * @param birthday  生日
      */
-    void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce,Integer gender, LocalDate birthday);
+    void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce, Integer gender, LocalDate birthday);
 
     /**
      * 更新粉丝或者关注数

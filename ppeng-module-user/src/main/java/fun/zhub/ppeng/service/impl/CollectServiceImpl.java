@@ -91,6 +91,7 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
             // 查看是否包含-1，也就是说该用户当前没有关注
             boolean b = members.contains(String.valueOf(-1));
             stringRedisTemplate.expire(key, USER_COLLECT_TTL, TimeUnit.MINUTES);
+            stringRedisTemplate.expire(key, USER_COLLECT_TTL, TimeUnit.MINUTES);
             if (b && members.size() == 1) {
                 return null;
             } else {
@@ -101,6 +102,8 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         if (collectList == null || collectList.isEmpty()) {
             // 如果没有，这插入一条为-1的数据，然后存入Redis
             stringRedisTemplate.opsForSet().add(key, "-1");
+            stringRedisTemplate.opsForSet().add(key);
+            stringRedisTemplate.expire(key, USER_COLLECT_TTL, TimeUnit.MINUTES);
             return null;
         }
 
@@ -165,6 +168,10 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
 
         // 没有则查询数据库
         Set<String> set = queryCollectedRecipeSet(userId);
+
+        if (set == null || set.isEmpty()) {
+            return false;
+        }
 
         return set.contains(String.valueOf(recipeId));
     }

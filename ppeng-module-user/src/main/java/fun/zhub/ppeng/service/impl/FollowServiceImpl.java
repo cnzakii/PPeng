@@ -222,6 +222,10 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         // 没有则查询数据库
         Set<String> set = queryFollowById(userId);
 
+        if(set==null||set.isEmpty()){
+            return false;
+        }
+
         return set.contains(String.valueOf(followId));
     }
 }

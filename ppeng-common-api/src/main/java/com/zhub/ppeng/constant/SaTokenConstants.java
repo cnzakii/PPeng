@@ -15,17 +15,17 @@ public interface SaTokenConstants {
     /**
      * 二级认证-更新用户密码
      */
-    String SAFE_UPDATE_PASSWORD = "update.user.password";
+    String SAFE_UPDATE_PASSWORD = "update:user:password";
 
     /**
      * 二级认证-更新用户邮箱
      */
-    String SAFE_UPDATE_EMAIL = "update.user.password";
+    String SAFE_UPDATE_EMAIL = "update:user:password";
 
     /**
      * 二级认证-删除用户
      */
-    String SAFE_DELETE_USER = "delete.user";
+    String SAFE_DELETE_USER = "delete:user";
 
     /**
      * 二级认证过期时间-秒

@@ -5,10 +5,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zhub.ppeng.common.ResponseResult;
+import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.VerifyEmailDTO;
@@ -81,7 +83,20 @@ public class UserController {
      */
     @PostMapping("/register")
     public ResponseResult<String> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
-        userService.register(registerDTO);
+        String email = registerDTO.getEmail();
+        String code = registerDTO.getCode();
+        String password = registerDTO.getPassword();
+
+        try {
+            password = rsa.decryptStr(password, KeyType.PrivateKey);
+        } catch (Exception e) {
+            return ResponseResult.fail("密码未加密");
+        }
+
+        // 验证邮箱
+        userService.verifyEmail(email, code, REGISTER_CODE_KEY);
+
+        userService.register(email, password);
         return ResponseResult.success();
     }
 
@@ -93,7 +108,15 @@ public class UserController {
      */
     @PostMapping("/login/by/password")
     public ResponseResult<String> loginByPassword(@Valid @RequestBody LoginFormDTO loginFormDTO) {
-        User user = userService.loginByPassword(loginFormDTO);
+        String email = loginFormDTO.getEmail();
+        String password;
+        try {
+            password = rsa.decryptStr(loginFormDTO.getPassword(), KeyType.PrivateKey);
+        } catch (Exception e) {
+            return ResponseResult.fail("密码未加密");
+        }
+
+        User user = userService.loginByPassword(email, password);
 
         String token = userService.afterLogin(user);
 
@@ -175,7 +198,7 @@ public class UserController {
     }
 
     /**
-     * 用户身份二次认证
+     * 用户身份安全认证
      *
      * @param verifyEmailDTO verifyEmailDTO
      * @return success
@@ -228,8 +251,9 @@ public class UserController {
         }
 
         if (BooleanUtil.isFalse(b)) {
-            return ResponseResult.fail("用户身份验证失败");
+            return ResponseResult.base(ResponseStatus.HTTP_STATUS_401);
         }
+
 
         return ResponseResult.success();
     }
@@ -242,9 +266,22 @@ public class UserController {
      */
     @PutMapping("/update/password")
     public ResponseResult<String> updateUserPassword(@RequestBody @Valid UpdateUserPasswordDTO userPasswordDTO) {
+        // 验证id是否和token对应的id一致
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        Long userId = userPasswordDTO.getUserId();
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
 
-        userService.updatePassword(userPasswordDTO);
+        try {
+            String newPassword = rsa.decryptStr(userPasswordDTO.getNewPassword(), KeyType.PrivateKey);
+            userService.updatePassword(userId, newPassword);
+        } catch (Exception e) {
+            return ResponseResult.fail("密码未加密");
+        }
 
+        // 关闭安全认证
+        StpUtil.closeSafe(SAFE_UPDATE_PASSWORD);
 
         return ResponseResult.success();
     }
@@ -256,9 +293,28 @@ public class UserController {
      */
     @PutMapping("/update/email")
     public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
+        // 验证id是否和token对应的id一致
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        Long userId = userEmailDTO.getUserId();
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
 
-        userService.updateEmail(userEmailDTO);
+        String newEmail = userEmailDTO.getEmail();
+        String code = userEmailDTO.getCode();
 
+        // 验证邮箱
+        Boolean b = userService.verifyEmail(newEmail, code, UPDATE_EMAIL_CODE_KEY);
+
+        if (BooleanUtil.isFalse(b)) {
+            return ResponseResult.fail("验证码错误");
+        }
+
+
+        userService.updateEmail(userId, newEmail);
+
+        // 关闭安全认证
+        StpUtil.closeSafe(SAFE_UPDATE_EMAIL);
         return ResponseResult.success();
     }
 
@@ -318,6 +374,8 @@ public class UserController {
         // 异步删除缓存
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_USER_CACHE_DELETE, id);
 
+        // 关闭安全认证
+        StpUtil.closeSafe(SAFE_DELETE_USER);
         return ResponseResult.success();
     }
 

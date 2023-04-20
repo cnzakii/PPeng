@@ -37,7 +37,7 @@ monitorInterval log4j2 自动检测配置文件的时间间隔（单位：秒）
         <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%6p} %style{%5pid}{bright,magenta} --- [%15.15t]%style{%-40.40logger{39}}{bright,cyan} : %m%n
         </Property>
         <Property name="LOG_HOME" value="${sys:user.home}/logs"/>
-        <property name="PROJECT_NAME" value="ppeng"/>
+        <property name="PROJECT_NAME" value="ppeng-other-api"/>
         <Property name="LOG_PATH">${LOG_HOME}/${PROJECT_NAME}</Property>
     </Properties>
     <Appenders>

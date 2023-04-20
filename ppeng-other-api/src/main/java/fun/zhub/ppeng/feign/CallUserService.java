@@ -34,7 +34,7 @@ public interface CallUserService {
     /**
      * 获取用户信息
      */
-    @GetMapping("/info/{userId}")
+    @GetMapping("/user/info/{userId}")
     ResponseResult<User> getUserInfo(@PathVariable("userId") Long userId);
 
 }

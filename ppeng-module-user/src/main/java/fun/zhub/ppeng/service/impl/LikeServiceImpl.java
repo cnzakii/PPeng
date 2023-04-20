@@ -103,6 +103,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
         if (likeList == null || likeList.isEmpty()) {
             // 如果没有，这插入一条为-1的数据，然后存入Redis
             stringRedisTemplate.opsForSet().add(key, "-1");
+            stringRedisTemplate.expire(key, USER_LIKE_TTL, TimeUnit.MINUTES);
             return null;
         }
 
@@ -170,6 +171,10 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
 
         // 没有则查询数据库
         Set<String> set = queryLikedRecipeSet(userId);
+
+        if(set==null||set.isEmpty()){
+            return false;
+        }
 
         return set.contains(String.valueOf(recipeId));
     }

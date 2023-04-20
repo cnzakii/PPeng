@@ -7,23 +7,19 @@ import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhub.ppeng.common.ResponseStatus;
 import com.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.dto.login.LoginFormDTO;
-import fun.zhub.ppeng.dto.register.RegisterDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
-import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.feign.WeChatService;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserService;
-import fun.zhub.ppeng.feign.WeChatService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -71,9 +68,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private Snowflake snowflake;
 
-    @Resource
-    private RSA rsa;
-
 
     @Resource
     private WeChatService weChatService;
@@ -82,33 +76,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现用户注册功能
      *
-     * @param registerDTO registerDTO
+     * @param email    邮箱
+     * @param password 密码
      */
     @Override
-    public void register(RegisterDTO registerDTO) {
-        String email = registerDTO.getEmail();
-        String code = registerDTO.getCode();
-        String password = registerDTO.getPassword();
+    public void register(String email, String password) {
 
-        try {
-            password = rsa.decryptStr(password, KeyType.PrivateKey);
-        } catch (Exception e) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
-        }
-
-        // 验证验证码和邮箱
-        if (!verifyEmail(email, code, REGISTER_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
-        }
         // 检查密码强度
-        boolean matches = password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$");
+        boolean matches = password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*()_+-=;:'\",.<>/?\\[\\]{}|`~]{8,20}$");
         if (BooleanUtil.isFalse(matches)) {
             throw new BusinessException(ResponseStatus.FAIL, "密码太弱");
         }
 
-
         // 查询email是否已经注册，包括已经删除的
-        User one = userMapper.selectOne(new QueryWrapper<User>().eq("email", email).in("is_deleted", 0, 1));
+        User one = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email).in(User::getIsDeleted, 0, 1));
 
 
         if (BeanUtil.isNotEmpty(one)) {
@@ -132,24 +113,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现通过密码登录
      *
-     * @param loginFormDTO 用户密码登录结构体
-     * @return id
+     * @param email    邮件
+     * @param password 密码
+     * @return user
      */
     @Override
-    public User loginByPassword(LoginFormDTO loginFormDTO) {
-        String email = loginFormDTO.getEmail();
-        String password;
-        try {
-            password = rsa.decryptStr(loginFormDTO.getPassword(), KeyType.PrivateKey);
-        } catch (Exception e) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "密码未加密");
-        }
-
+    public User loginByPassword(String email, String password) {
 
         // 根据邮箱查询用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("email", email));
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email));
 
-        if (user == null) {
+        if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
 
@@ -158,7 +132,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StrUtil.equals(password, user.getPassword())) {
             throw new BusinessException(ResponseStatus.FAIL, "密码错误");
         }
-
 
         return user;
     }
@@ -185,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 查看该用户是否已经注册
-        User one = userMapper.selectOne(new QueryWrapper<User>().eq("open_id", openId));
+        User one = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenId, openId));
 
         // 如果存在，则直接返回
         if (BeanUtil.isNotEmpty(one)) {
@@ -226,6 +199,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 将用户角色信息插入redis
         stringRedisTemplate.opsForSet().add(USER_ROLE + userId, user.getRole());
+        stringRedisTemplate.expire(USER_ROLE + userId, USER_INFO_TTL, TimeUnit.HOURS);
 
         /*
          * 异步加载用户其他信息：具体关注，具体粉丝，具体发布的笔记等
@@ -249,14 +223,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 先查询redis
         String json = stringRedisTemplate.opsForValue().get(key);
 
-
         // redis中存在 则返回
         if (StrUtil.isNotEmpty(json)) {
             return JSONUtil.toBean(json, User.class);
         }
 
         // redis中不存在，则查询数据库
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, id));
+
+
         if (BeanUtil.isEmpty(user)) {
             throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
         }
@@ -272,48 +247,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现更新用户密码
      *
-     * @param userPasswordDTO userPasswordDTO
+     * @param userId      用户id
+     * @param newPassword 新密码(明文)
      */
     @Override
-    public void updatePassword(UpdateUserPasswordDTO userPasswordDTO) {
-        String email = userPasswordDTO.getEmail();
-        Long id = userPasswordDTO.getUserId();
-
-        if (!verifyEmail(email, userPasswordDTO.getVerifyCode(), UPDATE_PASSWORD_CODE_KEY)) {
-            // 验证码错误
-            throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
-        }
-
-
-        // 一致，根据id查询用户
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
-
-        if (BeanUtil.isEmpty(user)) {
-            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
-        }
-
-        // 验证email是否一致
-        if (!StrUtil.equals(user.getEmail(), email)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "该邮箱不属于该账号");
-        }
-
-
-        // 密码解密/加密
-        String newPassword;
-        try {
-            newPassword = rsa.decryptStr(userPasswordDTO.getNewPassword(), KeyType.PrivateKey);
-        } catch (Exception e) {
-            throw new BusinessException(ResponseStatus.FAIL, "密码未加密");
-        }
+    @CacheEvict(cacheNames = "userInfo", key = "#userId")
+    public void updatePassword(Long userId, String newPassword) {
+        // 根据id查询用户信息
+        User user = getUserInfoById(userId);
 
         // 检查密码强度
-        boolean matches = newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*()_+-=;:'\",.<>/?\\[\\]{}|`~]{8,20}?$");
+        boolean matches = newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*()_+-=;:'\",.<>/?\\[\\]{}|`~]{8,20}$");
         if (!matches) {
             throw new BusinessException(ResponseStatus.FAIL, "密码太弱");
         }
 
-
-        newPassword = SmUtil.sm3(userPasswordDTO.getUserId() + newPassword);
+        // 加密，盐值为userId
+        newPassword = SmUtil.sm3(userId + newPassword);
 
         if (StrUtil.equals(user.getPassword(), newPassword)) {
             // 如果新旧密码一致，则返回错误结果
@@ -324,53 +274,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean b = update(new UpdateWrapper<User>()
                 .set("password", newPassword)
                 .set("update_time", LocalDateTime.now())
-                .eq("id", id));
-
+                .eq("id", userId));
 
         if (!b) {
-            log.error("更新用户{}失败", userPasswordDTO.getUserId());
+            log.error("更新用户{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "内部错误-更新失败");
         }
-
     }
 
 
     /**
      * 实现更新用户邮箱
      *
-     * @param userEmailDTO userEmailDTO
+     * @param userId   userId
+     * @param newEmail 邮箱
      */
     @Override
-    @CacheEvict(cacheNames = "userInfo", key = "#userEmailDTO.userId")
-    public void updateEmail(UpdateUserEmailDTO userEmailDTO) {
-        Long id = userEmailDTO.getUserId();
-        String newEmail = userEmailDTO.getEmail();
+    @CacheEvict(cacheNames = "userInfo", key = "#userId")
+    public void updateEmail(Long userId, String newEmail) {
+        // 查找是否有存在相同的邮箱
+        List<User> emailList = userMapper.selectList(new QueryWrapper<User>().eq("email", newEmail));
 
-        // 验证邮箱
-        if (!verifyEmail(newEmail, userEmailDTO.getCode(), UPDATE_EMAIL_CODE_KEY)) {
-            throw new BusinessException(ResponseStatus.FAIL, newEmail + "-验证码错误");
+        if (emailList != null && !emailList.isEmpty()) {
+            throw new BusinessException(ResponseStatus.FAIL, "该邮箱已被注册");
         }
 
 
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", id));
-        String oldEmail = user.getEmail();
-        if (BeanUtil.isEmpty(user)) {
-            throw new BusinessException(ResponseStatus.FAIL, "该用户不存在");
-        }
+        int i = userMapper.update(null,
+                new LambdaUpdateWrapper<User>()
+                        .eq(User::getId, userId)
+                        .set(User::getEmail, newEmail)
+                        .set(User::getUpdateTime, LocalDateTime.now()));
 
-        // 不允许新旧邮箱相同
-        if (StrUtil.equals(newEmail, oldEmail)) {
-            throw new BusinessException(ResponseStatus.FAIL, "新旧邮箱不允许一致");
-        }
-
-
-        boolean b = update(new UpdateWrapper<User>()
-                .set("email", newEmail)
-                .set("update_time", LocalDateTime.now())
-                .eq("id", id));
-
-        if (!b) {
-            log.error("更新用户{}失败", user.getId());
+        if (i == 0) {
+            log.error("更新用户{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "内部错误-更新失败");
         }
 
@@ -447,6 +384,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 实现更新用户关注或者粉丝
+     *
      * @param name   字段名
      * @param userId id
      * @param type   类型
@@ -462,13 +400,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数失败");
         }
 
+        int i = userMapper.update(null, new LambdaUpdateWrapper<User>().eq(User::getId, userId).setSql(sql));
 
-        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
 
-        updateWrapper.eq("id", userId).setSql(sql);
-
-        boolean b = update(updateWrapper);
-        if (!b) {
+        if (i == 0) {
             log.error("更新用户具体信息{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
         }
@@ -539,9 +474,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         String cacheCode = stringRedisTemplate.opsForValue().get(key + email);
 
-        // 验证验证码
-        // 不一致，抛出异常
-        return StrUtil.equals(code, cacheCode);
+        if (StrUtil.equals(code, cacheCode)) {
+            // 删除验证码
+            stringRedisTemplate.delete(key + email);
+            return true;
+        }
+
+        return false;
     }
 
 
