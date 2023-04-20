@@ -41,9 +41,6 @@ public class UserCacheUpdateListener {
     ))
     public void listenCanalQueue(String s) {
         JSONObject object = new JSONObject(s);
-
-        log.info(s);
-
         String type = object.getStr("type");
         String table = object.getStr("table");
         JSONArray data = object.getJSONArray("data");
