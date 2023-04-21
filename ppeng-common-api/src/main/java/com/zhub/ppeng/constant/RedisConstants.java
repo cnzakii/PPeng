@@ -107,5 +107,11 @@ public interface RedisConstants {
     Long USER_COLLECT_TTL = 30L;
 
 
+    /**
+     * 菜谱类型前缀
+     */
+    String RECIPE_TYPE = "recipe:type:";
+
+
 
 }

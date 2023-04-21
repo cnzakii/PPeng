@@ -1,7 +1,14 @@
 package fun.zhub.ppeng.controller;
 
+import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.service.RecipeTypeService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -15,4 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/recipe/type")
 public class RecipeTypeController {
 
+    @Resource
+    private RecipeTypeService recipeTypeService;
+
+
+    @GetMapping("/list")
+    public ResponseResult<Map<String, List<String>>> getTotalRecipeTypeList() {
+        Map<String, List<String>> map = recipeTypeService.queryTotalRecipeTypeList();
+        return ResponseResult.success(map);
+    }
 }
