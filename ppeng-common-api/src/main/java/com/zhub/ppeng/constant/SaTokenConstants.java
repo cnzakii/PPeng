@@ -32,4 +32,8 @@ public interface SaTokenConstants {
      */
     Long SAFE_TIME = 300L;
 
+    /**
+     * 禁止登录
+     */
+    String DISABLE_LOGIN = "user:disable:login";
 }
