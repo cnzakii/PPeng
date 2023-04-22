@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.config;
 
 
+import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
 import cn.dev33.satoken.router.SaHttpMethod;
 import cn.dev33.satoken.router.SaRouter;
@@ -88,7 +89,14 @@ public class SaTokenConfigure {
                 // 异常处理方法：每次setAuth函数出现异常时进入
                 .setError(e -> {
                             log.warn(e.getMessage());
-                            return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, e.getLocalizedMessage()));
+
+                            if (e instanceof NotPermissionException) {
+                                return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, "无权限"));
+                            } else {
+                                return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, e.getLocalizedMessage()));
+                            }
+
+
                         }
                 );
     }

@@ -28,7 +28,7 @@ public class RecipeTypeController {
 
     @GetMapping("/list")
     public ResponseResult<Map<String, List<String>>> getTotalRecipeTypeList() {
-        Map<String, List<String>> map = recipeTypeService.queryTotalRecipeTypeList();
+        Map<String, List<String>> map = recipeTypeService.queryTotalNameList();
         return ResponseResult.success(map);
     }
 }

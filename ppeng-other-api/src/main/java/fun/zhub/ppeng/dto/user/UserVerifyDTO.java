@@ -1,7 +1,10 @@
 package fun.zhub.ppeng.dto.user;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -35,7 +38,6 @@ public class UserVerifyDTO implements Serializable {
      * 1 更新邮箱
      * 2 删除账号
      */
-    @Max(value = 2, message = "type无效")
-    @Min(value = 0, message = "type无效")
+    @Range(min = 0,max = 2,message = "type无效")
     private Integer type;
 }

@@ -32,7 +32,6 @@ public interface RedisConstants {
     String DELETE_USER_CODE_KEY = "email:delete:user:code:";
 
 
-
     /**
      * 邮箱验证码过期时间
      */
@@ -43,7 +42,6 @@ public interface RedisConstants {
      * 用户角色前缀
      */
     String USER_ROLE = "user:role:";
-
 
 
     /**
@@ -62,7 +60,6 @@ public interface RedisConstants {
      */
 
     Long ROLE_USER_TTL = 12L;
-
 
 
     /**
@@ -108,10 +105,14 @@ public interface RedisConstants {
 
 
     /**
+     * 菜谱类型名字map前缀
+     */
+    String RECIPE_TYPE_NAME = "recipe:type:name";
+
+    /**
      * 菜谱类型前缀
      */
-    String RECIPE_TYPE = "recipe:type:";
-
+    String RECIPE_TYPE_DETAIL = "recipe:type:name:detail";
 
 
 }

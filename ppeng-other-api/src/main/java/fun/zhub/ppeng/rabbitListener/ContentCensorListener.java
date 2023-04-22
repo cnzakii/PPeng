@@ -34,7 +34,7 @@ public class ContentCensorListener {
     /**
      * 监听内容审核队列
      *
-     * @param json TextContentCensorDTO
+     * @param json ContentCensorDTO
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = CONTENT_CENSOR_QUEUE),

@@ -13,4 +13,30 @@ import fun.zhub.ppeng.entity.Recipe;
  */
 public interface RecipeService extends IService<Recipe> {
 
+    /**
+     * 保存图文菜谱
+     *
+     * @param userId         用户id
+     * @param typeId         类型id
+     * @param title          标题
+     * @param material       配料
+     * @param content        内容
+     * @param images         图片
+     * @param isProfessional 是否专业
+     * @return recipeId
+     */
+    Long saveImageRecipe(Long userId, Integer typeId, String title, String material, String content, String images, Integer isProfessional);
+
+    /**
+     * 保存视频菜谱
+     *
+     * @param userId         用户id
+     * @param typeId         类型
+     * @param title          标题
+     * @param material       配料表
+     * @param video          视频
+     * @param isProfessional 是否专业
+     * @return recipeId
+     */
+    Long saveVideoRecipe(Long userId, Integer typeId, String title, String material, String video, Integer isProfessional);
 }

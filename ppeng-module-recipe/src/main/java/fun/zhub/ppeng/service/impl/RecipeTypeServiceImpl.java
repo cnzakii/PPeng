@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.entity.RecipeType;
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE;
+import static com.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_DETAIL;
+import static com.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_NAME;
 
 /**
  * <p>
@@ -36,13 +38,13 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
     /**
      * 实现获取所有菜谱类型
      *
-     * @return var
+     * @return map
      */
     @Override
-    @Cacheable(cacheNames = "recipeType",key ="#root.methodName" ,sync = true)
-    public Map<String, List<String>> queryTotalRecipeTypeList() {
+    @Cacheable(cacheNames = "recipeType", key = "#root.methodName", sync = true)
+    public Map<String, List<String>> queryTotalNameList() {
         // 先查询redis
-        Map<Object, Object> objectMap = stringRedisTemplate.opsForHash().entries(RECIPE_TYPE);
+        Map<Object, Object> objectMap = stringRedisTemplate.opsForHash().entries(RECIPE_TYPE_NAME);
 
         if (CollUtil.isNotEmpty(objectMap)) {
             return objectMap.entrySet().stream()
@@ -71,9 +73,61 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
                         (list1, list2) -> list1, HashMap::new));
 
         // 存入redis
-        stringRedisTemplate.opsForHash().putAll(RECIPE_TYPE, map);
+        stringRedisTemplate.opsForHash().putAll(RECIPE_TYPE_NAME, map);
 
 
         return map;
     }
+
+    /**
+     * 实现获取所有菜谱对象集合
+     *
+     * @return list
+     */
+    @Override
+    @Cacheable(cacheNames = "recipeType", key = "#root.methodName", sync = true)
+    public List<RecipeType> queryTotalRecipeTypeList() {
+        // 先从redis中查询
+        List<String> list = stringRedisTemplate.opsForList().range(RECIPE_TYPE_DETAIL, 0, -1);
+
+        // 如果有则返回
+        if (list != null && !list.isEmpty()) {
+            return list.stream()
+                    .map(s -> JSONUtil.toBean(s, RecipeType.class))
+                    .collect(Collectors.toList());
+        }
+
+
+        // 如果没有，则查询数据库
+        List<RecipeType> recipeTypeList = recipeTypeMapper.selectList(null);
+
+        String[] recipeTypeArray = recipeTypeList.stream()
+                .map(JSONUtil::toJsonStr)
+                .toArray(String[]::new);
+
+        stringRedisTemplate.opsForList().leftPushAll(RECIPE_TYPE_DETAIL, recipeTypeArray);
+
+        return recipeTypeList;
+    }
+
+
+
+    /**
+     * 实现根据id获取名字
+     *
+     * @param recipeTypeId recipeTypeId
+     * @return name
+     */
+    @Override
+    public String getNameById(Integer recipeTypeId) {
+        // 获取所有菜谱类型对象的集合
+        List<RecipeType> list = queryTotalRecipeTypeList();
+
+        return list.stream()
+                .filter(recipeType -> Objects.nonNull(recipeType) && Objects.equals(recipeType.getId(), recipeTypeId))
+                .map(RecipeType::getName)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

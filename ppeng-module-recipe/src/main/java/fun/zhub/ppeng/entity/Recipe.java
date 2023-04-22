@@ -51,14 +51,10 @@ public class Recipe implements Serializable {
     private String title;
 
     /**
-     * 配料表,以Json格式存储
+     * 配料表
      */
     private String material;
 
-    /**
-     * 适合人群
-     */
-    private String applicable;
 
     /**
      * 文字内容 
@@ -66,7 +62,7 @@ public class Recipe implements Serializable {
     private String content;
 
     /**
-     * 图片路径，以;分隔
+     * 图片路径
      */
     private String imges;
 
@@ -78,12 +74,12 @@ public class Recipe implements Serializable {
     /**
      * 0代表图文，1代表视频
      */
-    private Byte isVideo;
+    private Integer isVideo;
 
     /**
      * 0代表非专业，1代表是专业
      */
-    private Byte isProfessional;
+    private Integer isProfessional;
 
     /**
      * 点赞数
@@ -106,12 +102,12 @@ public class Recipe implements Serializable {
     private LocalDateTime updateTime;
 
     /**
-     * 审核状态： 0 未审核，1 机器审核通过，2 人工审核通过
+     * 审核状态： 0 未审核，1 机器审核，2 人工审核
      */
-    private Byte status;
+    private Integer status;
 
     /**
      * 逻辑删除:审核通过，但用户自己删除
      */
-    private Byte isDeleted;
+    private Integer isDeleted;
 }

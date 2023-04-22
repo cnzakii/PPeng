@@ -17,9 +17,25 @@ import java.util.Map;
 public interface RecipeTypeService extends IService<RecipeType> {
 
     /**
-     * 获取所有的菜谱集合
+     * 获取所有的菜谱名字集合
      *
-     * @return var
+     * @return map
      */
-    Map<String, List<String>> queryTotalRecipeTypeList();
+    Map<String, List<String>> queryTotalNameList();
+
+    /**
+     * 获取所有菜谱对象集合
+     * @return list
+     */
+    List<RecipeType> queryTotalRecipeTypeList();
+
+
+    /**
+     * 根据recipeTypeId获取相应的名字
+     *
+     * @param recipeTypeId recipeTypeId
+     * @return name
+     */
+    String getNameById(Integer recipeTypeId);
+
 }
