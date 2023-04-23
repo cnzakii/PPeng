@@ -1,6 +1,6 @@
 package fun.zhub.ppeng.feign;
 
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.feign.impl.CallUserFallbackServiceImpl;
 import org.springframework.cloud.openfeign.FeignClient;

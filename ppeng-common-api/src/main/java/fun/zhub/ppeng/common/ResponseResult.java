@@ -1,4 +1,4 @@
-package com.zhub.ppeng.common;
+package fun.zhub.ppeng.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,9 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-
-import static com.zhub.ppeng.common.ResponseStatus.FAIL;
-import static com.zhub.ppeng.common.ResponseStatus.SUCCESS;
 
 /**
  * <p>
@@ -65,8 +62,8 @@ public class ResponseResult<T> implements Serializable {
      */
     public static <T> ResponseResult<T> success(T data) {
         return ResponseResult.<T>builder().data(data)
-                .message(SUCCESS.getDescription())
-                .status(SUCCESS.getResponseCode())
+                .message(ResponseStatus.SUCCESS.getDescription())
+                .status(ResponseStatus.SUCCESS.getResponseCode())
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
@@ -93,7 +90,7 @@ public class ResponseResult<T> implements Serializable {
     public static <T> ResponseResult<T> fail(T data, String message) {
         return ResponseResult.<T>builder().data(data)
                 .message(message)
-                .status(FAIL.getResponseCode())
+                .status(ResponseStatus.FAIL.getResponseCode())
                 .timestamp(System.currentTimeMillis())
                 .build();
     }

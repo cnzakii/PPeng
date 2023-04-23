@@ -5,8 +5,8 @@ import cn.hutool.core.util.IdUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import static com.zhub.ppeng.constant.SystemConstants.DATACENTER_ID;
-import static com.zhub.ppeng.constant.SystemConstants.WORK_ID;
+import static fun.zhub.ppeng.constant.SystemConstants.DATACENTER_ID;
+import static fun.zhub.ppeng.constant.SystemConstants.WORK_ID;
 
 /**
  * <p>

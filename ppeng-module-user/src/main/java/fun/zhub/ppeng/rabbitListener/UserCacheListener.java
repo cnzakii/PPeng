@@ -14,8 +14,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
-import static com.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
 
 /**
  * <p>

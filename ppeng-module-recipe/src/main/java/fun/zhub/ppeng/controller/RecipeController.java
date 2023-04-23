@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.PushRecipeDTO;
 import fun.zhub.ppeng.service.RecipeService;
 import jakarta.annotation.Resource;

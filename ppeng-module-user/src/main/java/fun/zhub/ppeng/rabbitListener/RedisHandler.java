@@ -3,7 +3,6 @@ package fun.zhub.ppeng.rabbitListener;
 import cn.hutool.json.JSONUtil;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
 
 /**
  * <p>
@@ -31,8 +30,6 @@ public class RedisHandler {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    @Resource
-    private UserService userService;
 
 
     /**

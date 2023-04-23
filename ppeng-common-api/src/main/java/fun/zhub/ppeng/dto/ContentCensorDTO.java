@@ -1,4 +1,4 @@
-package com.zhub.ppeng.dto;
+package fun.zhub.ppeng.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

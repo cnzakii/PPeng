@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.rabbitListener;
 
 import cn.hutool.json.JSONUtil;
-import com.zhub.ppeng.dto.ContentCensorDTO;
+import fun.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
  * <p>

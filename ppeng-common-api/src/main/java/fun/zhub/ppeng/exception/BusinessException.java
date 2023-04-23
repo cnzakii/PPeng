@@ -1,7 +1,7 @@
-package com.zhub.ppeng.exception;
+package fun.zhub.ppeng.exception;
 
 
-import com.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.common.ResponseStatus;
 
 /**
  * Business exception

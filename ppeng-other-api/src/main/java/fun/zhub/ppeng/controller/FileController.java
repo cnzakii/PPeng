@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.controller;
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.FileService;
 import jakarta.annotation.Resource;

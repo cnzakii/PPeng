@@ -1,6 +1,6 @@
 package fun.zhub.ppeng.controller;
 
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.service.RecipeTypeService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;

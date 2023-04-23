@@ -1,4 +1,4 @@
-package com.zhub.ppeng.constant;
+package fun.zhub.ppeng.constant;
 
 /**
  * <p>

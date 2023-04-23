@@ -1,4 +1,4 @@
-package com.zhub.ppeng.common;
+package fun.zhub.ppeng.common;
 
 
 import lombok.AllArgsConstructor;

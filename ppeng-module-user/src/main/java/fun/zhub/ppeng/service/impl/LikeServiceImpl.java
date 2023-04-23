@@ -4,9 +4,9 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.util.BooleanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Like;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.mapper.LikeMapper;
 import fun.zhub.ppeng.service.LikeService;
 import jakarta.annotation.Resource;
@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.zhub.ppeng.constant.RedisConstants.USER_LIKE_KEY;
-import static com.zhub.ppeng.constant.RedisConstants.USER_LIKE_TTL;
+import static fun.zhub.ppeng.constant.RedisConstants.USER_LIKE_KEY;
+import static fun.zhub.ppeng.constant.RedisConstants.USER_LIKE_TTL;
 
 /**
  * <p>

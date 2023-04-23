@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
 
 
 /**

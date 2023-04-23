@@ -2,7 +2,7 @@ package fun.zhub.ppeng.controller;
 
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.zhub.ppeng.constant.RoleConstants.BAD_NICK_NAME_PREFIX;
+import static fun.zhub.ppeng.constant.RoleConstants.BAD_NICK_NAME_PREFIX;
 
 /**
  * <p>

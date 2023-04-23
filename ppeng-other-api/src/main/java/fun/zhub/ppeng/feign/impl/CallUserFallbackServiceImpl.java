@@ -1,6 +1,6 @@
 package fun.zhub.ppeng.feign.impl;
 
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.feign.CallUserService;
 import org.springframework.stereotype.Component;

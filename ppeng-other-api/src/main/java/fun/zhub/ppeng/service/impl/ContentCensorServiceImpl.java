@@ -3,9 +3,9 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baidu.aip.contentcensor.AipContentCensor;
 import com.baidu.aip.contentcensor.EImgType;
-import com.zhub.ppeng.common.ResponseResult;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.feign.CallUserService;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
+import static fun.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
 
 
 /**

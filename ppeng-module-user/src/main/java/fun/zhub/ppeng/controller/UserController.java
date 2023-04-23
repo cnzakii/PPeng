@@ -9,9 +9,9 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.zhub.ppeng.common.ResponseResult;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.dto.ContentCensorDTO;
+import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.UserDTO;
 import fun.zhub.ppeng.dto.VerifyEmailDTO;
 import fun.zhub.ppeng.dto.login.LoginFormDTO;
@@ -33,10 +33,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
-import static com.zhub.ppeng.constant.RedisConstants.*;
-import static com.zhub.ppeng.constant.SaTokenConstants.*;
-import static com.zhub.ppeng.constant.SystemConstants.PPENG_URL;
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.SaTokenConstants.*;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 
 /**

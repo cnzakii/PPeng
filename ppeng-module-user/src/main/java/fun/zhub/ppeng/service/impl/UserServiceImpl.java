@@ -14,9 +14,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.feign.WeChatService;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserService;
@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
-import static com.zhub.ppeng.constant.RedisConstants.*;
-import static com.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static com.zhub.ppeng.constant.SystemConstants.PPENG_URL;
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
+import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**

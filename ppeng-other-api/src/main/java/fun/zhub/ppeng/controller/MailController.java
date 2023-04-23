@@ -3,7 +3,7 @@ package fun.zhub.ppeng.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.user.UserVerifyDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;

@@ -3,8 +3,8 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 
-import static com.zhub.ppeng.constant.SystemConstants.*;
+import static fun.zhub.ppeng.constant.SystemConstants.*;
 
 /**
  * <p>

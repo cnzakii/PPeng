@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_DETAIL;
-import static com.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_NAME;
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_DETAIL;
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_NAME;
 
 /**
  * <p>

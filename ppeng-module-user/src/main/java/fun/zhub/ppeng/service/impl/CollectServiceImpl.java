@@ -3,9 +3,9 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.util.BooleanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Collect;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.mapper.CollectMapper;
 import fun.zhub.ppeng.service.CollectService;
 import jakarta.annotation.Resource;
@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.zhub.ppeng.constant.RedisConstants.USER_COLLECT_KEY;
-import static com.zhub.ppeng.constant.RedisConstants.USER_COLLECT_TTL;
+import static fun.zhub.ppeng.constant.RedisConstants.USER_COLLECT_KEY;
+import static fun.zhub.ppeng.constant.RedisConstants.USER_COLLECT_TTL;
 
 /**
  * <p>

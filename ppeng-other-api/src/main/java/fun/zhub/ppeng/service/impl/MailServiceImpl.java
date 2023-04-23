@@ -4,9 +4,9 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.zhub.ppeng.common.ResponseStatus;
-import com.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.dto.VerifyMailDTO;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
@@ -23,9 +23,9 @@ import org.thymeleaf.context.Context;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static com.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
-import static com.zhub.ppeng.constant.RabbitConstants.ROUTING_MAIL_SEND;
-import static com.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
+import static fun.zhub.ppeng.constant.RabbitConstants.ROUTING_MAIL_SEND;
+import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constants.MailConstants.*;
 
 /**

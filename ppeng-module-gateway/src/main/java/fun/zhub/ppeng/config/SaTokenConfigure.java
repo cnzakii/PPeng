@@ -7,15 +7,15 @@ import cn.dev33.satoken.router.SaHttpMethod;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.json.JSONUtil;
-import com.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_401;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
-import static com.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static com.zhub.ppeng.constant.SaTokenConstants.*;
+import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_401;
+import static fun.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
+import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static fun.zhub.ppeng.constant.SaTokenConstants.*;
 
 /**
  * <p>

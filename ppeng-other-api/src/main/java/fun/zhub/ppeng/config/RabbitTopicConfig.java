@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.zhub.ppeng.constant.RabbitConstants.*;
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
  * <p>

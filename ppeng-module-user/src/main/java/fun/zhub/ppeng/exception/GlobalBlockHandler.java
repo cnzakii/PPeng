@@ -5,8 +5,8 @@ import com.alibaba.csp.sentinel.slots.block.authority.AuthorityException;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
-import com.zhub.ppeng.common.ResponseResult;
-import com.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
