@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * <p>
- * 利用OpenFeign调用其他模块 处理内容违规
+ * 利用OpenFeign调用user模块 处理内容违规
  * <p>
  *
  * @author Zaki

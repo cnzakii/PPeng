@@ -10,7 +10,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: ****:7744
+        server-addr: ****:8848  #****:7744
         namespace: ppeng
         group: PPENG_GROUP
         username: ppeng

@@ -42,18 +42,21 @@ public class ContentCensorListener {
             key = ROUTING_CONTENT_CENSOR
     ))
     public void listenTextContentCensorQueue(String json) {
-        ContentCensorDTO censorDTO = JSONUtil.toBean(json, ContentCensorDTO.class);
 
-        log.debug("content.censor.queue队列监听到消息====》{}", censorDTO);
+        ContentCensorDTO bean = JSONUtil.toBean(json, ContentCensorDTO.class);
 
-        String type = censorDTO.getType();
-        Long id = censorDTO.getId();
-        String content = censorDTO.getContent();
+        log.debug("content.censor.queue队列监听到消息====》{}", bean);
+
+        String type = bean.getType();
+        Long id = bean.getId();
+        String[] data = bean.getData();
+
 
         switch (type) {
-            case "nickName" -> censorService.censorNickName(id, content);
-            case "icon" -> censorService.censorUserIcon(id, content);
-            case "recipe" -> censorService.censorRecipeText(id, content);
+            case "nickName" -> censorService.censorNickName(id, data[0]);
+            case "icon" -> censorService.censorUserIcon(id, data[0]);
+            case "recipeImages" -> censorService.censorRecipeImages(id, data);
+            case "recipeVideo" -> censorService.censorRecipeVideo(id, data);
         }
     }
 

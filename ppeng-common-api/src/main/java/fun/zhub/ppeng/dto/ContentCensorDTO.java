@@ -1,6 +1,5 @@
 package fun.zhub.ppeng.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +13,6 @@ import lombok.NoArgsConstructor;
  * @since 2023-04-15
  **/
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class ContentCensorDTO {
 
@@ -29,7 +27,17 @@ public class ContentCensorDTO {
     private Long id;
 
     /**
-     * 审核内容
+     * 审核数据
      */
-    private String content;
+    private String[] data;
+
+    public void setData(String... data) {
+        this.data = data;
+    }
+
+    public ContentCensorDTO(String type, Long id, String... data) {
+        this.type = type;
+        this.id = id;
+        this.data = data;
+    }
 }

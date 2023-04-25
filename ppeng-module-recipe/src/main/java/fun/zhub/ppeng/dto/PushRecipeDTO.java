@@ -57,7 +57,7 @@ public class PushRecipeDTO implements Serializable {
     /**
      * 图片路径
      */
-    private String[] imges;
+    private String[] images;
 
     /**
      * 视频路径

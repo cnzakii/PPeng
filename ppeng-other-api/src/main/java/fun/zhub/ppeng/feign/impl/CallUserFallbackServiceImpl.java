@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * BadContentService 调用失败的兜底方法
+ * CallUserService 调用失败的兜底方法
  * <p>
  *
  * @author Zaki

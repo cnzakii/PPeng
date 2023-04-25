@@ -60,4 +60,10 @@ public class TestContentCensor {
          */
     }
 
+
+    @Test
+    void TestVideo() {
+        contentCensorService.censorRecipeVideo(1637127723212214272L, new String[]{"大傻逼", "https://ppeng.zhub.fun/resource/test2.mp4"});
+    }
+
 }

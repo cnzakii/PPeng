@@ -1,5 +1,7 @@
 package fun.zhub.ppeng.service;
 
+import org.json.JSONObject;
+
 /**
  * <p>
  * 内容审核interface
@@ -21,24 +23,37 @@ public interface ContentCensorService {
 
 
     /**
-     * 审核菜谱内容
+     * 审核头像
      *
-     * @param recipeId id
-     * @param text     菜谱内容
+     * @param userId 用户id
+     * @param path   头像路径
      */
-    void censorRecipeText(Long recipeId, String text);
+    void censorUserIcon(Long userId, String path);
+
+    /**
+     * 审核菜谱图文
+     *
+     * @param recipeId   菜谱id
+     * @param data 数据
+     */
+    void censorRecipeImages(Long recipeId, String[] data);
+
+    /**
+     * 审核菜谱视频
+     *
+     * @param recipeId 菜谱id
+     * @param data     数据
+     */
+    void censorRecipeVideo(Long recipeId, String[] data);
 
 
     /**
-     * 审核头像
+     * 通用 response 请求处理
      *
-     * @param id      用户id
-     * @param content 内容
+     * @param response response
+     * @return 不合规信息，如果合规，返回null
      */
-    void censorUserIcon(Long id, String content);
+    String getMsgFromResponse(JSONObject response);
 
-    /*
-     * TODO 审核菜谱图片，视频等
-     */
 
 }
