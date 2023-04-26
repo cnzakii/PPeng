@@ -21,10 +21,9 @@ public class DoCodeGeneration {
         CodeGeneration.Generation(
                 "jdbc:mysql://47.115.207.226:3306/db_ppeng?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=Asia/Shanghai",
                 "root",
-                "Ghidb!sd902#!.",
+                "Ghidbsd902df",
 
-
-                "t_recipe_comments"
+                "t_recipe_censor"
         );
     }
 

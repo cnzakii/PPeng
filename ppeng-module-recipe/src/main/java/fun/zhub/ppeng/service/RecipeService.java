@@ -39,4 +39,13 @@ public interface RecipeService extends IService<Recipe> {
      * @return recipeId
      */
     Long saveVideoRecipe(Long userId, Integer typeId, String title, String material, String video, Integer isProfessional);
+
+    /**
+     * 更新菜谱审核状态
+     *
+     * @param recipeId    菜谱id
+     * @param censorState 审核状态
+     * @param isBaned     是否违规
+     */
+    void updateCensorState(Long recipeId, Integer censorState, Integer isBaned);
 }

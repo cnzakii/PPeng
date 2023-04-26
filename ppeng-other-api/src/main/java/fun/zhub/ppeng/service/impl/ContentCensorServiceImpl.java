@@ -5,8 +5,9 @@ import com.baidu.aip.contentcensor.AipContentCensor;
 import com.baidu.aip.contentcensor.EImgType;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.feign.CallRecipeService;
+import fun.zhub.ppeng.feign.CallRecipeCensorService;
 import fun.zhub.ppeng.feign.CallUserService;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
@@ -16,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +47,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
 
 
     @Resource
-    private CallRecipeService recipeService;
+    private CallRecipeCensorService recipeService;
 
     /**
      * 实现用户昵称的审核
@@ -122,6 +124,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         // 只要有一项违规，就不再继续审核
         if (StrUtil.isNotEmpty(msg)) {
             log.info("菜谱({})标题违规===》{}", recipeId, msg);
+            msg = "内容: " + msg;
             flag = true;
         } else {
             // 审核图片集
@@ -132,6 +135,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
                     .collect(Collectors.joining());
             if (StrUtil.isNotEmpty(msg)) {
                 log.info("菜谱({})图片违规===》{}", recipeId, msg);
+                msg = "图片: " + msg;
                 flag = true;
             }
         }
@@ -140,7 +144,10 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             /*
              * 调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
              */
-            recipeService.setInaccessible("ai", recipeId);
+            recipeService.setInaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+        } else {
+            // 审核通过，记录审核结果并更新审核状态
+            recipeService.setaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
         }
 
 
@@ -168,6 +175,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         // 只要有一项违规，就不再继续审核
         if (StrUtil.isNotEmpty(msg)) {
             log.info("菜谱({})标题违规===》{}", recipeId, msg);
+            msg = "标题: " + msg;
             flag = true;
         } else {
             // 审核视频
@@ -183,7 +191,9 @@ public class ContentCensorServiceImpl implements ContentCensorService {
 
             if (StrUtil.equals(conclusion, "不合规") || StrUtil.equals(conclusion, "疑似")) {
                 msg = response.getJSONArray("conclusionTypeGroupInfos").getJSONObject(0).getString("msg");
-                log.info("菜谱({})sp违规===》{}", recipeId, msg);
+
+                log.info("菜谱({})视频违规===》{}", recipeId, msg);
+                msg = "视频: " + msg;
                 flag = true;
             }
         }
@@ -192,7 +202,10 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             /*
              *  调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
              */
-            recipeService.setInaccessible("ai", recipeId);
+            recipeService.setInaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+        } else {
+            // 审核通过，记录审核结果并更新审核状态
+            recipeService.setaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
         }
 
 

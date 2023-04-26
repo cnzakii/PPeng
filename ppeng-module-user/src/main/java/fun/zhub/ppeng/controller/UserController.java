@@ -20,6 +20,7 @@ import fun.zhub.ppeng.dto.update.UpdateUserEmailDTO;
 import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UserInfoUpdateDTO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
@@ -247,11 +248,11 @@ public class UserController {
                     StpUtil.openSafe(SAFE_DELETE_USER, SAFE_TIME);
                 }
             }
-            default -> b = false;
+            default -> throw  new BusinessException(ResponseStatus.HTTP_STATUS_400);
         }
 
         if (BooleanUtil.isFalse(b)) {
-            return ResponseResult.base(ResponseStatus.HTTP_STATUS_401);
+            throw  new BusinessException(ResponseStatus.FAIL,"验证码错误");
         }
 
 

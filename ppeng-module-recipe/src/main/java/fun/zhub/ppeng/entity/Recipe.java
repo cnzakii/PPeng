@@ -57,7 +57,7 @@ public class Recipe implements Serializable {
 
 
     /**
-     * 文字内容 
+     * 文字内容
      */
     private String content;
 
@@ -102,9 +102,15 @@ public class Recipe implements Serializable {
     private LocalDateTime updateTime;
 
     /**
-     * 审核状态： 0 未审核，1 机器审核，2 人工审核
+     * 审核状态： 0 未审核，1 机器审核，2 人工审核，3 人工复审
      */
-    private Integer status;
+    private Integer censorState;
+
+    /**
+     * 违规状态： 0 未违规， 1 违规
+     */
+    private Integer isBaned;
+
 
     /**
      * 逻辑删除:审核通过，但用户自己删除

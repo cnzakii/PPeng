@@ -2,6 +2,7 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Recipe;
@@ -70,6 +71,8 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         recipe.setContent(content);
         recipe.setImges(images);
         recipe.setIsProfessional(isProfessional);
+        recipe.setIsBaned(0);
+        recipe.setCensorState(0);
 
         recipe.setId(snowflake.nextId());
         recipe.setCreateTime(LocalDateTime.now());
@@ -113,6 +116,8 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         recipe.setMaterial(material);
         recipe.setVideo(video);
         recipe.setIsProfessional(isProfessional);
+        recipe.setIsBaned(0);
+        recipe.setCensorState(0);
 
         recipe.setId(snowflake.nextId());
         recipe.setCreateTime(LocalDateTime.now());
@@ -124,5 +129,26 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         }
 
         return recipe.getId();
+    }
+
+    /**
+     * 实现更新菜谱审核状态
+     *
+     * @param recipeId    菜谱id
+     * @param censorState 审核状态
+     * @param isBaned     是否违规
+     */
+    @Override
+    public void updateCensorState(Long recipeId, Integer censorState, Integer isBaned) {
+        int i = recipeMapper.update(null,
+                new LambdaUpdateWrapper<Recipe>()
+                        .eq(Recipe::getId, recipeId)
+                        .set(Recipe::getCensorState, censorState)
+                        .set(Recipe::getIsBaned, isBaned)
+                        .set(Recipe::getUpdateTime, LocalDateTime.now()));
+        if (i == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱不存在");
+        }
+
     }
 }
