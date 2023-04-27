@@ -38,15 +38,12 @@ public class FileController {
      */
     @PostMapping("/upload/{type}")
     @SentinelResource(value = "uploadFile", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
-    public ResponseResult<String> uploadFile(@PathVariable("type") String type, MultipartFile file) {
+    public ResponseResult<Object> uploadFile(@PathVariable("type") String type, MultipartFile... file) {
 
-        String url = switch (type) {
-            case "icon" -> fileService.updateUserIcon(file);
-            /*
-             * TODO 上传菜谱图片
-             */
-            case "recipe" -> null;
-
+        Object url = switch (type) {
+            case "icon" -> fileService.uploadUserIcon(file[0]);
+            case "recipe-images" -> fileService.uploadRecipeImages(file);
+            case "recipe-video" -> fileService.uploadRecipeVideo(file[0]);
             default -> null;
         };
 

@@ -23,7 +23,6 @@
         <dependency>
             <groupId>com.baidu.aip</groupId>
             <artifactId>java-sdk</artifactId>
-            <version>4.16.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -161,6 +160,11 @@
             <artifactId>sa-token-dao-redis-jackson</artifactId>
         </dependency>
 
+        <!-- Sa-Token插件：权限缓存与业务缓存分离 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-alone-redis</artifactId>
+        </dependency>
 
         <!--redis依赖-->
         <dependency>

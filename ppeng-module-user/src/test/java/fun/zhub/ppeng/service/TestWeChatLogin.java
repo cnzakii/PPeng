@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+
 import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**
@@ -28,6 +29,7 @@ public class TestWeChatLogin {
 
     @Test
     void TestLogin() {
+
         String s = weChatService.loginByWeChat(APP_ID, SECRET, "0e3UXMFa1jvG8F0VIxHa1CWKfu4UXMFu", GRANT_TYPE);
         log.info(s);
         /*

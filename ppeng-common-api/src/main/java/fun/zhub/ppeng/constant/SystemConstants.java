@@ -22,14 +22,10 @@ public interface SystemConstants {
 
 
     /**
-     * 文件存储根路径
+     * 文件存储根路径  /root/ppeng
      */
-    String FILE_ROOT_PATH = "/root/ppeng";
+    String FILE_ROOT_PATH = "/Users/zaki/Desktop";
 
-    /**
-     * 用户头像存储子路径
-     */
-    String FILE_ICON_SUB_PATH = "/icon/";
 
 
     /**

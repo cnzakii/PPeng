@@ -24,7 +24,7 @@ import static fun.zhub.ppeng.constant.RoleConstants.BAD_NICK_NAME_PREFIX;
  **/
 @RestController
 @RequestMapping("/handle/user")
-public class UserBadContentHandler {
+public class UserCensorHandler {
 
     @Resource
     private UserService userService;
@@ -33,7 +33,7 @@ public class UserBadContentHandler {
     @PostMapping("/nick/name/{id}")
     @SentinelResource(value = "handleBadNickName", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> handleBadNickName(@PathVariable("id") Long id) {
-        String newNickName = BAD_NICK_NAME_PREFIX + RandomUtil.randomString(10);
+        String newNickName = BAD_NICK_NAME_PREFIX + RandomUtil.randomString(10).toUpperCase();
         userService.updateUserInfo(id, newNickName, null, null, null, null, null);
 
         return ResponseResult.success();

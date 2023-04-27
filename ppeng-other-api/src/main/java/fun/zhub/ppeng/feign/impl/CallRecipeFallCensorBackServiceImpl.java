@@ -3,6 +3,7 @@ package fun.zhub.ppeng.feign.impl;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.feign.CallRecipeCensorService;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -13,6 +14,7 @@ import fun.zhub.ppeng.feign.CallRecipeCensorService;
  * @version 1.0
  * @since 2023-04-25
  **/
+@Component
 public class CallRecipeFallCensorBackServiceImpl implements CallRecipeCensorService {
 
     @Override

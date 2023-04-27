@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import fun.zhub.ppeng.entity.User;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 /**
  * <p>
@@ -44,7 +43,7 @@ public interface UserService extends IService<User> {
      * @param code 临时凭证
      * @return user 用户 ， Boolean 是否登录
      */
-    Map<String, Object> loginByWeChat(String code);
+    User loginByWeChat(String code);
 
 
     /**

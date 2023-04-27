@@ -18,7 +18,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableDiscoveryClient
 @SpringBootApplication
 @EnableFeignClients
-
 public class PPengOtherApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(PPengOtherApiApplication.class);

@@ -30,8 +30,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
@@ -95,9 +93,13 @@ public class UserController {
         }
 
         // 验证邮箱
-        userService.verifyEmail(email, code, REGISTER_CODE_KEY);
+        Boolean b = userService.verifyEmail(email, code, REGISTER_CODE_KEY);
 
+        if (BooleanUtil.isFalse(b)) {
+            return ResponseResult.fail("验证码错误");
+        }
         userService.register(email, password);
+
         return ResponseResult.success();
     }
 
@@ -131,20 +133,11 @@ public class UserController {
      * @return p-token
      */
     @PostMapping("/login/by/wx/{code}")
-    public ResponseResult<Map<String, Object>> loginByWeChat(@PathVariable("code") String code) {
+    public ResponseResult<String> loginByWeChat(@PathVariable("code") String code) {
 
-        Map<String, Object> map = userService.loginByWeChat(code);
-        User user = BeanUtil.toBean(map.get("user"), User.class);
-
+        User user = userService.loginByWeChat(code);
         String token = userService.afterLogin(user);
-
-        /*
-         * {"token": "", "isFirst": true}
-         */
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-        result.put("isFirst", map.get("isFirst"));
-        return ResponseResult.success(result);
+        return ResponseResult.success(token);
     }
 
 
@@ -248,11 +241,11 @@ public class UserController {
                     StpUtil.openSafe(SAFE_DELETE_USER, SAFE_TIME);
                 }
             }
-            default -> throw  new BusinessException(ResponseStatus.HTTP_STATUS_400);
+            default -> throw new BusinessException(ResponseStatus.HTTP_STATUS_400);
         }
 
         if (BooleanUtil.isFalse(b)) {
-            throw  new BusinessException(ResponseStatus.FAIL,"验证码错误");
+            throw new BusinessException(ResponseStatus.FAIL, "验证码错误");
         }
 
 
@@ -350,7 +343,7 @@ public class UserController {
 
         // 异步审核图片
         if (StrUtil.isNotEmpty(icon)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL,""))));
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL, ""))));
         }
 
 

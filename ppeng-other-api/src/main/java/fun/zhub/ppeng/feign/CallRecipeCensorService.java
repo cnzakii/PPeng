@@ -5,6 +5,7 @@ import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.feign.impl.CallRecipeFallCensorBackServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  **/
 
 @FeignClient(value = "ppeng-module-recipe", fallback = CallRecipeFallCensorBackServiceImpl.class)
+@Component
 public interface CallRecipeCensorService {
 
     /**

@@ -1,7 +1,7 @@
 package fun.zhub.ppeng.service.impl;
 
-import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.exception.BusinessException;
@@ -12,8 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
-import static fun.zhub.ppeng.constant.SystemConstants.*;
+import static fun.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 /**
  * <p>
@@ -35,11 +39,64 @@ public class FileServiceImpl implements FileService {
      * @return 头像路径
      */
     @Override
-    public String updateUserIcon(MultipartFile icon) {
-        String path = updateFile(FILE_ICON_SUB_PATH, icon);
+    public String uploadUserIcon(MultipartFile icon) {
+        LocalDate localDate = LocalDate.now();
+
+        String subPath = "/icon/" + localDate.getYear() + "/" + localDate.getMonthValue() + "/" + localDate.getDayOfMonth() + "/";
+
+        String path = uploadFile(subPath, icon);
+
 
         if (StrUtil.isEmpty(path)) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "头像保存失败");
+        }
+
+        return PPENG_URL + path;
+    }
+
+    /**
+     * 实现上传菜谱图片集功能
+     *
+     * @param images 图片集
+     * @return url数组
+     */
+    @Override
+    public String[] uploadRecipeImages(MultipartFile[] images) {
+        LocalDate localDate = LocalDate.now();
+
+        String subPath = "/recipe/image/" + localDate.getYear() + "/" + localDate.getMonthValue() + "/" + localDate.getDayOfMonth() + "/";
+
+
+        List<String> urls = Arrays.stream(images)
+                .map(image -> uploadFile(subPath, image))
+                .filter(StrUtil::isNotEmpty)
+                .map(path -> PPENG_URL + path)
+                .toList();
+
+        if (urls.size() != images.length) {
+            urls.forEach(url -> deleteFile(url.replace(PPENG_URL, "")));
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "菜谱图像保存失败");
+        }
+
+        return urls.toArray(new String[0]);
+    }
+
+    /**
+     * 实现菜谱视频上传功能
+     *
+     * @param video 视频
+     * @return url
+     */
+    @Override
+    public String uploadRecipeVideo(MultipartFile video) {
+        LocalDate localDate = LocalDate.now();
+
+        String subPath = "/recipe/video/" + localDate.getYear() + "/" + localDate.getMonthValue() + "/" + localDate.getDayOfMonth() + "/";
+
+        String path = uploadFile(subPath, video);
+
+        if (StrUtil.isEmpty(path)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "菜谱视频保存失败");
         }
 
         return PPENG_URL + path;
@@ -53,7 +110,7 @@ public class FileServiceImpl implements FileService {
      * @return 路径(不包含根路径)
      */
     @Override
-    public String updateFile(String subPath, MultipartFile file) {
+    public String uploadFile(String subPath, MultipartFile file) {
         String oldFileName = file.getOriginalFilename();
 
         if (StrUtil.isEmpty(oldFileName)) {
@@ -61,13 +118,15 @@ public class FileServiceImpl implements FileService {
             return null;
         }
 
-        String newFileName = UUID.randomUUID().toString(true) + oldFileName.substring(oldFileName.lastIndexOf("."));
+
+        String newFileName = IdUtil.simpleUUID() + oldFileName.substring(oldFileName.lastIndexOf("."));
 
         File dest = new File(FILE_ROOT_PATH + subPath + newFileName);
 
-        // 判断文件父目录是否存在
+        // 判断文件目录是否存在
         if (!dest.getParentFile().exists()) {
-            boolean b = dest.getParentFile().mkdir();
+            log.info("创建目录{}", dest.getParentFile());
+            boolean b = dest.getParentFile().mkdirs();
             if (!b) {
                 log.error("目录({})创建失败", dest.getParentFile());
                 return null;
@@ -98,7 +157,7 @@ public class FileServiceImpl implements FileService {
         File file = new File(path);
 
         if (!file.exists()) {
-            log.warn("文件不存在");
+            log.warn("文件{}不存在", file);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "文件不存在");
         }
 

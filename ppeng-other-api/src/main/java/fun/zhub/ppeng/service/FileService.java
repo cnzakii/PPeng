@@ -20,9 +20,23 @@ public interface FileService {
      * @param icon 头像
      * @return 地址
      */
-    String updateUserIcon(MultipartFile icon);
+    String uploadUserIcon(MultipartFile icon);
 
+    /**
+     * 上传菜谱图片集
+     *
+     * @param images 文件
+     * @return url数组
+     */
+    String[] uploadRecipeImages(MultipartFile[] images);
 
+    /**
+     * 上传菜谱视频
+     *
+     * @param video 视频
+     * @return url
+     */
+    String uploadRecipeVideo(MultipartFile video);
 
 
     /**
@@ -32,13 +46,12 @@ public interface FileService {
      * @param file    文件
      * @return 文件路径（不包含根路径）
      */
-    String updateFile(String subPath, MultipartFile file);
+    String uploadFile(String subPath, MultipartFile file);
 
     /**
      * 文件删除通用方法
      *
      * @param filePath 文件路径（包含文件名，不包含根路径）
-     *
      */
     void deleteFile(String filePath);
 

@@ -30,9 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
@@ -143,8 +141,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return user
      */
     @Override
-    public Map<String, Object> loginByWeChat(String code) {
-        Map<String, Object> map = new HashMap<>();
+    public User loginByWeChat(String code) {
         // 使用OpenFeign调用微信登录接口，获取该用户的唯一openId
         String json = weChatService.loginByWeChat(APP_ID, SECRET, code, GRANT_TYPE);
 
@@ -162,9 +159,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 如果存在，则直接返回
         if (BeanUtil.isNotEmpty(one)) {
-            map.put("user", one);
-            map.put("isFirst", false);
-            return map;
+            return one;
         }
 
         // 如果不不存在，则创建
@@ -174,11 +169,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(id);
         user.setOpenId(openId);
 
-        createUser(user);
-        map.put("user", user);
-        map.put("isFirst", true);
-
-        return map;
+        user = createUser(user);
+        return user;
     }
 
 
@@ -437,7 +429,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User createUser(User user) {
-        user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10));
+        user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10).toUpperCase());
         user.setRole(ROLE_USER);
 
         user.setGender(0);

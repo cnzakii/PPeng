@@ -2,11 +2,14 @@ server:
   port: 9836
 
 spring:
+  application:
+    name: ppeng-module-recipe
   output:
     ansi:
       enabled: always
-  application:
-    name: ppeng-module-recipe
+  data:
+    redis:
+      database: 2
   cloud:
     nacos:
       discovery:
