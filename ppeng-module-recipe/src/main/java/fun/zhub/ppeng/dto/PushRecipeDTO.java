@@ -3,6 +3,7 @@ package fun.zhub.ppeng.dto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import java.io.Serial;
@@ -37,7 +38,7 @@ public class PushRecipeDTO implements Serializable {
     private Integer typeId;
 
     /**
-     * 标题：现在150字以内
+     * 标题：200字以内
      */
     @NotEmpty(message = "标题不能为空")
     private String title;
@@ -46,23 +47,20 @@ public class PushRecipeDTO implements Serializable {
      * 配料表
      */
     @NotEmpty(message = "配料表不能为空")
-    private String[] material;
-
+    private String material;
 
     /**
      * 文字内容
      */
+    @Length(max = 400, message = "文字信息过长")
     private String content;
 
     /**
-     * 图片路径
+     * 媒体文件路径
      */
-    private String[] images;
+    @NotNull(message = "资源路径不能为空")
+    private String[] mediaUrl;
 
-    /**
-     * 视频路径
-     */
-    private String video;
 
     /**
      * 0代表图文，1代表视频
@@ -70,9 +68,5 @@ public class PushRecipeDTO implements Serializable {
     @Range(min = 0, max = 1, message = "isVideo标识错误")
     private Integer isVideo;
 
-    /**
-     * 0代表非专业，1代表是专业
-     */
-    @Range(min = 0, max = 1, message = "isProfessional标识错误")
-    private Integer isProfessional;
+
 }

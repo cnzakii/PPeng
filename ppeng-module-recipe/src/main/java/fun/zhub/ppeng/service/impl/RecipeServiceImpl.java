@@ -39,43 +39,34 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     @Resource
     private Snowflake snowflake;
 
+
     /**
-     * 实现上传图文菜谱
+     * 实现创建菜谱操作
      *
-     * @param userId         用户id
-     * @param typeId         类型id
-     * @param title          标题
-     * @param material       配料
-     * @param content        内容
-     * @param images         图片
-     * @param isProfessional 是否专业
-     * @return recipeId
+     * @param recipe 没有recipeId的recipe对象
+     * @return 菜谱id
      */
     @Override
-    public Long saveImageRecipe(Long userId, Integer typeId, String title, String material, String content, String images, Integer isProfessional) {
-        Recipe recipe = new Recipe();
-        recipe.setId(userId);
-
+    public Long createRecipe(Recipe recipe) {
         // 查询typeid是否正确
-        if (StrUtil.isEmpty(recipeTypeService.getNameById(typeId))) {
+        if (StrUtil.isEmpty(recipeTypeService.getNameById(recipe.getTypeId()))) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱类型错误");
         }
-        recipe.setTypeId(typeId);
 
-        if (StrUtil.hasEmpty(title, material, content, images)) {
+        if (StrUtil.hasEmpty(recipe.getTitle(), recipe.getMaterial(), recipe.getContent(), recipe.getMediaUrl())) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数为空");
         }
 
-        recipe.setTitle(title);
-        recipe.setMaterial(material);
-        recipe.setContent(content);
-        recipe.setImges(images);
-        recipe.setIsProfessional(isProfessional);
-        recipe.setIsBaned(0);
-        recipe.setCensorState(0);
+        long id = snowflake.nextId();
 
-        recipe.setId(snowflake.nextId());
+        recipe.setId(id);
+        recipe.setLikes(0);
+        recipe.setCollections(0);
+        recipe.setCensorState(0);
+        recipe.setIsBaned(0);
+        recipe.setIsDeleted(0);
         recipe.setCreateTime(LocalDateTime.now());
+
 
         // 插入数据库
         int i = recipeMapper.insert(recipe);
@@ -86,50 +77,6 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         return recipe.getId();
     }
 
-    /**
-     * 实现上传视频菜谱
-     *
-     * @param userId         用户id
-     * @param typeId         类型
-     * @param title          标题
-     * @param material       配料表
-     * @param video          视频
-     * @param isProfessional 是否专业
-     * @return recipeId
-     */
-    @Override
-    public Long saveVideoRecipe(Long userId, Integer typeId, String title, String material, String video, Integer isProfessional) {
-        Recipe recipe = new Recipe();
-        recipe.setId(userId);
-
-        // 查询typeid是否正确
-        if (StrUtil.isEmpty(recipeTypeService.getNameById(typeId))) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱类型错误");
-        }
-        recipe.setTypeId(typeId);
-
-        if (StrUtil.hasEmpty(title, material, video)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数为空");
-        }
-
-        recipe.setTitle(title);
-        recipe.setMaterial(material);
-        recipe.setVideo(video);
-        recipe.setIsProfessional(isProfessional);
-        recipe.setIsBaned(0);
-        recipe.setCensorState(0);
-
-        recipe.setId(snowflake.nextId());
-        recipe.setCreateTime(LocalDateTime.now());
-
-        // 插入数据库
-        int i = recipeMapper.insert(recipe);
-        if (i != 1) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加失败");
-        }
-
-        return recipe.getId();
-    }
 
     /**
      * 实现更新菜谱审核状态

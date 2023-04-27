@@ -32,7 +32,7 @@ public class FileController {
     /**
      * 文件上传功能
      *
-     * @param type 类型：icon-头像   recipe-菜谱
+     * @param type 类型：icon-头像   recipe-images 菜谱图片集合  recipe-video 菜谱视频
      * @param file 上传的文件
      * @return url地址
      */

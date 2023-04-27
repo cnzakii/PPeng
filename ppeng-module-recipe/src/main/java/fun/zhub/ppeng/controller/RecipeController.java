@@ -1,24 +1,19 @@
 package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.json.JSONUtil;
+import cn.hutool.core.bean.BeanUtil;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.ContentCensorDTO;
 import fun.zhub.ppeng.dto.PushRecipeDTO;
+import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.service.RecipeService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
-
-import static fun.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
-import static fun.zhub.ppeng.constant.RabbitConstants.ROUTING_CONTENT_CENSOR;
-import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 /**
  * <p>
@@ -36,10 +31,6 @@ public class RecipeController {
     private RecipeService recipeService;
 
 
-    @Resource
-    private RabbitTemplate rabbitTemplate;
-
-
     /**
      * 菜谱上传
      *
@@ -54,46 +45,12 @@ public class RecipeController {
         if (!Objects.equals(id, userId)) {
             return ResponseResult.fail("id错误");
         }
+        Recipe recipe = BeanUtil.copyProperties(pushRecipeDTO, Recipe.class);
+        recipe.setIsProfessional(0);
+        String urls = String.join(",", pushRecipeDTO.getMediaUrl());
+        recipe.setMediaUrl(urls);
 
-        Integer isVideo = pushRecipeDTO.getIsVideo();
-        // 标题
-        String title = pushRecipeDTO.getTitle();
-        // 类型
-        Integer typeId = pushRecipeDTO.getTypeId();
-        // 配料表
-        String material = String.join(",", pushRecipeDTO.getMaterial());
-        // 是否专业
-        Integer isProfessional = pushRecipeDTO.getIsProfessional();
-
-        Long recipeId;
-        if (isVideo == 0) {
-            // 图文
-            String content = pushRecipeDTO.getContent();
-            String images = String.join(",", pushRecipeDTO.getImages());
-            recipeId = recipeService.saveImageRecipe(userId, typeId, title, material, content, images, isProfessional);
-
-            // 审核
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR,
-                    JSONUtil.toJsonStr(
-                            new ContentCensorDTO(
-                                    "recipeImages",
-                                    recipeId,
-                                    title, content, images.replaceAll(PPENG_URL, ""))));
-        } else {
-            // 视频
-            String video = pushRecipeDTO.getVideo();
-            recipeId = recipeService.saveVideoRecipe(userId, typeId, title, material, video, isProfessional);
-
-            // 审核
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR,
-                    JSONUtil.toJsonStr(
-                            new ContentCensorDTO(
-                                    "recipeVideo",
-                                    recipeId,
-                                    title, video)));
-        }
-
-
+        Long recipeId = recipeService.createRecipe(recipe);
         return ResponseResult.success(String.valueOf(recipeId));
     }
 

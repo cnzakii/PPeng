@@ -3,8 +3,7 @@ package fun.zhub.ppeng.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -19,8 +18,7 @@ import java.time.LocalDateTime;
  * @author Zaki
  * @since 2023-03-17
  */
-@Getter
-@Setter
+@Data
 @Accessors(chain = true)
 @TableName("t_recipe")
 public class Recipe implements Serializable {
@@ -55,7 +53,6 @@ public class Recipe implements Serializable {
      */
     private String material;
 
-
     /**
      * 文字内容
      */
@@ -64,12 +61,7 @@ public class Recipe implements Serializable {
     /**
      * 图片路径
      */
-    private String imges;
-
-    /**
-     * 视频路径
-     */
-    private String video;
+    private String mediaUrl;
 
     /**
      * 0代表图文，1代表视频
