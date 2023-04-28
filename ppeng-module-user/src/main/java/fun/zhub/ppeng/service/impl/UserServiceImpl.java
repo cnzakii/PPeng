@@ -1,7 +1,6 @@
 package fun.zhub.ppeng.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -10,9 +9,7 @@ import cn.hutool.crypto.SmUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.User;
@@ -30,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
@@ -87,12 +84,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 查询email是否已经注册，包括已经删除的
-        User one = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email).in(User::getIsDeleted, 0, 1));
-
-
-        if (BeanUtil.isNotEmpty(one)) {
-            throw new BusinessException(ResponseStatus.FAIL, "用户已经注册");
-        }
+        Optional.ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email).in(User::getIsDeleted, 0, 1)))
+                .ifPresent(u -> {
+                    throw new BusinessException(ResponseStatus.FAIL, "用户已经注册");
+                });
 
 
         Long id = snowflake.nextId();
@@ -119,11 +114,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User loginByPassword(String email, String password) {
 
         // 根据邮箱查询用户
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email));
+        User user = Optional
+                .ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email)))
+                .orElseThrow(() -> new BusinessException(ResponseStatus.FAIL, "用户不存在"));
 
-        if (BeanUtil.isEmpty(user)) {
-            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
-        }
 
         // 验证密码
         password = SmUtil.sm3(user.getId() + password);
@@ -145,31 +139,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 使用OpenFeign调用微信登录接口，获取该用户的唯一openId
         String json = weChatService.loginByWeChat(APP_ID, SECRET, code, GRANT_TYPE);
 
-        JSONObject jsonObject = JSONUtil.parseObj(json);
+        // 获取openId
+        String openId = Optional.ofNullable(JSONUtil.parseObj(json).getStr("openid"))
+                .orElseThrow(() -> {
+                    JSONObject jsonObject = JSONUtil.parseObj(json);
+                    log.info(json);
+                    return new BusinessException(ResponseStatus.HTTP_STATUS_400, jsonObject.get("errmsg", String.class));
+                });
 
-        String openId = (String) jsonObject.get("openid");
+        // 获取user对象，没有则创建
+        User user;
+        user = Optional.ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenId, openId)))
+                .orElseGet(() -> {
+                    Long id = snowflake.nextId();
+                    User newUser = new User();
+                    newUser.setId(id);
+                    newUser.setOpenId(openId);
+                    return createUser(newUser);
+                });
 
-        if (StrUtil.isEmpty(openId)) {
-            log.info(json);
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, jsonObject.get("errmsg", String.class));
-        }
-
-        // 查看该用户是否已经注册
-        User one = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenId, openId));
-
-        // 如果存在，则直接返回
-        if (BeanUtil.isNotEmpty(one)) {
-            return one;
-        }
-
-        // 如果不不存在，则创建
-        Long id = snowflake.nextId();
-
-        User user = new User();
-        user.setId(id);
-        user.setOpenId(openId);
-
-        user = createUser(user);
         return user;
     }
 
@@ -209,30 +197,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return user
      */
     @Override
-    @Cacheable(cacheNames = "userInfo", key = "#id", sync = true)
+    @Cacheable(cacheNames = "userInfo", key = "#id")
     public User getUserInfoById(Long id) {
         String key = USER_INFO + id;
-        // 先查询redis
-        String json = stringRedisTemplate.opsForValue().get(key);
+        User one;
 
-        // redis中存在 则返回
-        if (StrUtil.isNotEmpty(json)) {
-            return JSONUtil.toBean(json, User.class);
-        }
+        // 先查询redis，
+        one = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
+                .map(json -> JSONUtil.toBean(json, User.class))
+                .orElseGet(() -> {
+                    // redis不存在则查询数据库，数据库仍不存在则抛出异常
+                    User user = Optional.ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, id)))
+                            .orElseThrow(() -> new BusinessException(ResponseStatus.FAIL, "用户不存在"));
 
-        // redis中不存在，则查询数据库
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, id));
-
-
-        if (BeanUtil.isEmpty(user)) {
-            throw new BusinessException(ResponseStatus.FAIL, "用户不存在");
-        }
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(user), USER_INFO_TTL, TimeUnit.HOURS);
+                    return user;
+                });
 
 
-        // 写入redis
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(user), USER_INFO_TTL, TimeUnit.HOURS);
-
-        return user;
+        return one;
     }
 
 
@@ -263,12 +246,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
 
-        boolean b = update(new UpdateWrapper<User>()
-                .set("password", newPassword)
-                .set("update_time", LocalDateTime.now())
-                .eq("id", userId));
+        int i = userMapper.update(null, new LambdaUpdateWrapper<User>()
+                .set(User::getPassword, newPassword)
+                .set(User::getUpdateTime, LocalDateTime.now())
+                .eq(User::getId, userId));
 
-        if (!b) {
+        if (i == 0) {
             log.error("更新用户{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "内部错误-更新失败");
         }
@@ -285,11 +268,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public void updateEmail(Long userId, String newEmail) {
         // 查找是否有存在相同的邮箱
-        List<User> emailList = userMapper.selectList(new QueryWrapper<User>().eq("email", newEmail));
-
-        if (emailList != null && !emailList.isEmpty()) {
-            throw new BusinessException(ResponseStatus.FAIL, "该邮箱已被注册");
-        }
+        Optional.ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, newEmail).in(User::getIsDeleted, 0, 1)))
+                .ifPresent(one -> {
+                    throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "用户存在");
+                });
 
 
         int i = userMapper.update(null,
