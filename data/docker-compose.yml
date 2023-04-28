@@ -1,0 +1,183 @@
+version: "3.8"
+
+# 定义网络
+networks:
+  ppeng_net:
+    driver: bridge
+    name: docker_ppeng
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+  # 网关模块
+  ppeng-gateway:
+    image: ppeng/gateway:1.0
+    container_name: ppeng-gateway
+    ports:
+      - "6378:6378"
+    volumes:
+      - "/home/ppeng/logs/ppeng-gateway:/root/logs/ppeng-gateway"
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.10
+    restart: always
+    depends_on:
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+
+
+  # 用户模块
+  ppeng-user:
+    image: ppeng/user:1.0
+    container_name: ppeng-user
+    ports:
+      - "3377:3377"
+    volumes:
+      - "/home/ppeng/logs/ppeng-user:/root/logs/ppeng-user"
+      - "/home/ppeng/resource:/root/resource"
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.11
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # 第三方API模块
+  ppeng-other-api:
+    image: ppeng/other-api:1.0
+    container_name: ppeng-other-api
+    ports:
+      - "3450:3450"
+    volumes:
+      - "/home/ppeng/logs/ppeng-other-api:/root/logs/ppeng-other-api"
+      - "/home/ppeng/resource:/root/resource"
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.12
+    restart: always
+    depends_on:
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # mysql配置
+  mysql:
+    image: mysql:8.0.32
+    container_name: mysql
+    ports:
+      - "6326:3306"
+    volumes:
+      - "/home/mysql/log:/var/log/mysql"
+      - "/home/mysql/data:/var/lib/mysql"
+      - "/home/mysql/conf/my.cnf:/etc/mysql/my.cnf"
+    env_file:
+      - "./ppeng.env"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    privileged: true
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.13
+    restart: always
+
+
+
+  # nacos配置
+  nacos:
+    image: nacos/nacos-server:v2.2.0
+    container_name: nacos
+    privileged: true
+    restart: always
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_DB_NAME: db_nacos
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: nacos
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_NACOS_PASSWORD}
+      TIME_ZONE: Asia/Shanghai
+    ports:
+      - "7744:8848"
+      - "8744:9848"
+      - "8745:9849"
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.3
+    volumes:
+      - "/home/nacos/logs:/home/nacos/logs"
+
+  # canal配置
+  canal:
+    image: canal/canal-server
+    container_name: canal
+    ports:
+      - "11111:11111"
+    environment:
+      - canal.destinations=db_ppeng
+      - canal.instance.master.address=mysql:3306
+      - canal.instance.dbUsername=canal
+      - canal.instance.dbPassword=${CANAL_MYSQL_PASSWORD}
+      - canal.instance.connectionCharset=UTF-8
+      - canal.instance.tsdb.enable=true
+      - canal.instance.gtidon=false
+      - canal.instance.filter.regex=db_ppeng\\..*
+      - canal.mq.topic=cache.update
+      - rabbitmq.host=rabbitmq
+      - rabbitmq.virtual.host=/
+      - rabbitmq.exchange=ppeng.topic.exchange
+      - rabbitmq.username=${RABBITMQ_DEFAULT_USER}
+      - rabbitmq.password=${RABBITMQ_DEFAULT_PASS}
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.4
+    restart: always
+
+  # redis配置
+  redis:
+    image: redis:6.2.6
+    container_name: redis
+    ports:
+      - "7562:6379"
+    volumes:
+      - "/home/redis/redis.conf:/etc/redis.conf"
+      - "/home/redis/data:/data"
+    command: redis-server /etc/redis.conf
+    networks:
+      ppeng_net:
+        ipv4_address: 172.20.0.5
+    restart: always
+
+  # RabbitMQ 配置
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      ppeng_net:
+        ipv4_address:
+          172.20.0.6
+    restart: always
+
