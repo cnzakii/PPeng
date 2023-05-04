@@ -107,12 +107,21 @@ public interface RedisConstants {
     /**
      * 菜谱类型名字map前缀
      */
-    String RECIPE_TYPE_NAME = "recipe:type:name";
+    String RECIPE_TYPE_NAME_KEY = "recipe:type:name:";
 
     /**
      * 菜谱类型前缀
      */
-    String RECIPE_TYPE_DETAIL = "recipe:type:name:detail";
+    String RECIPE_TYPE_DETAIL_KEY = "recipe:type:name:detail:";
 
+    /**
+     * 普通菜谱推荐前缀
+     */
+    String RECIPE_RECOMMEND_COMMON_KEY = "recipe:recommend:common:";
+
+    /**
+     * 专业菜谱推荐前缀
+     */
+    String RECIPE_RECOMMEND_PROFESSIONAL_KEY = "recipe:recommend:professional:";
 
 }

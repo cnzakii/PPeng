@@ -11,7 +11,7 @@ CREATE DATABASE IF NOT EXISTS db_ppeng;
 CREATE USER 'canal'@'%' IDENTIFIED WITH mysql_native_password BY 'wYyEYbRY4qgv-';
 
 -- 授权 canal 用户访问 db_ppeng 数据库
-GRANT ALL PRIVILEGES ON db_ppeng.* TO 'canal'@'%';
+GRANT REPLICATION CLIENT ON *.* TO 'canal'@'%';
 
 -- 授权 canal 用户作为 MySQL slave
 GRANT REPLICATION SLAVE ON *.* TO 'canal'@'%';

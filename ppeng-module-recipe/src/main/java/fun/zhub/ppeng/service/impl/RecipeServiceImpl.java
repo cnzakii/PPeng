@@ -2,7 +2,10 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Recipe;
@@ -15,11 +18,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_COMMON_KEY;
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_PROFESSIONAL_KEY;
 
 /**
- * <p>
- * 菜谱表,包含了菜谱的标题，配料表，图片路径，以及其他属性 服务实现类
- * </p>
+ * RecipeService
  *
  * @author Zaki
  * @since 2023-03-17
@@ -97,5 +103,68 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱不存在");
         }
 
+    }
+
+    /**
+     * 实现删除菜谱
+     *
+     * @param userId   用户id
+     * @param recipeId 菜谱id
+     */
+    @Override
+    public void deleteRecipeById(Long userId, Long recipeId) {
+        int i = recipeMapper.delete(new LambdaQueryWrapper<Recipe>().eq(Recipe::getUserId, userId).eq(Recipe::getId, recipeId));
+
+        if (i == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "删除菜谱失败");
+        }
+    }
+
+    /**
+     * 实现 根据用户id查找菜谱
+     *
+     * @param userId   用户id
+     * @param pageNum  当前页数
+     * @param pageSize 一页所呈现的菜谱数量
+     * @return list
+     */
+    @Override
+    public List<Recipe> getRecipeListByUserId(String userId, Integer pageNum, Integer pageSize) {
+        Page<Recipe> page = new Page<>(pageNum, pageSize, false);
+        Page<Recipe> recipePage = recipeMapper.selectPage(page,
+                new LambdaQueryWrapper<Recipe>()
+                        .eq(Recipe::getUserId, userId)
+                        .eq(Recipe::getIsBaned, "0")
+                        .orderByDesc(Recipe::getCreateTime));
+
+        return recipePage.getRecords();
+    }
+
+    /**
+     * 实现获取 推荐列表
+     *
+     * @param isProfessional 是否为专业
+     * @param pageNum        当前页数
+     * @param pageSize       一页所呈现的菜谱数量
+     * @return list
+     */
+    @Override
+    public List<Recipe> getRecommendnRecipeList(Integer isProfessional, Integer pageNum, Integer pageSize) {
+        String key;
+        if (isProfessional == 1) {
+            key = RECIPE_RECOMMEND_PROFESSIONAL_KEY;
+        } else {
+            key = RECIPE_RECOMMEND_COMMON_KEY;
+        }
+
+        Set<String> set = stringRedisTemplate.opsForZSet().range(key, 0, -1);
+
+
+        if (set == null || set.isEmpty()) {
+            return null;
+        }
+
+
+        return set.stream().map(s -> JSONUtil.toBean(s, Recipe.class)).toList();
     }
 }

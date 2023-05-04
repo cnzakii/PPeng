@@ -2,7 +2,7 @@ package fun.zhub.ppeng.feign.impl;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.feign.CallUserService;
+import fun.zhub.ppeng.feign.UserService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @since 2023-04-15
  **/
 @Component
-public class CallUserFallbackServiceImpl implements CallUserService {
+public class UserFallbackServiceImpl implements UserService {
     @Override
     public ResponseResult<String> handleBadNickName(Long id) {
         return ResponseResult.fail("调用user模块失败");

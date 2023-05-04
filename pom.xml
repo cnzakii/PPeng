@@ -16,7 +16,6 @@
         <module>ppeng-module-gateway</module>
         <module>ppeng-module-recipe</module>
         <module>ppeng-module-admin</module>
-        <module>ppeng-module-recommend</module>
         <module>ppeng-module-search</module>
         <module>ppeng-other-api</module>
     </modules>

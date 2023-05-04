@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 菜谱违规信息处理
+ * 菜谱违规信息处理接口
  * <p>
  *
  * @author Zaki

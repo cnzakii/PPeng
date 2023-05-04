@@ -2,7 +2,7 @@ package fun.zhub.ppeng.feign;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.feign.impl.CallUserFallbackServiceImpl;
+import fun.zhub.ppeng.feign.impl.UserFallbackServiceImpl;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @version 1.0
  * @since 2023-04-14
  **/
-@FeignClient(value = "ppeng-module-user", fallback = CallUserFallbackServiceImpl.class)
+@FeignClient(value = "ppeng-module-user", fallback = UserFallbackServiceImpl.class)
 @Component
-public interface CallUserService {
+public interface UserService {
 
     /**
      * 处理昵称违规

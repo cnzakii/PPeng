@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_DETAIL;
-import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_NAME;
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_DETAIL_KEY;
+import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_TYPE_NAME_KEY;
 
 /**
  * <p>
@@ -44,7 +44,7 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
     @Cacheable(cacheNames = "recipeType", key = "#root.methodName", sync = true)
     public Map<String, List<String>> queryTotalNameList() {
         // 先查询redis
-        Map<Object, Object> objectMap = stringRedisTemplate.opsForHash().entries(RECIPE_TYPE_NAME);
+        Map<Object, Object> objectMap = stringRedisTemplate.opsForHash().entries(RECIPE_TYPE_NAME_KEY);
 
         if (CollUtil.isNotEmpty(objectMap)) {
             return objectMap.entrySet().stream()
@@ -73,7 +73,7 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
                         (list1, list2) -> list1, HashMap::new));
 
         // 存入redis
-        stringRedisTemplate.opsForHash().putAll(RECIPE_TYPE_NAME, map);
+        stringRedisTemplate.opsForHash().putAll(RECIPE_TYPE_NAME_KEY, map);
 
 
         return map;
@@ -88,7 +88,7 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
     @Cacheable(cacheNames = "recipeType", key = "#root.methodName", sync = true)
     public List<RecipeType> queryTotalRecipeTypeList() {
         // 先从redis中查询
-        List<String> list = stringRedisTemplate.opsForList().range(RECIPE_TYPE_DETAIL, 0, -1);
+        List<String> list = stringRedisTemplate.opsForList().range(RECIPE_TYPE_DETAIL_KEY, 0, -1);
 
         // 如果有则返回
         if (list != null && !list.isEmpty()) {
@@ -105,7 +105,7 @@ public class RecipeTypeServiceImpl extends ServiceImpl<RecipeTypeMapper, RecipeT
                 .map(JSONUtil::toJsonStr)
                 .toArray(String[]::new);
 
-        stringRedisTemplate.opsForList().leftPushAll(RECIPE_TYPE_DETAIL, recipeTypeArray);
+        stringRedisTemplate.opsForList().leftPushAll(RECIPE_TYPE_DETAIL_KEY, recipeTypeArray);
 
         return recipeTypeList;
     }

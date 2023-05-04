@@ -11,9 +11,11 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.feign.FileService;
 import fun.zhub.ppeng.feign.WeChatService;
 import fun.zhub.ppeng.mapper.UserMapper;
 import fun.zhub.ppeng.service.UserService;
@@ -24,6 +26,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,7 +37,6 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 import static fun.zhub.ppeng.contants.WeChatApiContants.*;
 
 /**
@@ -66,6 +68,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private WeChatService weChatService;
+
+    @Resource
+    private FileService fileService;
 
 
     /**
@@ -294,7 +299,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      *
      * @param userId    userId
      * @param nickName  昵称
-     * @param icon      头像url
      * @param address   地址
      * @param introduce 简介
      * @param gender    性别
@@ -302,7 +306,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @CacheEvict(cacheNames = "userInfo", key = "#userId")
-    public void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce, Integer gender, LocalDate birthday) {
+    public void updateUserInfo(Long userId, String nickName, String address, String introduce, Integer gender, LocalDate birthday) {
         // 根据Id获取当前用户
         User user = getUserInfoById(userId);
         // 用于判断是否需要更新
@@ -313,17 +317,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setNickName(nickName);
         }
 
-        if (StrUtil.isNotEmpty(icon)) {
-            if (StrUtil.isNotEmpty(user.getIcon())) {
-                // 异步删除旧的icon
-                String oldIcon = user.getIcon().replace(PPENG_URL, "");
-                rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_FILE_DELETE, oldIcon);
-            }
-            b = true;
-            user.setIcon(icon);
-        }
 
-        if (!StrUtil.equals("null", address)) {
+        if (StrUtil.isNotEmpty(address)) {
             b = true;
             user.setAddress(address);
         }
@@ -349,11 +344,50 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setUpdateTime(LocalDateTime.now());
             int i = userMapper.updateById(user);
             if (i == 0) {
+                log.error("更新用户({})信息失败失败", userId);
                 throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
             }
             log.info("更新用户信息{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
         }
 
+    }
+
+    /**
+     * 实现更新用户头像
+     *
+     * @param userId 用户id
+     * @param icon   头像
+     * @return 头像url
+     */
+    @Override
+    @CacheEvict(cacheNames = "userInfo", key = "#userId")
+    public String updateUserIcon(Long userId, MultipartFile icon) {
+        // 根据Id获取当前用户
+        User user = getUserInfoById(userId);
+
+        // 异步删除旧的icon,
+        String oldIconPath = user.getIcon();
+        if (StrUtil.isNotEmpty(oldIconPath) && !StrUtil.equals(oldIconPath, "/icon/default.png")) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, FILE_DELETE_QUEUE, user.getIcon());
+        }
+
+        // 上传头像
+        ResponseResult<String> response = fileService.uploadFile(icon);
+        if (!StrUtil.equals(response.getStatus(), "200")) {
+            log.error("上传头像失败，响应为====》{}", response);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "上传头像失败");
+        }
+        String iconPath = response.getData();
+
+        // 更新数据库
+        int i = userMapper.update(null, new LambdaUpdateWrapper<User>().eq(User::getId, userId).set(User::getIcon, iconPath));
+        if (i == 0) {
+            log.error("更新用户({})头像失败失败", userId);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
+        }
+
+        // 返回子路径
+        return iconPath;
     }
 
     /**

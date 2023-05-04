@@ -51,7 +51,7 @@ public class FileServiceImpl implements FileService {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "头像保存失败");
         }
 
-        return PPENG_URL + path;
+        return path;
     }
 
     /**

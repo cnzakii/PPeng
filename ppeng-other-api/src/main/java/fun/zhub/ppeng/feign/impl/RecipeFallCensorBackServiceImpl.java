@@ -2,7 +2,7 @@ package fun.zhub.ppeng.feign.impl;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
-import fun.zhub.ppeng.feign.CallRecipeCensorService;
+import fun.zhub.ppeng.feign.RecipeCensorService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @since 2023-04-25
  **/
 @Component
-public class CallRecipeFallCensorBackServiceImpl implements CallRecipeCensorService {
+public class RecipeFallCensorBackServiceImpl implements RecipeCensorService {
 
     @Override
     public ResponseResult<String> setInaccessible(RecipeCensorResultDTO resultDTO) {

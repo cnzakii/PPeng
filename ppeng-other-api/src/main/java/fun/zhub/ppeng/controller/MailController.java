@@ -7,7 +7,7 @@ import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.user.UserVerifyDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
-import fun.zhub.ppeng.feign.CallUserService;
+import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -35,7 +35,7 @@ public class MailController {
     private MailService mailService;
 
     @Resource
-    private CallUserService userService;
+    private UserService userService;
 
     /**
      * 发送注册邮件，无需token

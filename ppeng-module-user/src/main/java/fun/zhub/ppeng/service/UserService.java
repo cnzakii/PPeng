@@ -2,6 +2,7 @@ package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import fun.zhub.ppeng.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -87,13 +88,21 @@ public interface UserService extends IService<User> {
      *
      * @param userId    userId
      * @param nickName  昵称
-     * @param icon      头像url
      * @param address   地址
      * @param introduce 简介
      * @param gender    性别
      * @param birthday  生日
      */
-    void updateUserInfo(Long userId, String nickName, String icon, String address, String introduce, Integer gender, LocalDate birthday);
+    void updateUserInfo(Long userId, String nickName, String address, String introduce, Integer gender, LocalDate birthday);
+
+    /**
+     * 更新用户头像
+     *
+     * @param userId 用户id
+     * @param icon   头像
+     * @return 头像地址
+     */
+    String updateUserIcon(Long userId, MultipartFile icon);
 
     /**
      * 更新粉丝或者关注数

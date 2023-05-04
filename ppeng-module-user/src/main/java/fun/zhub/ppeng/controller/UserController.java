@@ -28,9 +28,11 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
@@ -40,7 +42,7 @@ import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 
 /**
  * <p>
- * 用户表，包含了用户的基本信息：用户id，手机号，昵称，头像地址等 前端控制器
+ * 用户接口
  * </p>
  *
  * @author Zaki
@@ -328,26 +330,49 @@ public class UserController {
         }
 
         String nickName = userInfoUpdateDTO.getNickName();
-        String icon = userInfoUpdateDTO.getIcon();
-        String address = String.join(",", userInfoUpdateDTO.getAddress());
+
+        String address = Optional.ofNullable(userInfoUpdateDTO.getAddress())
+                .map(list -> String.join(",", list))
+                .orElse(null);
+
         String introduce = userInfoUpdateDTO.getIntroduce();
         Integer gender = userInfoUpdateDTO.getGender();
         LocalDate birthday = userInfoUpdateDTO.getBirthday();
 
-        userService.updateUserInfo(userId, nickName, icon, address, introduce, gender, birthday);
+        userService.updateUserInfo(userId, nickName, address, introduce, gender, birthday);
 
         // 异步审核昵称
         if (StrUtil.isNotEmpty(nickName)) {
             rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("nickName", id, nickName)));
         }
 
-        // 异步审核图片
-        if (StrUtil.isNotEmpty(icon)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, icon.replace(PPENG_URL, ""))));
-        }
-
 
         return ResponseResult.success();
+    }
+
+
+    /**
+     * 更新用户头像
+     *
+     * @param userId 用户id
+     * @param icon   头像文件
+     * @return success
+     */
+    @PutMapping("/update/icon/{userId}")
+    public ResponseResult<String> updateUserIcon(@PathVariable("userId") Long userId, MultipartFile icon) {
+        Long id = Long.valueOf((String) StpUtil.getLoginId());
+        if (!Objects.equals(id, userId)) {
+            return ResponseResult.fail("id错误");
+        }
+
+        String iconPath = userService.updateUserIcon(userId, icon);
+
+        // 异步审核图片
+        if (StrUtil.isNotEmpty(iconPath)) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, iconPath.replace(PPENG_URL, ""))));
+        }
+
+        return ResponseResult.success(PPENG_URL + iconPath);
     }
 
 

@@ -7,8 +7,8 @@ import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.feign.CallRecipeCensorService;
-import fun.zhub.ppeng.feign.CallUserService;
+import fun.zhub.ppeng.feign.RecipeCensorService;
+import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +43,11 @@ public class ContentCensorServiceImpl implements ContentCensorService {
     private AipContentCensor client;
 
     @Resource
-    private CallUserService userService;
+    private UserService userService;
 
 
     @Resource
-    private CallRecipeCensorService recipeService;
+    private RecipeCensorService recipeService;
 
     /**
      * 实现用户昵称的审核
