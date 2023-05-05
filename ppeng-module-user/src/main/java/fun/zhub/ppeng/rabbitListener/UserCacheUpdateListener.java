@@ -1,11 +1,9 @@
 package fun.zhub.ppeng.rabbitListener;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import fun.zhub.ppeng.entity.Follow;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.util.MyCanalUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -14,6 +12,8 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 
@@ -39,28 +39,47 @@ public class UserCacheUpdateListener {
             exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = ROUTING_CACHE_UPDATE
     ))
-    public void listenCanalQueue(String s) {
-        JSONObject object = new JSONObject(s);
+    public void listenCanalQueue(String json) {
+        System.out.println(json);
+
+        // 获取操作类型-INSERT UPDATE DELETE
+        String type = MyCanalUtil.getType(json);
 
 
-        String type = object.getStr("type");
-        String table = object.getStr("table");
-        JSONArray data = object.getJSONArray("data");
-        Object one = data.get(0);
+        // 获取表名
+        String table = MyCanalUtil.getTable(json);
 
-        if (StrUtil.equals(type, "UPDATE")) {
-            switch (table) {
-                case "t_user" -> {
-                    User user = BeanUtil.toBean(one, User.class);
-                    // 更新Redis
-                    redisHandler.updateUser(user);
-                }
-                case "t_follow" -> {
-                    Follow follow = BeanUtil.toBean(one, Follow.class);
-                    redisHandler.updateFan(follow);
-                }
-            }
+
+        // user表更新数据时
+        if (StrUtil.equals(type, "UPDATE") && StrUtil.equals(table, "t_user")) {
+            // 获取旧数据
+            List<User> oldData = MyCanalUtil.getOldData(json, User.class);
+            // 获取新数据
+            List<User> newData = MyCanalUtil.getChangeData(json, User.class);
+
+            // 更新Redis
+            redisHandler.updateUserCache(oldData, newData);
+            return;
+        }
+
+
+        // follow表 插入 数据时
+        if (StrUtil.equals(type, "INSERT") && StrUtil.equals(table, "t_follow")) {
+            // 获取新数据
+            List<Follow> newData = MyCanalUtil.getChangeData(json, Follow.class);
+            // 更新Redis
+            redisHandler.insertFansCache(newData);
+            return;
+        }
+
+        // follow表 删除数据时
+        if (StrUtil.equals(type, "DELETE") && StrUtil.equals(table, "t_follow")) {
+            // 获取删除数据
+            List<Follow> deletedData = MyCanalUtil.getChangeData(json, Follow.class);
+            // 更新Redis
+            redisHandler.deleteFansCache(deletedData);
         }
 
     }
 }
+

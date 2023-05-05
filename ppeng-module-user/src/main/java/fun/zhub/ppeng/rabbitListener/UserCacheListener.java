@@ -94,7 +94,6 @@ public class UserCacheListener {
         // 删除用户信息
         stringRedisTemplate.delete(USER_INFO + id);
 
-
         // 删除具体关注
         stringRedisTemplate.delete(USER_FOLLOWS_KEY + id);
 
