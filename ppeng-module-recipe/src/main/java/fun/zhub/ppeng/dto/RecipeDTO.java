@@ -1,6 +1,9 @@
 package fun.zhub.ppeng.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serial;
@@ -23,12 +26,23 @@ public class RecipeDTO implements Serializable {
     /**
      * 菜谱id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
      * 发布者id
      */
     private Long userId;
+
+    /**
+     * 发布者昵称
+     */
+    private String nickName;
+
+    /**
+     * 发布者头像
+     */
+    private String icon;
 
     /**
      * 菜谱类型
@@ -73,10 +87,12 @@ public class RecipeDTO implements Serializable {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createTime;
 
     /**
      * 更新时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updateTime;
 }

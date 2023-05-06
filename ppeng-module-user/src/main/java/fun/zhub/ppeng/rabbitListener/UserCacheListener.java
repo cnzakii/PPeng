@@ -18,9 +18,7 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 
 /**
- * <p>
  * 监听RabbitMQ队列，加载用户信息到缓存中, 从缓存中删除用户信息
- * <p>
  *
  * @author Zaki
  * @version 1.0
@@ -46,7 +44,6 @@ public class UserCacheListener {
     /**
      * 监听用户缓存队列(user.cache.queue)，加载用户信息到缓存中
      */
-
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = USER_CACHE_QUEUE),
             exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
@@ -73,6 +70,7 @@ public class UserCacheListener {
 
 
     }
+
 
     /**
      * 监听用户缓存队列(user.cache.delete.queue)，从缓存中删除用户信息

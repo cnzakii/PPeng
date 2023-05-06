@@ -18,9 +18,7 @@ import java.util.stream.IntStream;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 
 /**
- * <p>
  * 更新redis缓存
- * <p>
  *
  * @author Zaki
  * @version 1.0

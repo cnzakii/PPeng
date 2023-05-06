@@ -65,6 +65,8 @@ public class RecipeController {
      */
     @GetMapping("/list/{userId}")
     public ResponseResult<List<RecipeDTO>> queryRecipeListByUserId(@PathVariable("userId") String userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+
+
         var list = recipeService.getRecipeListByUserId(userId, page, size)
                 .stream()
                 .map(recipe -> BeanUtil.copyProperties(recipe, RecipeDTO.class))

@@ -1,6 +1,9 @@
 package fun.zhub.ppeng.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serial;
@@ -27,7 +30,8 @@ public class UserDTO implements Serializable {
     /**
      * 用户id
      */
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long id;
 
     /**
      * 邮箱
@@ -80,12 +84,13 @@ public class UserDTO implements Serializable {
     /**
      * 创建时间
      */
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createTime;
 
     /**
      * 更新时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updateTime;
 
 }

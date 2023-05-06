@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 
 /**
- * 自定义Bean对象操作类
+ * 自定义处理Bean对象 的 工具类
  *
  * @author Zaki
  * @version 1.0

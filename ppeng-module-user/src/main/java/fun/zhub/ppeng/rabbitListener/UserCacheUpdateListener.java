@@ -18,9 +18,7 @@ import java.util.List;
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
- * <p>
  * 监听RabbitMQ队列，更新缓存
- * <p>
  *
  * @author Zaki
  * @version 1.0
@@ -34,21 +32,23 @@ public class UserCacheUpdateListener {
     private RedisHandler redisHandler;
 
 
+    /**
+     * Canal消息监听队列
+     *
+     * @param json Canal传输的json字符串
+     */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = USER_CACHE_UPDATE_QUEUE),
             exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = ROUTING_CACHE_UPDATE
     ))
     public void listenCanalQueue(String json) {
-        System.out.println(json);
 
         // 获取操作类型-INSERT UPDATE DELETE
         String type = MyCanalUtil.getType(json);
 
-
         // 获取表名
         String table = MyCanalUtil.getTable(json);
-
 
         // user表更新数据时
         if (StrUtil.equals(type, "UPDATE") && StrUtil.equals(table, "t_user")) {
@@ -61,7 +61,6 @@ public class UserCacheUpdateListener {
             redisHandler.updateUserCache(oldData, newData);
             return;
         }
-
 
         // follow表 插入 数据时
         if (StrUtil.equals(type, "INSERT") && StrUtil.equals(table, "t_follow")) {
