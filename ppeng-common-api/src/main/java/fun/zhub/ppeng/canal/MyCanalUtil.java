@@ -1,9 +1,10 @@
-package fun.zhub.ppeng.util;
+package fun.zhub.ppeng.canal;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import fun.zhub.ppeng.util.MyBeanUtil;
 
 import java.util.List;
 import java.util.Objects;
