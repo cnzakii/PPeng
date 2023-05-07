@@ -11,7 +11,11 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
- * 处理Canal通过MQ发送过来的数据
+ * 处理Canal通过MQ发送过来的数据<br>
+ * 通过MQ接收到Canal传输的消息是Json字符串，本类封装了以下方法：<br>
+ * 1.获取表名<br>
+ * 2.获取操作类型:INSERT UPDATE DELETE<br>
+ * 3.获取数据<br>
  *
  * @author Zaki
  * @version 1.0

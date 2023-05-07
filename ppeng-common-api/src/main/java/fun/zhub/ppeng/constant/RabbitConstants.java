@@ -27,12 +27,12 @@ public interface RabbitConstants {
      */
     String USER_CACHE_DELETE_QUEUE = "user.cache.delete.queue";
 
-    /*
-     * user信息更新缓存队列
+    /**
+     * 用户模块Canal监听模块
      */
-    String USER_CACHE_UPDATE_QUEUE = "user.cache.update.queue";
+    String USER_CANAL_QUEUE = "user.canal.queue";
 
-    /*
+    /**
      * 发送邮件队列
      */
     String MAIL_SEND_QUEUE = "mail.send.queue";
@@ -50,6 +50,12 @@ public interface RabbitConstants {
 
 
     /**
+     * 菜谱模块Canal监听队列
+     */
+    String RECIPE_CANAL_QUEUE = "recipe.canal.queue";
+
+
+    /**
      * routingKey 添加用户缓存
      */
     String ROUTING_USER_CACHE = "user.cache";
@@ -60,9 +66,9 @@ public interface RabbitConstants {
     String ROUTING_USER_CACHE_DELETE = "user.cache.delete";
 
     /**
-     * routingKey: 更新缓存
+     * routingKey: Canal传输的数据
      */
-    String ROUTING_CACHE_UPDATE = "cache.update";
+    String ROUTING_CANAL_DATA = "canal.data";
 
 
     /**

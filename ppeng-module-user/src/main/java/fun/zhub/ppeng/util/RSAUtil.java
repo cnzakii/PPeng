@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class RSAUtil {
 
     @Bean
-    public RSA getRSA() {
+    public RSA getRsa() {
         return new RSA();
     }
 }

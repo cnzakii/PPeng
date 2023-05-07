@@ -1,9 +1,11 @@
-package fun.zhub.ppeng.annotation;
+package fun.zhub.ppeng.canal;
 
 import java.lang.annotation.*;
 
 /**
- * Canal 监听器
+ * CanalTable注解<br>
+ * 使用该注解的类将 用于处理特定表的变化数据<br>
+ * 例如：带有@CanalTable("user") 并继承AbstractCanalHandler<T>的类将用于处理user表中添加，修改，删除数据后的操作后的操作
  *
  * @author Zaki
  * @version 1.0

@@ -1,8 +1,8 @@
-package fun.zhub.ppeng.rabbitListener;
+package fun.zhub.ppeng.canalHandler;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import fun.zhub.ppeng.annotation.CanalTable;
+import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.AbstractCanalHandler;
 import fun.zhub.ppeng.entity.User;
 import jakarta.annotation.Resource;

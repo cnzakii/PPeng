@@ -37,7 +37,7 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
-import static fun.zhub.ppeng.contants.WeChatApiContants.*;
+import static fun.zhub.ppeng.contant.WeChatApiContants.*;
 
 /**
  * <p>

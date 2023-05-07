@@ -58,14 +58,14 @@ public class RabbitTopicConfig {
     }
 
     /**
-     * 配置用户缓存更新队列
+     * 用户模块Canal监听队列
      *
-     * @return userCacheUpdateQueue
+     * @return UserCanalQueue
      */
-    @Bean("userCacheUpdateQueue")
-    public Queue userCacheUpdateQueue() {
+    @Bean("userCanalQueue")
+    public Queue userCanalQueue() {
 
-        return QueueBuilder.durable(USER_CACHE_UPDATE_QUEUE).build();
+        return QueueBuilder.durable(USER_CANAL_QUEUE).build();
     }
 
     /**
@@ -114,9 +114,9 @@ public class RabbitTopicConfig {
      * @return getBinding
      */
     @Bean
-    public Binding userCacheUpdateQueueBinding(@Qualifier("userCacheUpdateQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+    public Binding userCacheUpdateQueueBinding(@Qualifier("userCanalQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CACHE_UPDATE);
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CANAL_DATA);
     }
 
 

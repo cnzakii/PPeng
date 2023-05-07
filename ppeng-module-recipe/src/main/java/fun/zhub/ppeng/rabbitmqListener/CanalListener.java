@@ -1,11 +1,9 @@
-package fun.zhub.ppeng.rabbitListener;
-
+package fun.zhub.ppeng.rabbitmqListener;
 
 import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.MyCanalUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -28,8 +26,8 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
  * 例如：插入新的数据，更新数据，删除旧数据
  *
  * @author Zaki
- * @version 2.0
- * @since 2023-05-07
+ * @version 1.0
+ * @since 2023-05-08
  **/
 @Component
 @Slf4j
@@ -46,12 +44,13 @@ public class CanalListener {
      * @param json Canal传输的json字符串
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = USER_CANAL_QUEUE),
+            value = @Queue(name = RECIPE_CANAL_QUEUE),
             exchange = @Exchange(name = PPENG_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = ROUTING_CANAL_DATA
     ))
     public void listenCanalQueue(String json) {
         log.info(json);
+
         // 获取表名
         String table = MyCanalUtil.getTable(json);
 
@@ -158,4 +157,3 @@ public class CanalListener {
                 .orElse(null);
     }
 }
-

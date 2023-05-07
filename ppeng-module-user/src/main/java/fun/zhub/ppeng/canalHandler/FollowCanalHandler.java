@@ -1,7 +1,7 @@
-package fun.zhub.ppeng.rabbitListener;
+package fun.zhub.ppeng.canalHandler;
 
 import cn.hutool.core.collection.CollUtil;
-import fun.zhub.ppeng.annotation.CanalTable;
+import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.AbstractCanalHandler;
 import fun.zhub.ppeng.entity.Follow;
 import jakarta.annotation.Resource;
@@ -25,7 +25,7 @@ import static fun.zhub.ppeng.constant.RedisConstants.USER_FANS_TTL;
 @Component
 @CanalTable("t_follow")
 @Slf4j
-public class FollowCanalHamdler extends AbstractCanalHandler<Follow> {
+public class FollowCanalHandler extends AbstractCanalHandler<Follow> {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;

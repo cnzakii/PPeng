@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * 接收Canal数据，进行处理的抽象类
+ * 处理数据库表的变化数据<br>
+ * insert,update,delete 为抽象方法，必须实现<br>
+ * insertList,updateList,deleteList 支持重写，如不重写，则使用本类默认实现
  *
  * @author Zaki
  * @version 1.0
@@ -33,6 +35,9 @@ public abstract class AbstractCanalHandler<T> {
      * @param data 删除操作
      */
     public abstract void delete(T data);
+
+
+//------------------------------处理多条数据----------------------------------------------------------
 
     /**
      * 发生插入操作的处理方法--多条

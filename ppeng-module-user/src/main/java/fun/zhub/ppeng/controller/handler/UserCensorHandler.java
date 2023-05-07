@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.controller;
+package fun.zhub.ppeng.controller.handler;
 
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;

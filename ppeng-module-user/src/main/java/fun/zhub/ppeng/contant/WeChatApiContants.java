@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.contants;
+package fun.zhub.ppeng.contant;
 
 /**
  * <p>
