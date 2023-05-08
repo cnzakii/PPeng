@@ -1,8 +1,8 @@
 package fun.zhub.ppeng.canalHandler;
 
 import cn.hutool.core.collection.CollUtil;
-import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.AbstractCanalHandler;
+import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.entity.Follow;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

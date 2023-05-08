@@ -1,5 +1,7 @@
 package fun.zhub.ppeng.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -7,18 +9,27 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.dto.RecipeDTO;
+import fun.zhub.ppeng.dto.RecommendRecipeDTO;
 import fun.zhub.ppeng.entity.Recipe;
+import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.mapper.RecipeMapper;
 import fun.zhub.ppeng.service.RecipeService;
 import fun.zhub.ppeng.service.RecipeTypeService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_COMMON_KEY;
@@ -31,6 +42,7 @@ import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_PROFESSION
  * @since 2023-03-17
  */
 @Service
+@Slf4j
 public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> implements RecipeService {
 
     @Resource
@@ -41,6 +53,9 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 
     @Resource
     private RecipeTypeService recipeTypeService;
+
+    @Resource
+    private UserService userService;
 
     @Resource
     private Snowflake snowflake;
@@ -121,6 +136,24 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     }
 
     /**
+     * 实现根据用户id和菜谱id
+     *
+     * @param userId   用户id
+     * @param recipeId 菜谱id
+     * @return recipe
+     */
+    @Override
+    public Recipe getRecipeByUserIdAndRecipeId(Long userId, Long recipeId) {
+        Recipe recipe = recipeMapper.selectOne(new LambdaQueryWrapper<Recipe>().eq(Recipe::getId, recipeId).eq(Recipe::getUserId, userId));
+
+        if (recipe == null) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱不存在");
+        }
+
+        return recipe;
+    }
+
+    /**
      * 实现 根据用户id查找菜谱
      *
      * @param userId   用户id
@@ -144,27 +177,83 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
      * 实现获取 推荐列表
      *
      * @param isProfessional 是否为专业
-     * @param pageNum        当前页数
+     * @param timestamp      最后一篇菜谱的时间戳
      * @param pageSize       一页所呈现的菜谱数量
-     * @return list
+     * @return RecommendRecipeDTO
      */
     @Override
-    public List<Recipe> getRecommendnRecipeList(Integer isProfessional, Integer pageNum, Integer pageSize) {
-        String key;
-        if (isProfessional == 1) {
-            key = RECIPE_RECOMMEND_PROFESSIONAL_KEY;
-        } else {
-            key = RECIPE_RECOMMEND_COMMON_KEY;
-        }
+    public RecommendRecipeDTO getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize) {
+        String key = (isProfessional == 1) ? RECIPE_RECOMMEND_PROFESSIONAL_KEY : RECIPE_RECOMMEND_COMMON_KEY;
 
-        Set<String> set = stringRedisTemplate.opsForZSet().range(key, 0, -1);
+        Set<TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, 0, timestamp, 0, pageSize);
 
-
-        if (set == null || set.isEmpty()) {
+        // 为null则直接返回
+        if (CollUtil.isEmpty(typedTuples)) {
             return null;
         }
 
+        // 初始化成当前时间戳
+        long lastTimestamp = System.currentTimeMillis();
 
-        return set.stream().map(s -> JSONUtil.toBean(s, Recipe.class)).toList();
+        List<Recipe> recipeList = new ArrayList<>(typedTuples.size());
+        for (TypedTuple<String> typedTuple : typedTuples) {
+            // 获取分数
+            lastTimestamp = Objects.requireNonNull(typedTuple.getScore()).longValue();
+            recipeList.add(JSONUtil.toBean(typedTuple.getValue(), Recipe.class));
+        }
+
+        List<RecipeDTO> list = recipeList.stream().map(this::fillRecipeUserInfo).toList();
+        RecommendRecipeDTO recommendRecipeDTO = new RecommendRecipeDTO();
+        recommendRecipeDTO.setRecipeDTOList(list);
+        recommendRecipeDTO.setMinTimestamp(lastTimestamp);
+
+
+        return recommendRecipeDTO;
     }
+
+    /**
+     * 实现更新菜谱
+     *
+     * @param recipe recipe
+     */
+    @Override
+    public void updateRecipe(Recipe recipe) {
+        recipe.setUpdateTime(LocalDateTime.now());
+
+        int i = recipeMapper.updateById(recipe);
+
+        if (i == 0) {
+            log.error("更新菜谱{}失败", recipe.getId());
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新菜谱失败");
+        }
+        log.info("更新菜谱{}成功,更新时间：{}", recipe.getId(), recipe.getUpdateTime());
+
+    }
+
+    /**
+     * 填充菜谱的用户信息
+     *
+     * @param recipe 菜谱对象
+     * @return RecipeDTO
+     */
+    @Override
+    public RecipeDTO fillRecipeUserInfo(Recipe recipe) {
+        RecipeDTO recipeDTO = BeanUtil.copyProperties(recipe, RecipeDTO.class);
+
+        Long userId = recipe.getUserId();
+        ResponseResult<User> result = userService.getUserInfo(userId);
+
+        // 判断是否请求成功
+        if (!StrUtil.equals(result.getStatus(), "200")) {
+            log.error("填充菜谱的用户信息失败===》{}", result);
+            return recipeDTO;
+        }
+
+        User userInfo = result.getData();
+        recipeDTO.setNickName(userInfo.getNickName());
+        recipeDTO.setIcon(userInfo.getIcon());
+        return recipeDTO;
+    }
+
+
 }

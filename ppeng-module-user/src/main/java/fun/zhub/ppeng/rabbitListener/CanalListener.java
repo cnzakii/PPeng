@@ -5,7 +5,6 @@ import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.MyCanalUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -56,9 +55,10 @@ public class CanalListener {
         String table = MyCanalUtil.getTable(json);
 
         // 查找带有@CanalTable("table")注解的Bean对象
-        Object bean = Optional.ofNullable(getCanalTableBean(table))
-                .orElseThrow(() -> new RuntimeException("Cannot find the corresponding bean"));
-
+        Object bean = getCanalTableBean(table);
+        if (Objects.isNull(bean)) {
+            return;
+        }
 
         // 获取操作类型-INSERT UPDATE DELETE
         String type = MyCanalUtil.getType(json);

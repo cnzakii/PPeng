@@ -32,6 +32,7 @@ public class RecipeDTO implements Serializable {
     /**
      * 发布者id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
 
     /**

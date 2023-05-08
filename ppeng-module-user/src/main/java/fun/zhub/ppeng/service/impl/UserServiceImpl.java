@@ -28,7 +28,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +70,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private FileService fileService;
+
+
 
 
     /**
@@ -231,7 +232,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param newPassword 新密码(明文)
      */
     @Override
-    @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public void updatePassword(Long userId, String newPassword) {
         // 根据id查询用户信息
         User user = getUserInfoById(userId);
@@ -270,7 +270,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param newEmail 邮箱
      */
     @Override
-    @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public void updateEmail(Long userId, String newEmail) {
         // 查找是否有存在相同的邮箱
         Optional.ofNullable(userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, newEmail).in(User::getIsDeleted, 0, 1)))
@@ -297,58 +296,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 实现更新用户信息
      *
-     * @param userId    userId
-     * @param nickName  昵称
-     * @param address   地址
-     * @param introduce 简介
-     * @param gender    性别
-     * @param birthday  生日
+     * @param user User
      */
     @Override
-    @CacheEvict(cacheNames = "userInfo", key = "#userId")
-    public void updateUserInfo(Long userId, String nickName, String address, String introduce, Integer gender, LocalDate birthday) {
-        // 根据Id获取当前用户
-        User user = getUserInfoById(userId);
-        // 用于判断是否需要更新
-        boolean b = false;
+    public void updateUserInfo(User user) {
 
-        if (StrUtil.isNotEmpty(nickName)) {
-            b = true;
-            user.setNickName(nickName);
+        user.setUpdateTime(LocalDateTime.now());
+        int i = userMapper.updateById(user);
+        if (i == 0) {
+            log.error("更新用户({})信息失败失败", user.getId());
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
         }
+        log.info("更新用户信息{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
 
-
-        if (StrUtil.isNotEmpty(address)) {
-            b = true;
-            user.setAddress(address);
-        }
-
-
-        if (StrUtil.isNotEmpty(introduce)) {
-            b = true;
-            user.setIntroduce(introduce);
-        }
-
-        if (gender != null) {
-            b = true;
-            user.setGender(gender);
-        }
-
-        if (birthday != null) {
-            b = true;
-            user.setBirthday(birthday);
-        }
-
-
-        if (b) {
-            user.setUpdateTime(LocalDateTime.now());
-            int i = userMapper.updateById(user);
-            if (i == 0) {
-                log.error("更新用户({})信息失败失败", userId);
-                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
-            }
-            log.info("更新用户信息{}成功,更新时间：{}", user.getId(), user.getUpdateTime());
-        }
 
     }
 
@@ -360,7 +320,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 头像url
      */
     @Override
-    @CacheEvict(cacheNames = "userInfo", key = "#userId")
     public String updateUserIcon(Long userId, MultipartFile icon) {
         // 根据Id获取当前用户
         User user = getUserInfoById(userId);

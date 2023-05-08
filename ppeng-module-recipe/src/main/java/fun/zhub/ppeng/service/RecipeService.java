@@ -1,6 +1,8 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.zhub.ppeng.dto.RecipeDTO;
+import fun.zhub.ppeng.dto.RecommendRecipeDTO;
 import fun.zhub.ppeng.entity.Recipe;
 
 import java.util.List;
@@ -44,6 +46,16 @@ public interface RecipeService extends IService<Recipe> {
 
 
     /**
+     * 根据用户id和菜谱id查询菜谱
+     *
+     * @param userId   用户id
+     * @param recipeId 菜谱id
+     * @return recipe
+     */
+    Recipe getRecipeByUserIdAndRecipeId(Long userId, Long recipeId);
+
+
+    /**
      * 根据用户id查询菜谱
      *
      * @param userId   用户id
@@ -57,9 +69,28 @@ public interface RecipeService extends IService<Recipe> {
      * 获取推荐菜谱列表
      *
      * @param isProfessional 是否为专业
-     * @param pageNum        当前页数
+     * @param timestamp      最后一篇菜谱的时间戳
      * @param pageSize       一页所呈现的菜谱数量
-     * @return list
+     * @return recommendRecipeDTO
      */
-    List<Recipe> getRecommendnRecipeList(Integer isProfessional, Integer pageNum, Integer pageSize);
+    RecommendRecipeDTO getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize);
+
+
+    /**
+     * 更新recipe
+     *
+     * @param recipe recipe
+     */
+    void updateRecipe(Recipe recipe);
+
+
+    /**
+     * 填充菜谱的用户信息
+     *
+     * @param recipe 菜谱对象
+     * @return recipeDTO
+     */
+    RecipeDTO fillRecipeUserInfo(Recipe recipe);
+
+
 }

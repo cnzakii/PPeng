@@ -23,6 +23,7 @@ import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
+import fun.zhub.ppeng.util.MyBeanUtil;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -72,6 +72,7 @@ public class UserController {
     @GetMapping("/rsa")
     @SentinelResource(value = "getPublicKey", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> getPublicKey() {
+
         return ResponseResult.success(rsa.getPublicKeyBase64());
     }
 
@@ -192,8 +193,6 @@ public class UserController {
         User user = userService.getUserInfoById(userId);
         return ResponseResult.success(user);
     }
-
-
 
 
     /**
@@ -332,23 +331,24 @@ public class UserController {
             return ResponseResult.fail("id错误");
         }
 
-        String nickName = userInfoUpdateDTO.getNickName();
+        User user = userService.getUserInfoById(id);
+
+        MyBeanUtil.copyPropertiesIgnoreNull(userInfoUpdateDTO, user);
 
         String address = Optional.ofNullable(userInfoUpdateDTO.getAddress())
                 .map(list -> String.join(",", list))
                 .orElse(null);
+        user.setAddress(address);
 
-        String introduce = userInfoUpdateDTO.getIntroduce();
-        Integer gender = userInfoUpdateDTO.getGender();
-        LocalDate birthday = userInfoUpdateDTO.getBirthday();
 
-        userService.updateUserInfo(userId, nickName, address, introduce, gender, birthday);
+        userService.updateUserInfo(user);
 
+
+        String nickName = user.getNickName();
         // 异步审核昵称
         if (StrUtil.isNotEmpty(nickName)) {
             rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("nickName", id, nickName)));
         }
-
 
         return ResponseResult.success();
     }

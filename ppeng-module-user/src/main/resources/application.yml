@@ -8,6 +8,8 @@ spring:
   output:
     ansi:
       enabled: always
+  cache:
+    type: caffeine
   data:
     redis:
       database: 1

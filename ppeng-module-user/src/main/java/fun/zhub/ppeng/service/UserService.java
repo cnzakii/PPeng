@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import fun.zhub.ppeng.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-
 /**
  * <p>
  * UserService interface
@@ -86,14 +84,9 @@ public interface UserService extends IService<User> {
     /**
      * 更新用户信息
      *
-     * @param userId    userId
-     * @param nickName  昵称
-     * @param address   地址
-     * @param introduce 简介
-     * @param gender    性别
-     * @param birthday  生日
+     * @param user User
      */
-    void updateUserInfo(Long userId, String nickName, String address, String introduce, Integer gender, LocalDate birthday);
+    void updateUserInfo(User user);
 
     /**
      * 更新用户头像
