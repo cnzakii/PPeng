@@ -1,8 +1,8 @@
 package fun.zhub.ppeng.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -10,6 +10,8 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -23,17 +25,18 @@ import java.time.LocalDateTime;
 @Setter
 @Accessors(chain = true)
 @TableName("t_recipe_comment")
-public class RecipeComment implements Serializable {
+public class  RecipeComment implements Serializable {
 
 
     @Serial
     private static final long serialVersionUID = -1111505832798447786L;
 
+
     /**
      * 自增id
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     /**
      * 菜谱id
@@ -43,7 +46,9 @@ public class RecipeComment implements Serializable {
     /**
      * 关联一级评论id，如果是一级评论，则值为0
      */
-    private Integer parentId;
+    private Long parentId;
+
+
 
     /**
      * 评论者id
@@ -69,5 +74,22 @@ public class RecipeComment implements Serializable {
     /**
      * 逻辑删除：0，未删除，1，已删除
      */
+    @TableField(fill = FieldFill.INSERT)
+    @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
+
+
+    /**
+     * 子评论
+     */
+    @TableField(exist = false)
+    private List<RecipeComment> children;
+
+
+
+
+
+
+
+
 }
