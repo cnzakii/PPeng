@@ -13,10 +13,10 @@ public interface BaiduApiConstants {
     /**
      * 文本审核内容
      */
-    String APP_ID = "**confidential**";
+    String APP_ID = "33432617";
 
-    String API_KEY = "**confidential**";
+    String API_KEY = "WYc5RH95VooGIoXHh2GX39fM";
 
-    String SECRET_KEY = "**confidential**";
+    String SECRET_KEY = "IxeAo6o7OCxx6wTuhcoM2BicoEgpFHYC";
 
 }
