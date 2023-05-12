@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class Goods implements Serializable {
     @Field
     private String name;
 
-    @Field
+    @Field(type = FieldType.Long,analyzer = "ik_max_word",searchAnalyzer = "ik_smart")
     private String title;
 
     @Field

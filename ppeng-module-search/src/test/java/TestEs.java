@@ -47,6 +47,8 @@ public class TestEs {
     @Resource
     private ElasticsearchTemplate elasticsearchTemplate;
 
+
+
     @Test
     public void insert() {
         Goods goods = Goods.builder()
@@ -296,8 +298,10 @@ public class TestEs {
     @Test
     public void delete() {
         // 删除文档
-        elasticsearchTemplate.delete("10001", IndexCoordinates.of("goods"));
+        elasticsearchTemplate.delete("", IndexCoordinates.of("goods"));
     }
+
+
 
     private List<Goods> buildGoodsList() {
         List<Goods> goodsList = new ArrayList<>();
