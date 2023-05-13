@@ -3,6 +3,7 @@ package fun.zhub.ppeng.feign;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.feign.impl.RecipeFallCensorBackServiceImpl;
+import fun.zhub.ppeng.feign.interceptor.FeignInterceptor;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @since 2023-04-25
  **/
 
-@FeignClient(value = "ppeng-module-recipe", fallback = RecipeFallCensorBackServiceImpl.class)
+@FeignClient(value = "ppeng-module-recipe", fallback = RecipeFallCensorBackServiceImpl.class, configuration = FeignInterceptor.class)
 @Component
 public interface RecipeCensorService {
 

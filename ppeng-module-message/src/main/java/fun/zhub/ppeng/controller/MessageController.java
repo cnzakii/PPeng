@@ -24,7 +24,7 @@ import java.util.Objects;
  * @since 2023-05-13
  */
 @RestController
-@RequestMapping("/user/message")
+@RequestMapping("/message")
 public class MessageController {
 
     @Resource
@@ -33,15 +33,12 @@ public class MessageController {
     /**
      * 添加用户消息，仅系统和管理员能添加
      *
-     * @return success
+     * @return true or false
      */
     @PostMapping("/add")
-    public ResponseResult<String> addMeaasge(@RequestBody AddUserMessageDTO messageDTO) {
+    public Boolean addMeaasge(@RequestBody AddUserMessageDTO messageDTO) {
         Message message = BeanUtil.copyProperties(messageDTO, Message.class);
-
-        messageService.saveMeaasge(message);
-
-        return ResponseResult.success();
+        return messageService.save(message);
     }
 
     /**

@@ -411,8 +411,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setFans(0);
         user.setFollows(0);
 
-        user.setCreateTime(LocalDateTime.now());
-        user.setIsDeleted(0);
 
 
         int i = userMapper.insert(user);

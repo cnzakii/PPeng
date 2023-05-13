@@ -85,8 +85,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         recipe.setCollections(0);
         recipe.setCensorState(0);
         recipe.setIsBaned(0);
-        recipe.setIsDeleted(0);
-        recipe.setCreateTime(LocalDateTime.now());
+
 
 
         // 插入数据库

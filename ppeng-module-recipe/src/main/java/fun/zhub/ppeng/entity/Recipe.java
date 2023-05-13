@@ -1,8 +1,6 @@
 package fun.zhub.ppeng.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -86,6 +84,7 @@ public class Recipe implements Serializable {
     /**
      * 创建时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
@@ -107,5 +106,7 @@ public class Recipe implements Serializable {
     /**
      * 逻辑删除:审核通过，但用户自己删除
      */
+    @TableField(fill = FieldFill.INSERT)
+    @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
 }

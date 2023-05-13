@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.controller;
+package fun.zhub.ppeng.controller.handler;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;

@@ -97,7 +97,7 @@ public class ResponseResult<T> implements Serializable {
 
 
     /**
-     * 自定义状态码
+     * 自定义返回结果
      *
      * @param status  状态码
      * @param data    数据
@@ -106,11 +106,19 @@ public class ResponseResult<T> implements Serializable {
      * @return 响应结果
      */
     public static <T> ResponseResult<T> base(ResponseStatus status, T data, String message) {
-        return ResponseResult.<T>builder().data(data)
-                .message(message)
-                .status(status.getResponseCode())
-                .timestamp(System.currentTimeMillis())
-                .build();
+        return base(status.getResponseCode(),data,message);
+    }
+
+    /**
+     * 自定义返回结果
+     *
+     * @param status  ResponseStatus
+     * @param message 信息
+     * @param <T>T
+     * @return ResponseResult
+     */
+    public static <T> ResponseResult<T> base(ResponseStatus status, String message) {
+        return base(status, null, message);
     }
 
 
@@ -122,8 +130,9 @@ public class ResponseResult<T> implements Serializable {
      * @return ResponseResult
      */
     public static <T> ResponseResult<T> base(ResponseStatus status) {
-        return base(status, null, success().getMessage());
+        return base(status, null, status.getDescription());
     }
+
 
     /**
      * 自定义返回结果

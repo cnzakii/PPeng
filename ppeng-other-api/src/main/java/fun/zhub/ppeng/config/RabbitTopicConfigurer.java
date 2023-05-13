@@ -18,7 +18,7 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
  * @since 2023-03-21
  **/
 @Configuration
-public class RabbitTopicConfig {
+public class RabbitTopicConfigurer {
 
 
     /**

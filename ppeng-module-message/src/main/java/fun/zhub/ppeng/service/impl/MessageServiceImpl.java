@@ -12,7 +12,6 @@ import fun.zhub.ppeng.service.MessageService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -27,22 +26,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     @Resource
     private MessageMapper messageMapper;
 
-    /**
-     * 保存消息
-     *
-     * @param message 消息类
-     */
-    @Override
-    public void saveMeaasge(Message message) {
-        message.setStatus(0);
-        message.setIsDeleted(0);
-        message.setCreateTime(LocalDateTime.now());
 
-        int i = messageMapper.insert(message);
-        if (i == 0) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加消息失败");
-        }
-    }
 
     /**
      * 查询用户消息

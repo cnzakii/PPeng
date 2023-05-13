@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2023-04-17
  **/
 @Configuration
-public class CacheConfig {
+public class CacheConfigurer {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();

@@ -13,7 +13,6 @@ import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +57,6 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
         Like like = new Like();
         like.setUserId(userId);
         like.setRecipeId(recipeId);
-        like.setCreateTime(LocalDateTime.now());
         int i = likeMapper.insert(like);
         if (i == 0) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加失败");

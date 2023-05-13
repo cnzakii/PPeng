@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
  **/
 
 @RestController
-@RequestMapping("file")
+@RequestMapping("/file")
 public class FileController {
 
     @Resource

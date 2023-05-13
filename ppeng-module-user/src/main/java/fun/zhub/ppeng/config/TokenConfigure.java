@@ -6,16 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * <p>
  * 自定义token
- * <p>
  *
  * @author Zaki
  * @version 1.0
  * @since 2023-04-20
  **/
 @Configuration
-public class SaTokenConfigure {
+public class TokenConfigure {
 
     /**
      * 重写 Sa-Token 框架内部算法策略

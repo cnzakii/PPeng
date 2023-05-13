@@ -45,12 +45,14 @@ public class Message implements Serializable {
     /**
      * 状态：0未读，1已读
      */
+    @TableField(fill = FieldFill.INSERT)
     private Integer status;
 
 
     /**
      * 创建时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**

@@ -1,18 +1,19 @@
 package fun.zhub.ppeng.config;
 
 
-import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
 import cn.dev33.satoken.router.SaHttpMethod;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_401;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static fun.zhub.ppeng.constant.SaTokenConstants.*;
@@ -88,15 +89,16 @@ public class SaTokenConfigure {
                 })
                 // 异常处理方法：每次setAuth函数出现异常时进入
                 .setError(e -> {
-                            log.warn(e.getMessage());
-
-                            if (e instanceof NotPermissionException) {
-                                return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, "无权限"));
-                            } else {
-                                return JSONUtil.toJsonStr(ResponseResult.base(HTTP_STATUS_401, null, e.getLocalizedMessage()));
+                            log.info(e.getLocalizedMessage());
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String json;
+                            try {
+                                json = objectMapper.writeValueAsString(ResponseResult.base(ResponseStatus.HTTP_STATUS_401));
+                            } catch (JsonProcessingException ex) {
+                                log.error("Failed to convert object to JSON string===>{}", ex.getLocalizedMessage());
+                                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "Failed to convert object to JSON string");
                             }
-
-
+                            return json;
                         }
                 );
     }

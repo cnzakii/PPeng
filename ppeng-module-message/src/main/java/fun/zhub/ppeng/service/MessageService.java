@@ -13,12 +13,7 @@ import java.util.List;
  */
 public interface MessageService extends IService<Message> {
 
-    /**
-     * 保存消息
-     *
-     * @param message 消息类
-     */
-    void saveMeaasge(Message message);
+
 
     /**
      * 查询用户消息

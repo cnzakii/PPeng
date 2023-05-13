@@ -101,7 +101,7 @@ public class User implements Serializable {
     /**
      * 创建时间
      */
-
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**

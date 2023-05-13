@@ -12,7 +12,6 @@ import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +58,6 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper, Collect> impl
         Collect collect = new Collect();
         collect.setUserId(userId);
         collect.setRecipeId(recipeId);
-        collect.setCreateTime(LocalDateTime.now());
         int i = collectMapper.insert(collect);
         if (i == 0) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "收藏失败");

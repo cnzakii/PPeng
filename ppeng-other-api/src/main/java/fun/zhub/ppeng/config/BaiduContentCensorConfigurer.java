@@ -18,7 +18,7 @@ import static fun.zhub.ppeng.constants.BaiduApiConstants.*;
  **/
 
 @Configuration
-public class BaiduContentCensorConfig {
+public class BaiduContentCensorConfigurer {
 
     /**
      * 配置内容审核client

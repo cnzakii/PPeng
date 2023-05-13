@@ -15,7 +15,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -65,7 +64,6 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         Follow follow = new Follow();
         follow.setUserId(userId);
         follow.setFollowId(followId);
-        follow.setCreateTime(LocalDateTime.now());
         int i = followMapper.insert(follow);
         if (i == 0) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加失败");

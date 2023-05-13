@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 2023-05-04
  **/
 @Configuration
-public class MybatisPlusConfig {
+public class MybatisPlusConfigurer {
 
 
     /**
