@@ -1,4 +1,4 @@
-//package com.zhub.ppeng.util;
+//package fun.zhub.ppeng.util;
 //
 //import com.baomidou.mybatisplus.annotation.IdType;
 //import com.baomidou.mybatisplus.generator.FastAutoGenerator;
@@ -25,7 +25,7 @@
 //     *
 //     * @param tableName 表名
 //     */
-//    public static void Generation(String url, String username, String password, String... tableName) {
+//    public static void generation(String url, String username, String password, String... tableName) {
 //        FastAutoGenerator.create(url, username, password)
 //                .globalConfig(builder -> {
 //                    builder.author("Zaki")

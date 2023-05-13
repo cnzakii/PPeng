@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.entity;
 
+import fun.zhub.ppeng.constant.AnalyzerType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -23,7 +24,7 @@ public class Goods implements Serializable {
     @Field
     private String name;
 
-    @Field(type = FieldType.Long,analyzer = "ik_max_word",searchAnalyzer = "ik_smart")
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART)
     private String title;
 
     @Field

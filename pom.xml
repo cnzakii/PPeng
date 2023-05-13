@@ -18,6 +18,7 @@
         <module>ppeng-module-admin</module>
         <module>ppeng-module-search</module>
         <module>ppeng-other-api</module>
+        <module>ppeng-module-message</module>
     </modules>
 
 

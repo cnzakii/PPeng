@@ -18,7 +18,7 @@ spring:
   elasticsearch:
     uris: http://****:9200
     username: elastic
-    password: QSDJfBgRdFrD4Wg8BUtq
+    password: fLh8si8jssOdZzl9AoFo
 
 
 

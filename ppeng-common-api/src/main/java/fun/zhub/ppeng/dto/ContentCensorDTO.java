@@ -3,6 +3,9 @@ package fun.zhub.ppeng.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * <p>
  * 文本审核传输对象
@@ -14,7 +17,10 @@ import lombok.NoArgsConstructor;
  **/
 @Data
 @NoArgsConstructor
-public class ContentCensorDTO {
+public class ContentCensorDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -3246666969807229076L;
 
     /**
      * 审核类型：昵称，菜谱内容....
