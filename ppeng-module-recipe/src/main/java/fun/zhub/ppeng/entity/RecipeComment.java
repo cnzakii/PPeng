@@ -1,6 +1,8 @@
 package fun.zhub.ppeng.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -71,4 +73,19 @@ public class RecipeComment implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
+
+
+    /**
+     * 子评论
+     */
+    @TableField(exist = false)
+    private List<RecipeComment> children;
+
+
+
+
+
+
+
+
 }
