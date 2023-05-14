@@ -18,36 +18,34 @@ public interface RecipeCommentService extends IService<RecipeComment> {
     /**
      * 新增评论
      *
-     * @param recipeId
-     * @param parentId
-     * @param commenterId
-     * @param content
+     * @param recipeId    菜谱id
+     * @param parentId    父类评论id
+     * @param commenterId 评论者id
+     * @param content     内容
      */
-    void addComment(Long recipeId, Long parentId, Long commenterId, String content);
+    void addComment(Long recipeId, Integer parentId, Long commenterId, String content);
 
     /**
-     * 通过菜谱id删除评论
+     * 通过评论id删除评论
      *
-     * @param id
+     * @param id id
      */
-    void deleteCommentById(Long id);
+    void deleteCommentById(Integer id);
 
     /**
      * 通过菜谱id获取评论
      *
-     * @param recipeId
-     * @return
+     * @param recipeId 菜谱id
+     * @return list
      */
     List<RecipeComment> getCommentsByRecipeId(Long recipeId);
 
     /**
      * 创建子评论
      *
-     * @param recipeComment
+     * @param recipeComment ecipeComment
      */
     void setChildren(RecipeComment recipeComment);
-
-
 
 
 }

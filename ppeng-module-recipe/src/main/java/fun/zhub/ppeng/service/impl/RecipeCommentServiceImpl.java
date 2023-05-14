@@ -1,11 +1,8 @@
 package fun.zhub.ppeng.service.impl;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.RecipeComment;
@@ -16,10 +13,7 @@ import fun.zhub.ppeng.service.RecipeCommentService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
 
 /**
  * <p>
@@ -40,13 +34,13 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
     /**
      * 实现新增评论
      *
-     * @param recipeId 菜谱id
-     * @param parentId 父评论id
+     * @param recipeId    菜谱id
+     * @param parentId    父评论id
      * @param commenterId 评论者id
-     * @param content 评论内容
+     * @param content     评论内容
      */
     @Override
-    public void addComment(Long recipeId, Long parentId, Long commenterId, String content) {
+    public void addComment(Long recipeId, Integer parentId, Long commenterId, String content) {
 
         //检查菜谱评论是否为空
         if (StrUtil.isEmpty(content)) {
@@ -76,8 +70,6 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
         recipeComment.setParentId(parentId);
         recipeComment.setCommenterId(commenterId);
         recipeComment.setContent(content);
-        recipeComment.setCreateTime(LocalDateTime.now());
-        recipeComment.setIsDeleted(0);
         int i = recipeCommentMapper.insert(recipeComment);
         if (i != 1) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价失败");
@@ -92,10 +84,10 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
      * @param id 评论id
      */
     @Override
-    public void deleteCommentById(Long id) {
+    public void deleteCommentById(Integer id) {
         int c = recipeCommentMapper.deleteById(id);
         if (c == 0) {
-            throw new BusinessException(ResponseStatus.FAIL, "评价不存在");
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "评价不存在");
         }
 
     }
@@ -104,7 +96,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
      * 通过菜谱id查看评论
      *
      * @param recipeId 菜谱id
-     * @return
+     * @return list
      */
     @Override
     public List<RecipeComment> getCommentsByRecipeId(Long recipeId) {
@@ -117,7 +109,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
         }
 
         //从数据库中获取parentId为0的评论数据,创建根评论
-        List<RecipeComment> rootComments = baseMapper.findByRecipeId(recipeId, 0L);
+        List<RecipeComment> rootComments = baseMapper.findByRecipeId(recipeId, 0);
         //创建子评论
         rootComments.forEach(this::setChildren);
         return rootComments;
@@ -127,7 +119,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
     /**
      * 创建子评论
      *
-     * @param recipeComment
+     * @param recipeComment recipeComment
      */
     @Override
     public void setChildren(RecipeComment recipeComment) {
@@ -141,8 +133,6 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
             children.forEach(this::setChildren);
         }
     }
-
-
 
 
 }

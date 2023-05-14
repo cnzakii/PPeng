@@ -1,21 +1,14 @@
 package fun.zhub.ppeng.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.common.ResponseStatus;
-import fun.zhub.ppeng.dto.PushRecipeDTO;
-import fun.zhub.ppeng.dto.RecipeCommentDto;
+import fun.zhub.ppeng.dto.RecipeCommentDTO;
 import fun.zhub.ppeng.entity.RecipeComment;
-import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.RecipeCommentService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * <p>
@@ -31,35 +24,43 @@ public class RecipeCommentController {
     @Resource
     private RecipeCommentService recipeCommentService;
 
+
     /**
      * 发表评论
-     * @param recipeCommentDto
-     * @return
+     *
+     * @param recipeCommentDTO recipeCommentDTO
+     * @return success
      */
     @PostMapping("/push")
-    public ResponseResult<String> pushComment(@Valid @RequestBody RecipeCommentDto recipeCommentDto) {
-        // 验证id是否和token对应的id一致
-        // Long id = Long.valueOf((String) StpUtil.getLoginId());
-        Long commenterId = recipeCommentDto.getCommenterId();
-        // if (!Objects.equals(id, commenterId)) {
-        // return ResponseResult.fail("id错误");
-        //}
+    public ResponseResult<String> pushComment(@Valid @RequestBody RecipeCommentDTO recipeCommentDTO) {
 
-        Long recipeId = recipeCommentDto.getRecipeId();
-        Long parentId = recipeCommentDto.getParentId();
-        //TODO 审核菜谱评论content
-        String content = recipeCommentDto.getContent();
+        Long commenterId = recipeCommentDTO.getCommenterId();
+
+        Long recipeId = recipeCommentDTO.getRecipeId();
+        Integer parentId = recipeCommentDTO.getParentId();
+        String content = recipeCommentDTO.getContent();
         recipeCommentService.addComment(recipeId, parentId, commenterId, content);
+
+        /*
+         *TODO 审核菜谱评论content
+         */
+
         return ResponseResult.success("评论成功");
     }
 
     /**
      * 通过评论id删除评论
-     * @param id
-     * @return
+     *
+     * @param id id
+     * @return success
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseResult<String> deleteComment(@PathVariable("id") Long id) {
+    public ResponseResult<String> deleteComment(@PathVariable("id") Integer id) {
+       // Long userId = Long.valueOf((String) StpUtil.getLoginId());
+        /*
+         * TODO 验证身份，只有评论者和作者能够删除
+         */
+
         recipeCommentService.deleteCommentById(id);
         return ResponseResult.success("删除成功");
 
@@ -68,12 +69,15 @@ public class RecipeCommentController {
 
     /**
      * 通过菜谱id查看评论
-     * @param recipeId
-     * @return
+     *
+     * @param recipeId recipeId
+     * @return list
      */
     @GetMapping("/list/{recipeId}")
-    public List<RecipeComment> getCommentsByRecipeId(@PathVariable("recipeId") Long recipeId) {
-        return recipeCommentService.getCommentsByRecipeId(recipeId);
+    public ResponseResult<List<RecipeComment>> getCommentsByRecipeId(@PathVariable("recipeId") Long recipeId) {
+
+        var commentList = recipeCommentService.getCommentsByRecipeId(recipeId);
+        return ResponseResult.success(commentList);
     }
 
 

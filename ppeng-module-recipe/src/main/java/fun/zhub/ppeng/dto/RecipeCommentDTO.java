@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -8,13 +9,14 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+/**
+ * @author boliang
+ */
 @Data
-public class RecipeCommentDto implements Serializable {
+public class RecipeCommentDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 7972880728057882121L;
-
-
-
 
     /**
      * 菜谱id
@@ -26,12 +28,13 @@ public class RecipeCommentDto implements Serializable {
      * 关联一级评论id，如果是一级评论，则值为0
      */
     @NotNull(message = "parentId不能为空")
-    private Long parentId;
+    private Integer parentId;
 
     /**
      * 评论者id
      */
     @NotNull(message = "commenterId不能为空")
+    @MatchToken
     private Long commenterId;
 
     /**
