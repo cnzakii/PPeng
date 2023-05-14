@@ -1,6 +1,5 @@
 package fun.zhub.ppeng.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
@@ -10,12 +9,14 @@ import fun.zhub.ppeng.dto.MessageUpdateDTO;
 import fun.zhub.ppeng.entity.Message;
 import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.MessageService;
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
+
+
 
 /**
  * 用户消息 接口
@@ -25,6 +26,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/message")
+@Validated
 public class MessageController {
 
     @Resource
@@ -50,11 +52,7 @@ public class MessageController {
      * @return list
      */
     @GetMapping("/list")
-    public ResponseResult<List<MessageDTO>> listUserMessageList(@RequestParam("userId") Long userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-        if (!Objects.equals(id, userId)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "id错误");
-        }
+    public ResponseResult<List<MessageDTO>> listUserMessageList(@RequestParam("userId") @MatchToken Long userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
 
         var list = messageService.getMessagePage(userId, page, size)
                 .stream()
@@ -71,13 +69,14 @@ public class MessageController {
      * @return success
      */
     @PutMapping("/read")
-    public ResponseResult<String> changeMessageStatus(@Valid @RequestBody MessageUpdateDTO messageUpdateDTO) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> changeMessageStatus(@Validated @RequestBody MessageUpdateDTO messageUpdateDTO) {
         Long userId = messageUpdateDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "id错误");
-        }
+
         Integer[] messageIds = messageUpdateDTO.getMessageIds();
+        // 校验messageIds
+        if (messageIds.length == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "messageIds不能为null");
+        }
 
         messageService.changeMessageStatusById(userId, 1, messageIds);
 
@@ -91,13 +90,16 @@ public class MessageController {
      * @return success
      */
     @DeleteMapping("/delete")
-    public ResponseResult<String> deleteMeaasge(@Valid @RequestBody MessageUpdateDTO messageUpdateDTO) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> deleteMeaasge(@Validated @RequestBody MessageUpdateDTO messageUpdateDTO) {
         Long userId = messageUpdateDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "id错误");
-        }
+
         Integer[] messageIds = messageUpdateDTO.getMessageIds();
+        // 校验messageIds
+        if (messageIds.length == 0) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "messageIds不能为null");
+        }
+
+
         messageService.removeMessageById(userId, messageIds);
         return ResponseResult.success();
     }

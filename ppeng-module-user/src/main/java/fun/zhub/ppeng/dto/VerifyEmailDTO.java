@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.dto;
 
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class VerifyEmailDTO implements Serializable {
      * 用户id
      */
     @NotNull(message = "userId不能为空")
+    @MatchToken
     private Long userId;
 
 

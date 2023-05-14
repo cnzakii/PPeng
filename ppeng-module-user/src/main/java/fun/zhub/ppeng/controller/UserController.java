@@ -24,14 +24,14 @@ import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
 import fun.zhub.ppeng.util.MyBeanUtil;
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
@@ -53,6 +53,7 @@ import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
 @RestController
 @RequestMapping("/user")
 @Slf4j
+@Validated
 public class UserController {
     @Resource
     private RSA rsa;
@@ -84,7 +85,7 @@ public class UserController {
      * @return p-token
      */
     @PostMapping("/register")
-    public ResponseResult<String> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
+    public ResponseResult<String> registerUser(@RequestBody @Validated RegisterDTO registerDTO) {
         String email = registerDTO.getEmail();
         String code = registerDTO.getCode();
         String password = registerDTO.getPassword();
@@ -113,7 +114,7 @@ public class UserController {
      * @return p-token
      */
     @PostMapping("/login/by/password")
-    public ResponseResult<String> loginByPassword(@Valid @RequestBody LoginFormDTO loginFormDTO) {
+    public ResponseResult<String> loginByPassword(@RequestBody @Validated LoginFormDTO loginFormDTO) {
         String email = loginFormDTO.getEmail();
         String password;
         try {
@@ -172,7 +173,6 @@ public class UserController {
     public ResponseResult<UserDTO> getCurrentInfo() {
         Long id = Long.valueOf((String) StpUtil.getLoginId());
 
-
         User userInfo = userService.getUserInfoById(id);
 
         UserDTO userDTO = BeanUtil.copyProperties(userInfo, UserDTO.class);
@@ -202,16 +202,11 @@ public class UserController {
      * @return success
      */
     @PostMapping("/safe/verify")
-    public ResponseResult<String> verifyIdentity(@RequestBody @Valid VerifyEmailDTO verifyEmailDTO) {
-        // 验证id是否和token对应的id一致
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> verifyIdentity(@RequestBody @Validated VerifyEmailDTO verifyEmailDTO) {
         Long userId = verifyEmailDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
 
         // 验证email是否一致
-        User user = userService.getUserInfoById(id);
+        User user = userService.getUserInfoById(userId);
 
         if (!StrUtil.equals(verifyEmailDTO.getEmail(), user.getEmail())) {
             return ResponseResult.fail("邮箱错误");
@@ -263,13 +258,9 @@ public class UserController {
      * @return success
      */
     @PutMapping("/update/password")
-    public ResponseResult<String> updateUserPassword(@RequestBody @Valid UpdateUserPasswordDTO userPasswordDTO) {
-        // 验证id是否和token对应的id一致
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> updateUserPassword(@RequestBody @Validated UpdateUserPasswordDTO userPasswordDTO) {
         Long userId = userPasswordDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+
 
         try {
             String newPassword = rsa.decryptStr(userPasswordDTO.getNewPassword(), KeyType.PrivateKey);
@@ -290,13 +281,10 @@ public class UserController {
      * @return success
      */
     @PutMapping("/update/email")
-    public ResponseResult<String> updateUserEmail(@RequestBody @Valid UpdateUserEmailDTO userEmailDTO) {
-        // 验证id是否和token对应的id一致
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> updateUserEmail(@RequestBody @Validated UpdateUserEmailDTO userEmailDTO) {
+
         Long userId = userEmailDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+
 
         String newEmail = userEmailDTO.getEmail();
         String code = userEmailDTO.getCode();
@@ -324,14 +312,11 @@ public class UserController {
      * @return success
      */
     @PutMapping("/current")
-    public ResponseResult<String> updateUserInfo(@RequestBody @Valid UserInfoUpdateDTO userInfoUpdateDTO) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-        Long userId = userInfoUpdateDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+    public ResponseResult<String> updateUserInfo(@RequestBody @Validated UserInfoUpdateDTO userInfoUpdateDTO) {
 
-        User user = userService.getUserInfoById(id);
+        Long userId = userInfoUpdateDTO.getUserId();
+
+        User user = userService.getUserInfoById(userId);
 
         MyBeanUtil.copyPropertiesIgnoreNull(userInfoUpdateDTO, user);
 
@@ -347,7 +332,7 @@ public class UserController {
         String nickName = user.getNickName();
         // 异步审核昵称
         if (StrUtil.isNotEmpty(nickName)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("nickName", id, nickName)));
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("nickName", userId, nickName)));
         }
 
         return ResponseResult.success();
@@ -362,17 +347,14 @@ public class UserController {
      * @return success
      */
     @PutMapping("/update/icon/{userId}")
-    public ResponseResult<String> updateUserIcon(@PathVariable("userId") Long userId, MultipartFile icon) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+    public ResponseResult<String> updateUserIcon(@PathVariable("userId") @MatchToken Long userId, MultipartFile icon) {
+
 
         String iconPath = userService.updateUserIcon(userId, icon);
 
         // 异步审核图片
         if (StrUtil.isNotEmpty(iconPath)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", id, iconPath.replace(PPENG_URL, ""))));
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", userId, iconPath.replace(PPENG_URL, ""))));
         }
 
         return ResponseResult.success(PPENG_URL + iconPath);

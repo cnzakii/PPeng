@@ -7,6 +7,9 @@ spring:
   output:
     ansi:
       enabled: always
+  data:
+    redis:
+      database: 1
   cloud:
     nacos:
       discovery:
@@ -33,6 +36,7 @@ spring:
           uri: lb://ppeng-module-message
           predicates:
             - Path=/message/**
+
 
 
 

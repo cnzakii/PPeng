@@ -81,12 +81,11 @@ public class UserCanalHandler extends AbstractCanalHandler<User> {
 
         // 更新本地缓存
         Cache cache = cacheManager.getCache("userInfo");
-        System.out.println(cache);
         Long userId = oldData.getId();
         if (cache == null) {
             return;
         }
-        System.out.println(cache.get(userId, User.class));
+
         boolean b = cache.evictIfPresent(userId);
         if (b) {
             log.info("更新用户({})信息本地缓存", id);

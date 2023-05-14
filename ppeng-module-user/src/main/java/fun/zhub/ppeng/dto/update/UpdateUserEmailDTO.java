@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.dto.update;
 
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -28,6 +29,7 @@ public class UpdateUserEmailDTO implements Serializable {
      * 用户id
      */
     @NotNull(message = "userId不能为空")
+    @MatchToken
     private Long userId;
 
 

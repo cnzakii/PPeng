@@ -3,6 +3,7 @@ package fun.zhub.ppeng.dto.update;
 
 
 
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -31,6 +32,7 @@ public class UserInfoUpdateDTO implements Serializable {
      * userId
      */
     @NotNull(message = "userId不能为空")
+    @MatchToken
     private Long userId;
 
     /**

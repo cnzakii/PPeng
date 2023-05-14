@@ -2,12 +2,12 @@ package fun.zhub.ppeng.exception;
 
 
 import fun.zhub.ppeng.common.ResponseResult;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_400;
+import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_500;
 
 /**
  * <p>
@@ -52,24 +53,22 @@ public class GlobalExceptionHandler {
             ValidationException.class
     })
     public ResponseResult<String> handleParameterVerificationException(Exception e) {
-
         List<String> exceptionMsg = new ArrayList<>();
+        log.error("ResponseCode：400,Exception: {}", e.getMessage());
 
-        log.error("Exception: {}", e.getMessage());
-
-        if (e instanceof BindException) {
-            BindingResult bindingResult = ((BindException) e).getBindingResult();
-            bindingResult.getAllErrors()
+        if (e instanceof BindException bindException) {
+            bindException.getBindingResult().getAllErrors()
                     .forEach(a -> exceptionMsg.add(a.getDefaultMessage()));
-        } else if (e instanceof ConstraintViolationException) {
-            if (e.getMessage() != null) {
-                exceptionMsg.add(e.getMessage());
-            }
+        } else if (e instanceof ConstraintViolationException violationException) {
+            violationException.getConstraintViolations()
+                    .stream()
+                    .map(ConstraintViolation::getMessage)
+                    .forEach(exceptionMsg::add);
         } else {
             exceptionMsg.add("invalid parameter");
         }
 
-        return ResponseResult.base(HTTP_STATUS_400, null, String.join(",",exceptionMsg));
+        return ResponseResult.base(HTTP_STATUS_400, String.join(",", exceptionMsg));
     }
 
 
@@ -82,7 +81,6 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(BusinessException.class)
     public ResponseResult<BusinessException> processBusinessException(BusinessException businessException) {
-
         log.error("ResponseCode：{},Exception: {}", businessException.getCode(), businessException.getDescription());
         return ResponseResult.base(businessException.getCode(), null, businessException.getDescription());
     }
@@ -97,8 +95,9 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public ResponseResult<Exception> processException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-        // 这里可以屏蔽掉后台的异常栈信息，直接返回"server error"
-        return ResponseResult.fail(exception.getLocalizedMessage());
+
+        log.error("ResponseCode：500,Exception: {}", exception.getLocalizedMessage());
+
+        return ResponseResult.base(HTTP_STATUS_500, exception.getLocalizedMessage());
     }
 }

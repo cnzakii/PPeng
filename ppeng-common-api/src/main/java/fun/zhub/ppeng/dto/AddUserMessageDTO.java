@@ -1,6 +1,9 @@
 package fun.zhub.ppeng.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,6 +16,9 @@ import java.io.Serializable;
  * @since 2023-05-13
  **/
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class AddUserMessageDTO implements Serializable {
 
     @Serial

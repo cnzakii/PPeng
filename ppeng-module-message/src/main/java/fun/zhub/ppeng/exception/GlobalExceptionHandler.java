@@ -95,7 +95,6 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public ResponseResult<Exception> processException(Exception exception) {
-
         log.error("ResponseCode：500,Exception: {}", exception.getLocalizedMessage());
 
         return ResponseResult.base(HTTP_STATUS_500, exception.getLocalizedMessage());

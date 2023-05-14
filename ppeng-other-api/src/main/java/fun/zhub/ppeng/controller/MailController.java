@@ -1,6 +1,5 @@
 package fun.zhub.ppeng.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import fun.zhub.ppeng.common.ResponseResult;
@@ -10,10 +9,8 @@ import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 
 /**
@@ -62,12 +59,9 @@ public class MailController {
      */
     @PostMapping("/verify")
     @SentinelResource(value = "sendUpdateMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
-    public ResponseResult<String> sendUpdateMail(@RequestBody @Valid UserVerifyDTO userVerifyDTO) {
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
+    public ResponseResult<String> sendUpdateMail(@RequestBody @Validated UserVerifyDTO userVerifyDTO) {
         Long userId = userVerifyDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+
         // 服务调用user服务，查询该用户信息
         ResponseResult<User> response = userService.getUserInfo(userId);
 

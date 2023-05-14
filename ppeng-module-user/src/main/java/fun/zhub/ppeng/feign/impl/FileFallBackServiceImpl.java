@@ -13,10 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 2023-05-04
  **/
 @Component
-public class FileFallBackService implements FileService {
+public class FileFallBackServiceImpl implements FileService {
 
     @Override
-    public ResponseResult<String> uploadFile(MultipartFile... file) {
+    public ResponseResult<String> uploadFile( MultipartFile... file) {
         return ResponseResult.fail("文件上传服务调用失败");
     }
 

@@ -63,9 +63,11 @@ public class SaTokenConfigure {
                     SaRouter.match(
                             "/user/**",
                             "/mail/update/**",
-                            "/file/upload/**"
+                            "/file/upload/**",
+                            "/message/**"
                     ).notMatch(
-                            "/user/info/**"
+                            "/user/info/**",
+                            "/message/add"
                     ).check(r -> StpUtil.checkRole(ROLE_USER));
 
 
@@ -93,7 +95,7 @@ public class SaTokenConfigure {
                             ObjectMapper objectMapper = new ObjectMapper();
                             String json;
                             try {
-                                json = objectMapper.writeValueAsString(ResponseResult.base(ResponseStatus.HTTP_STATUS_401));
+                                json = objectMapper.writeValueAsString(ResponseResult.base(ResponseStatus.HTTP_STATUS_401, e.getLocalizedMessage()));
                             } catch (JsonProcessingException ex) {
                                 log.error("Failed to convert object to JSON string===>{}", ex.getLocalizedMessage());
                                 throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "Failed to convert object to JSON string");

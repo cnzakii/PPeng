@@ -50,6 +50,12 @@
             <artifactId>ppeng-common-api</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.dev33</groupId>
+                    <artifactId>sa-token-spring-boot3-starter</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--gateway-->

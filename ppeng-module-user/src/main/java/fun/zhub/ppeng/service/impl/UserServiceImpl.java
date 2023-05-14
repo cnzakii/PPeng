@@ -72,8 +72,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private FileService fileService;
 
 
-
-
     /**
      * 实现用户注册功能
      *
@@ -410,7 +408,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setGender(0);
         user.setFans(0);
         user.setFollows(0);
-
 
 
         int i = userMapper.insert(user);

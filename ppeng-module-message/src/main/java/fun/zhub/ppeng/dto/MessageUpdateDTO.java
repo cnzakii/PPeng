@@ -1,5 +1,9 @@
 package fun.zhub.ppeng.dto;
 
+
+
+import fun.zhub.ppeng.validation.annotation.MatchToken;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.io.Serial;
@@ -21,10 +25,12 @@ public class MessageUpdateDTO implements Serializable {
     /**
      * 用户id
      */
+    @MatchToken
     Long userId;
 
     /**
      * 消息id集合
      */
+    @NotNull(message = "messageIds不能为空")
     Integer[] messageIds;
 }

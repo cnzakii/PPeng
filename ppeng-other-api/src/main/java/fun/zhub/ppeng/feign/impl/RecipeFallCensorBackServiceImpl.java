@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * CallRecipeService 调用失败的兜底方法
+ * RecipeService 调用失败的兜底方法
  * <p>
  *
  * @author Zaki

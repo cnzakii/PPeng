@@ -49,6 +49,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
     @Resource
     private RecipeCensorService recipeService;
 
+
     /**
      * 实现用户昵称的审核
      *
@@ -59,23 +60,23 @@ public class ContentCensorServiceImpl implements ContentCensorService {
     public void censorNickName(Long userId, String nickName) {
         JSONObject response = client.textCensorUserDefined(nickName);
         String msg = getMsgFromResponse(response);
-        if (StrUtil.isNotEmpty(msg)) {
-            log.info("用户({})昵称违规===》{}", userId, msg);
-            /*
-             *TODO 可以调用信息模块，告知用户违规原因
-             */
 
-            // 利用OpenFeign调用修改昵称接口，修改昵称为： 违规昵称_5fsdfsfdf
-            ResponseResult<String> result = userService.handleBadNickName(userId);
-
-            // 判断是否调用成功
-            if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
-                log.error("修改{}违规昵称失败", userId);
-                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规昵称失败");
-            }
-        } else {
+        // 不存在违规消息，则直接返回
+        if (StrUtil.isEmpty(msg)) {
             log.info("{}昵称({})审核通过", userId, nickName);
+            return;
         }
+
+        log.info("用户({})昵称违规===》{}", userId, msg);
+
+        // 利用OpenFeign调用修改昵称接口，修改昵称为： 违规昵称_5fsdfsfdf ，并通知用户
+        ResponseResult<String> result = userService.handleBadNickName(userId);
+
+        if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
+            log.error("修改{}违规昵称失败", userId);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规昵称失败");
+        }
+
     }
 
 
@@ -91,12 +92,16 @@ public class ContentCensorServiceImpl implements ContentCensorService {
 
         String msg = getMsgFromResponse(response);
 
-        if (StrUtil.isNotEmpty(msg)) {
-            log.info("用户({})头像违规===》{}", userId, msg);
-            /*
-             * TODO 服务调用，将icon转换成特定头像
-             */
+        if (StrUtil.isEmpty(msg)) {
+            log.info("用户({})头像({})审核通过", userId, path);
+            return;
         }
+
+
+        log.info("用户({})头像违规===》{}", userId, msg);
+        /*
+         * TODO 服务调用，将icon转换成特定头像
+         */
 
 
     }
@@ -145,6 +150,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
              * 调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
              */
             recipeService.setInaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+
         } else {
             // 审核通过，记录审核结果并更新审核状态
             recipeService.setaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
