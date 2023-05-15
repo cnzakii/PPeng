@@ -7,6 +7,9 @@ spring:
   output:
     ansi:
       enabled: always
+  data:
+    redis:
+      database: 3
   cloud:
     nacos:
       discovery:
@@ -19,6 +22,8 @@ spring:
       transport:
         dashboard: ****:8976  # 配置Sentinel dashboard地址
         port: 8719                 # 默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
+    openfeign:
+      lazy-attributes-resolution: true
 
 
 mybatis-plus:
@@ -34,3 +39,7 @@ management:
     web:
       exposure:
         include: '*'
+
+feign:
+  sentinel:
+    enabled: true

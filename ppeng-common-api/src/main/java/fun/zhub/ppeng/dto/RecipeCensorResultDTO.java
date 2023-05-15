@@ -50,7 +50,10 @@ public class RecipeCensorResultDTO implements Serializable {
      */
     private LocalDateTime censorTime;
 
-
-
+    /**
+     * 仅审核通过时可选，内容违规强制通知用户
+     * 是否通知用户 0：不通知，1：通知
+     */
+    private Integer isNotify;
 
 }

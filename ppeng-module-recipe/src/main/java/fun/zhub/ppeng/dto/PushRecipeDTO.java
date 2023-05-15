@@ -1,10 +1,10 @@
 package fun.zhub.ppeng.dto;
 
+import fun.zhub.ppeng.validation.annotation.ZeroOrOne;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -65,7 +65,7 @@ public class PushRecipeDTO implements Serializable {
     /**
      * 0代表图文，1代表视频
      */
-    @Range(min = 0, max = 1, message = "isVideo标识错误")
+    @ZeroOrOne(message = "isVideo标识错误")
     private Integer isVideo;
 
 

@@ -18,7 +18,7 @@ import static fun.zhub.ppeng.constant.RabbitConstants.*;
  * @since 2023-05-08
  **/
 @Configuration
-public class RabbitTopicConfig {
+public class RabbitTopicConfigurer {
 
     /**
      * 配置交换机-TopicExchange

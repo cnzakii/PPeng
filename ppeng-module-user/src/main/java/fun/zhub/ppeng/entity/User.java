@@ -30,7 +30,6 @@ public class User implements Serializable {
     private static final long serialVersionUID = 4339224709741456224L;
     /**
      * 手机号登录用户：雪花算法唯一ID
-     * 微信登录用户：openid
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;

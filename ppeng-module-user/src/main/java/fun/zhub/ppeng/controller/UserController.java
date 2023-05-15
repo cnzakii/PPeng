@@ -37,7 +37,7 @@ import java.util.Optional;
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constant.SaTokenConstants.*;
-import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
 
 
 /**
@@ -354,10 +354,10 @@ public class UserController {
 
         // 异步审核图片
         if (StrUtil.isNotEmpty(iconPath)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", userId, iconPath.replace(PPENG_URL, ""))));
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", userId, iconPath.replace(PPENG_RESOURCE_URL, ""))));
         }
 
-        return ResponseResult.success(PPENG_URL + iconPath);
+        return ResponseResult.success(PPENG_RESOURCE_URL + iconPath);
     }
 
 

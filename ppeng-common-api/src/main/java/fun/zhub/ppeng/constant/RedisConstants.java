@@ -124,4 +124,24 @@ public interface RedisConstants {
      */
     String RECIPE_RECOMMEND_PROFESSIONAL_KEY = "recipe:recommend:professional:";
 
+    /**
+     * 菜谱举报前缀
+     */
+    String REPORT_RECIPE_KEY = "report:recipe";
+
+    /**
+     * 菜谱上述前缀
+     */
+    String APPEAL_RECIPE_KEY = "appeal:recipe";
+
+    /**
+     * 菜谱id映射前缀
+     */
+    String MAP_RECIPE_ID_KEY = "map:recipe:id:";
+
+    /**
+     * 菜谱id映射过期时间
+     */
+    Long MAP_RECIPE_ID_TTL = 7L;
+
 }

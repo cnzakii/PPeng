@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.rabbitmqListener;
+package fun.zhub.ppeng.rabbitListener;
 
 import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.canal.MyCanalUtil;

@@ -2,7 +2,6 @@ package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -57,9 +56,6 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     @Resource
     private UserService userService;
 
-    @Resource
-    private Snowflake snowflake;
-
 
     /**
      * 实现创建菜谱操作
@@ -74,18 +70,20 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱类型错误");
         }
 
-        if (StrUtil.hasEmpty(recipe.getTitle(), recipe.getMaterial(), recipe.getContent(), recipe.getMediaUrl())) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数为空");
+        // 如果是图文，保证菜谱标题，内容，配料表，图片路径都存在
+        if (recipe.getIsVideo() == 0 && StrUtil.hasEmpty(recipe.getTitle(), recipe.getMaterial(), recipe.getContent(), recipe.getMediaUrl())) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "部分参数为空");
         }
 
-        long id = snowflake.nextId();
+        // 如果是视频，保证菜谱标题，视频路径都存在
+        if (recipe.getIsVideo() == 1 && StrUtil.hasEmpty(recipe.getTitle(), recipe.getMediaUrl())) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "部分参数为空");
+        }
 
-        recipe.setId(id);
         recipe.setLikes(0);
         recipe.setCollections(0);
         recipe.setCensorState(0);
         recipe.setIsBaned(0);
-
 
 
         // 插入数据库
@@ -143,12 +141,15 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
      */
     @Override
     public Recipe getRecipeByUserIdAndRecipeId(Long userId, Long recipeId) {
-        Recipe recipe = recipeMapper.selectOne(new LambdaQueryWrapper<Recipe>().eq(Recipe::getId, recipeId).eq(Recipe::getUserId, userId));
+        Recipe recipe = recipeMapper.selectOne(new LambdaQueryWrapper<Recipe>().eq(Recipe::getId, recipeId));
 
         if (recipe == null) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱不存在");
         }
 
+        if (!Objects.equals(recipe.getUserId(), userId)) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "菜谱不属于该用户");
+        }
         return recipe;
     }
 
@@ -161,13 +162,33 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
      * @return list
      */
     @Override
-    public List<Recipe> getRecipeListByUserId(String userId, Integer pageNum, Integer pageSize) {
+    public List<Recipe> getRecipeListByUserId(Long userId, Integer pageNum, Integer pageSize) {
         Page<Recipe> page = new Page<>(pageNum, pageSize, false);
         Page<Recipe> recipePage = recipeMapper.selectPage(page,
                 new LambdaQueryWrapper<Recipe>()
                         .eq(Recipe::getUserId, userId)
                         .eq(Recipe::getIsBaned, "0")
-                        .orderByDesc(Recipe::getCreateTime));
+                        .orderByDesc(Recipe::getUpdateTime));
+
+        return recipePage.getRecords();
+    }
+
+    /**
+     * 实现 根据菜谱类型id查找菜谱
+     *
+     * @param typeId   菜谱类型id
+     * @param pageNum  当前页数
+     * @param pageSize 一页所呈现的菜谱数量
+     * @return list
+     */
+    @Override
+    public List<Recipe> getRecipeListByTypeId(Integer typeId, Integer pageNum, Integer pageSize) {
+        Page<Recipe> page = new Page<>(pageNum, pageSize, false);
+        Page<Recipe> recipePage = recipeMapper.selectPage(page,
+                new LambdaQueryWrapper<Recipe>()
+                        .eq(Recipe::getTypeId, typeId)
+                        .eq(Recipe::getIsBaned, "0")
+                        .orderByDesc(Recipe::getUpdateTime));
 
         return recipePage.getRecords();
     }

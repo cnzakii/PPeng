@@ -26,14 +26,20 @@ public interface SystemConstants {
      */
     String FILE_ROOT_PATH = "/Users/zaki/Desktop";
 
-
     /**
      * url
      */
-    String PPENG_URL = "https://ppeng.zhub.fun/resource";
+    String PPENG_URL = "https://ppeng.zhub.fun/";
 
 
+    /**
+     * 资源url
+     */
+    String PPENG_RESOURCE_URL = PPENG_URL + "resource";
 
-
+    /**
+     * 菜谱上述url
+     */
+    String PPENG_RECIPE_APPEAL_URL = PPENG_URL + "recipe/censor/appeal";
 
 }

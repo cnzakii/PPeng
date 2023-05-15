@@ -2,21 +2,24 @@ package fun.zhub.ppeng.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.PushRecipeDTO;
-import fun.zhub.ppeng.dto.RecipeDTO;
-import fun.zhub.ppeng.dto.RecommendRecipeDTO;
-import fun.zhub.ppeng.dto.UpdateRecipeDTO;
+import fun.zhub.ppeng.dto.*;
 import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.service.RecipeService;
 import fun.zhub.ppeng.util.MyBeanUtil;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static fun.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
+import static fun.zhub.ppeng.constant.RabbitConstants.ROUTING_CONTENT_CENSOR;
 
 
 /**
@@ -32,6 +35,16 @@ public class RecipeController {
     @Resource
     private RecipeService recipeService;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    /**
+     * 根据菜谱id获取菜谱--仅限服务间调用
+     */
+    @GetMapping("/info/{recipeId}")
+    public Recipe queryRecipeById(@PathVariable("recipeId") Long recipeId) {
+        return recipeService.getById(recipeId);
+    }
 
     /**
      * 菜谱上传
@@ -53,8 +66,22 @@ public class RecipeController {
         recipe.setMediaUrl(urls);
 
         Long recipeId = recipeService.createRecipe(recipe);
+
+        /*
+         *  审核菜谱内容
+         */
+        ContentCensorDTO censorDTO;
+        if (recipe.getIsVideo() == 0) {
+            censorDTO = new ContentCensorDTO("recipeImages", recipeId, recipe.getTitle(), recipe.getContent(), urls);
+        } else {
+            censorDTO = new ContentCensorDTO("recipeVideo", recipeId, recipe.getTitle(), urls);
+        }
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(censorDTO));
+
         return ResponseResult.success(String.valueOf(recipeId));
     }
+
+
 
 
     /**
@@ -65,8 +92,8 @@ public class RecipeController {
      * @param size   一页的菜谱数量
      * @return list
      */
-    @GetMapping("/list/{userId}")
-    public ResponseResult<List<RecipeDTO>> queryRecipeListByUserId(@PathVariable("userId") String userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    @GetMapping("/list/by/user")
+    public ResponseResult<List<RecipeDTO>> queryRecipeListByUserId(@PathParam("userId") Long userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
 
         var list = recipeService.getRecipeListByUserId(userId, page, size)
                 .stream()
@@ -75,6 +102,27 @@ public class RecipeController {
 
         return ResponseResult.success(list);
     }
+
+
+    /**
+     * 根据类型id获取菜谱列表
+     *
+     * @param typeId 菜谱类型id
+     * @param page   当前页数
+     * @param size   一页的菜谱数量
+     * @return list
+     */
+    @GetMapping("/list/by/type")
+    public ResponseResult<List<RecipeDTO>> queryRecipeListByTypeId(@PathParam("typeId") Integer typeId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+
+        var list = recipeService.getRecipeListByTypeId(typeId, page, size)
+                .stream()
+                .map(recipe -> BeanUtil.copyProperties(recipe, RecipeDTO.class))
+                .toList();
+
+        return ResponseResult.success(list);
+    }
+
 
     /**
      * 获取推荐列表--普通菜谱
@@ -122,6 +170,7 @@ public class RecipeController {
         // 获取recipe对象
         Recipe recipe = recipeService.getRecipeByUserIdAndRecipeId(userId, updateRecipeDTO.getRecipeId());
 
+
         // 复制不为null的属性
         MyBeanUtil.copyPropertiesIgnoreNull(updateRecipeDTO, recipe);
 
@@ -135,9 +184,18 @@ public class RecipeController {
         // 更新recipe
         recipeService.updateRecipe(recipe);
 
+        Long recipeId = recipe.getId();
+        String urls = String.join(",", recipe.getMediaUrl());
         /*
-         * TODO 审核内容
+         *  审核菜谱内容
          */
+        ContentCensorDTO censorDTO;
+        if (recipe.getIsVideo() == 0) {
+            censorDTO = new ContentCensorDTO("recipeImages", recipeId, recipe.getTitle(), recipe.getContent(), urls);
+        } else {
+            censorDTO = new ContentCensorDTO("recipeVideo", recipeId, recipe.getTitle(), urls);
+        }
+        rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(censorDTO));
 
 
         return ResponseResult.success();

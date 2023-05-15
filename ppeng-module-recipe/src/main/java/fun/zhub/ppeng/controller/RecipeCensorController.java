@@ -1,38 +1,36 @@
-package fun.zhub.ppeng.controller.handler;
+package fun.zhub.ppeng.controller;
 
-import cn.hutool.core.util.BooleanUtil;
+import cn.dev33.satoken.stp.StpUtil;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.common.ResponseStatus;
-import fun.zhub.ppeng.dto.AddUserMessageDTO;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
 import fun.zhub.ppeng.entity.Recipe;
-import fun.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.feign.MessageService;
+import fun.zhub.ppeng.entity.RecipeCensor;
 import fun.zhub.ppeng.service.RecipeCensorService;
 import fun.zhub.ppeng.service.RecipeService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+import static fun.zhub.ppeng.constant.RedisConstants.*;
+
 /**
- * <p>
- * 菜谱违规信息处理接口
- * <p>
+ * 菜谱审查接口
  *
  * @author Zaki
  * @version 1.0
- * @since 2023-04-25
+ * @since 2023-05-15
  **/
 @RestController
-@RequestMapping("/handler/recipe")
+@RequestMapping("/recipe/censor")
 @Slf4j
-public class RecipeCensorHandler {
+public class RecipeCensorController {
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private RecipeService recipeService;
@@ -40,8 +38,65 @@ public class RecipeCensorHandler {
     @Resource
     private RecipeCensorService censorService;
 
-    @Resource
-    private MessageService messageService;
+    /**
+     * 根据菜谱id获取审查结果---仅限服务间调用
+     */
+    @GetMapping("/info/{recipeId}")
+    public RecipeCensor getRecipeCensorById(@PathVariable("recipeId") Long recipeId){
+        return censorService.getById(recipeId);
+    }
+
+
+
+    /**
+     * 举报菜谱
+     *
+     * @param recipeId 菜谱id
+     * @return success
+     */
+    @PostMapping("/report/{recipeId}")
+    public ResponseResult<String> reporteRecipe(@PathVariable("recipeId") Long recipeId) {
+        /*
+         * 添加到Redis的菜谱举报Zset集合中，value为菜谱id，score为当前时间戳
+         */
+        stringRedisTemplate.opsForZSet().addIfAbsent(REPORT_RECIPE_KEY, String.valueOf(recipeId), System.currentTimeMillis());
+
+        return ResponseResult.success();
+    }
+
+    /**
+     * 用户申述菜谱
+     *
+     * @param sign 标识
+     * @return success
+     */
+    @PostMapping("/appeal")
+    public ResponseResult<String> appealRecipe(@RequestParam("sign") String sign) {
+        Long userId = Long.valueOf((String) StpUtil.getLoginId());
+        String key = MAP_RECIPE_ID_KEY + sign;
+
+        // 从Redis中获取sign对应的映射
+        String s = stringRedisTemplate.opsForValue().get(key);
+        if (s == null) {
+            return ResponseResult.fail("sign无效");
+        }
+
+        // 获取recipeId
+        Long recipeId = Long.valueOf(s);
+
+        // 根据userId和recipeId获取菜谱，真实目的是检查RecipeId和userId是否匹配
+        Recipe recipe = recipeService.getRecipeByUserIdAndRecipeId(userId, recipeId);
+
+        /*
+         * 添加到Redis的菜谱上述Zset集合中，value为菜谱id，score为当前时间戳
+         */
+        stringRedisTemplate.opsForZSet().addIfAbsent(APPEAL_RECIPE_KEY, String.valueOf(recipe.getId()), System.currentTimeMillis());
+
+        // 删除sign映射
+        stringRedisTemplate.delete(key);
+
+        return ResponseResult.success();
+    }
 
 
     /**
@@ -53,14 +108,13 @@ public class RecipeCensorHandler {
     @PostMapping("/ban")
     public ResponseResult<String> setInAccessible(@Valid @RequestBody RecipeCensorResultDTO resultDTO) {
         Long recipeId = resultDTO.getRecipeId();
-        // 根据recipeId获取当前菜谱
         Recipe recipe = recipeService.getById(recipeId);
         Long userId = recipe.getUserId();
-
         Integer censorState = resultDTO.getCensorState();
 
-
+        // 更新审核状态
         recipeService.updateCensorState(recipeId, censorState, 1);
+
         // 如果人工复审（CensorState=3）仍不通过审核，则进一步执行删除操作
         if (censorState == 3) {
             boolean b = recipeService.removeById(recipeId);
@@ -78,24 +132,7 @@ public class RecipeCensorHandler {
         /*
          * 调用消息模块，通知用户
          */
-        /*
-         *TODO 获取人工复审链接
-         */
-        String title = "菜谱违规通知";
-        String content;
-        if (censorState == 3) {
-            content = "尊敬的用户，您的菜谱存在违规内容，违规原因是" + censorResult + "。结合多次审核结果，我们不再接受关于该菜谱的申述处理，并永久删除该菜谱。感谢您的配合！";
-        } else {
-            content = "尊敬的用户，您的菜谱存在违规内容，违规原因是" + censorResult + "。如果你对此有异议，请点击下方链接进行人工复审，我们将在7个工作日回复您。感谢您的配合！";
-        }
-        AddUserMessageDTO addUserMessageDTO = new AddUserMessageDTO(userId, title, content);
-
-        Boolean a = messageService.addMeaasge(addUserMessageDTO);
-
-        if (BooleanUtil.isFalse(a)) {
-            log.error("发送({})违规通知失败", userId);
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "发送违规通知失败");
-        }
+        censorService.sendViolationNotification(userId, recipeId, censorState, censorResult);
 
         return ResponseResult.success();
     }
@@ -128,16 +165,8 @@ public class RecipeCensorHandler {
         /*
          * 调用消息模块，通知用户
          */
-        String title = "菜谱审核通过通知";
-        String content = "尊敬的用户，恭喜您！您的菜谱已通过审核，符合我们的社区标准和规定。感谢您的分享和支持！继续创作精彩的菜谱，为我们的社区带来更多美味的享受吧！祝您继续成功！";
-
-        AddUserMessageDTO addUserMessageDTO = new AddUserMessageDTO(userId, title, content);
-
-        Boolean a = messageService.addMeaasge(addUserMessageDTO);
-
-        if (BooleanUtil.isFalse(a)) {
-            log.error("发送({})违规通知失败", userId);
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "发送违规通知失败");
+        if (resultDTO.getIsNotify() == 1) {
+            censorService.sendApprovalNotification(userId, recipeId);
         }
 
         return ResponseResult.success();

@@ -1,9 +1,6 @@
 package fun.zhub.ppeng.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,10 +14,7 @@ import java.time.LocalDateTime;
  * @author Zaki
  * @since 2023-04-26
  */
-@Getter
-@Setter
-@Accessors(chain = true)
-@TableName("t_recipe_censor")
+@Data
 public class RecipeCensor implements Serializable {
 
 

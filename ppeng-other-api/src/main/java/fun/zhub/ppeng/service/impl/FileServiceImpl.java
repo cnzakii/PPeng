@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static fun.zhub.ppeng.constant.SystemConstants.FILE_ROOT_PATH;
-import static fun.zhub.ppeng.constant.SystemConstants.PPENG_URL;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
 
 /**
  * <p>
@@ -70,11 +70,11 @@ public class FileServiceImpl implements FileService {
         List<String> urls = Arrays.stream(images)
                 .map(image -> uploadFile(subPath, image))
                 .filter(StrUtil::isNotEmpty)
-                .map(path -> PPENG_URL + path)
+                .map(path -> PPENG_RESOURCE_URL + path)
                 .toList();
 
         if (urls.size() != images.length) {
-            urls.forEach(url -> deleteFile(url.replace(PPENG_URL, "")));
+            urls.forEach(url -> deleteFile(url.replace(PPENG_RESOURCE_URL, "")));
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "菜谱图像保存失败");
         }
 
@@ -99,7 +99,7 @@ public class FileServiceImpl implements FileService {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "菜谱视频保存失败");
         }
 
-        return PPENG_URL + path;
+        return PPENG_RESOURCE_URL + path;
     }
 
 

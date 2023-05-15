@@ -63,7 +63,18 @@ public interface RecipeService extends IService<Recipe> {
      * @param pageSize 一页所呈现的菜谱数量
      * @return list
      */
-    List<Recipe> getRecipeListByUserId(String userId, Integer pageNum, Integer pageSize);
+    List<Recipe> getRecipeListByUserId(Long userId, Integer pageNum, Integer pageSize);
+
+    /**
+     * 根据类型id查询菜谱
+     *
+     * @param typeId   菜谱类型id
+     * @param pageNum  当前页数
+     * @param pageSize 一页所呈现的菜谱数量
+     * @return list
+     */
+    List<Recipe> getRecipeListByTypeId(Integer typeId, Integer pageNum, Integer pageSize);
+
 
     /**
      * 获取推荐菜谱列表

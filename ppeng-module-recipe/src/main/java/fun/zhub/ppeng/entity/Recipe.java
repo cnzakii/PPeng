@@ -28,7 +28,7 @@ public class Recipe implements Serializable {
     /**
      * 菜谱id
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -90,6 +90,7 @@ public class Recipe implements Serializable {
     /**
      * 更新时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime updateTime;
 
     /**

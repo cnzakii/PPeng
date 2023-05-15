@@ -1,12 +1,11 @@
 package fun.zhub.ppeng.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -23,19 +22,20 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("t_admin")
 public class Admin implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -6792594938747158151L;
 
-    private static final long serialVersionUID = 1L;
 
     /**
      * 管理员id
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
      * 手机号
      */
-    private String phone;
+    private String email;
 
     /**
      * 密码（加密方式：SM3 盐值：id）
@@ -43,7 +43,7 @@ public class Admin implements Serializable {
     private String password;
 
     /**
-     * 昵称，默认是用户id前20位
+     * 昵称
      */
     private String nickName;
 
@@ -75,6 +75,7 @@ public class Admin implements Serializable {
     /**
      * 创建时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
@@ -85,5 +86,7 @@ public class Admin implements Serializable {
     /**
      * 逻辑删除
      */
-    private Byte isDeleted;
+    @TableField(fill = FieldFill.INSERT)
+    @TableLogic(value = "0", delval = "1")
+    private Integer isDeleted;
 }

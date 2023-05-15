@@ -145,15 +145,15 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             }
         }
 
-        if (flag) {
-            /*
-             * 调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
-             */
-            recipeService.setInaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+        // 创建菜谱审核结果数据传输对象，设置当审核通过时通知作者
+        RecipeCensorResultDTO censorResultDTO = new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now(), 1);
 
+        if (flag) {
+            // 调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
+            recipeService.setInaccessible(censorResultDTO);
         } else {
             // 审核通过，记录审核结果并更新审核状态
-            recipeService.setaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+            recipeService.setaccessible(censorResultDTO);
         }
 
 
@@ -204,16 +204,16 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             }
         }
 
+        // 创建菜谱审核结果数据传输对象，设置当审核通过时通知作者
+        RecipeCensorResultDTO censorResultDTO = new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now(), 1);
+
         if (flag) {
-            /*
-             *  调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
-             */
-            recipeService.setInaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+            // 调用OpenFeign，将该菜谱加入黑名单，允许用户申述，交由人工审核
+            recipeService.setInaccessible(censorResultDTO);
         } else {
             // 审核通过，记录审核结果并更新审核状态
-            recipeService.setaccessible(new RecipeCensorResultDTO(recipeId, 1, msg, null, LocalDateTime.now()));
+            recipeService.setaccessible(censorResultDTO);
         }
-
 
     }
 

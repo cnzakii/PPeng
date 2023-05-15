@@ -19,8 +19,6 @@ import java.util.Objects;
 public class MatchTokenValidator implements ConstraintValidator<MatchToken, Long> {
     @Override
     public boolean isValid(Long userId, ConstraintValidatorContext constraintValidatorContext) {
-
-
         Long id = Long.valueOf((String) StpUtil.getLoginId());
         return Objects.equals(id, userId);
     }

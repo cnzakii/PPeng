@@ -25,4 +25,22 @@ public interface RecipeCensorService extends IService<RecipeCensor> {
      * @param censorState  审核人员标识 1，机器，2人工，3人工复审
      */
     void saveCensorResult(Long recipeId, String censorResult, Long censorId, LocalDateTime censorTime, Integer censorState);
+
+    /**
+     * 发送违规通知
+     *
+     * @param userId       userId
+     * @param recipeId     菜谱id
+     * @param censorState  审核人员标识 1，机器，2人工，3人工复审
+     * @param censorResult 审核结果
+     */
+    void sendViolationNotification(Long userId, Long recipeId, Integer censorState, String censorResult);
+
+    /**
+     * 发送审核通过通知
+     *
+     * @param userId   userId
+     * @param recipeId 菜谱id
+     */
+    void sendApprovalNotification(Long userId, Long recipeId);
 }
