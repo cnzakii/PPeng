@@ -70,6 +70,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
         recipeComment.setParentId(parentId);
         recipeComment.setCommenterId(commenterId);
         recipeComment.setContent(content);
+//        recipeComment.setCreateTime(LocalDateTime.now());
         int i = recipeCommentMapper.insert(recipeComment);
         if (i != 1) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价失败");
@@ -81,16 +82,40 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
     /**
      * 实现通过评论id删除评论
      *
-     * @param id 评论id
+     * @param id     评论id
+     * @param userId
      */
     @Override
-    public void deleteCommentById(Integer id) {
-        int c = recipeCommentMapper.deleteById(id);
-        if (c == 0) {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "评价不存在");
-        }
+    public void deleteCommentById(Integer id, Long userId) {
+        //获取该评论所评价的菜谱的id
+        LambdaQueryWrapper<RecipeComment> lambdaQueryWrapper1 = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper1.eq(RecipeComment::getId, id);
+        Long recipeId = recipeCommentMapper.selectOne(lambdaQueryWrapper1).getRecipeId();
 
+        //获取该菜谱的发布者id
+        LambdaQueryWrapper<Recipe> lambdaQueryWrapper2 = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper2.eq(Recipe::getId, recipeId);
+        Long userId1 = recipeMapper.selectOne(lambdaQueryWrapper2).getUserId();
+        Long commenterId = recipeCommentMapper.selectOne(lambdaQueryWrapper1).getCommenterId();
+        //判断是否为菜谱发布者
+        if (userId1 == userId) {
+            int c1 = recipeCommentMapper.delete(new LambdaQueryWrapper<RecipeComment>().eq(RecipeComment::getId, id));
+            if (c1 == 0) {
+                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价不存在");
+            }
+
+        }
+        //否则，只有评论者才能删除评论
+        else if (commenterId == userId) {
+            int c2 = recipeCommentMapper.delete(new LambdaQueryWrapper<RecipeComment>().eq(RecipeComment::getId, id));
+            if (c2 == 0) {
+                throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价不存在");
+            }
+        } else {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "只有作者或是评论者才能删除该评论");
+        }
     }
+
 
     /**
      * 通过菜谱id查看评论
