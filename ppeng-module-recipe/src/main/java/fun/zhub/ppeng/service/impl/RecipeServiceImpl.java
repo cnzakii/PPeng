@@ -169,6 +169,11 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 
         List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("user_id", userId, dateTime, pageSize);
 
+        // 如果为空，则直接返回
+        if (CollUtil.isEmpty(recipeList)) {
+            return new PageBean<>();
+        }
+
         List<RecipeDTO> list = recipeList.stream()
                 .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
                 .toList();
@@ -194,6 +199,12 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 
 
         List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("type_id", typeId, dateTime, pageSize);
+
+
+        // 如果为空，则直接返回
+        if (CollUtil.isEmpty(recipeList)) {
+            return new PageBean<>();
+        }
 
         List<RecipeDTO> list = recipeList.stream()
                 .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
@@ -222,7 +233,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 
         // 为null则直接返回
         if (CollUtil.isEmpty(typedTuples)) {
-            return null;
+            return new PageBean<>();
         }
 
         // 初始化成当前时间戳

@@ -41,11 +41,6 @@ public class RecipeCommentController {
         Integer parentId = recipeCommentDTO.getParentId();
         String content = recipeCommentDTO.getContent();
         recipeCommentService.addComment(recipeId, parentId, commenterId, content);
-
-        /*
-         *TODO 审核菜谱评论content
-         */
-
         return ResponseResult.success("评论成功");
     }
 

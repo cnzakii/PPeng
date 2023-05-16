@@ -2,6 +2,7 @@ package fun.zhub.ppeng.feign;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
+import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.RecipeCensor;
 import fun.zhub.ppeng.feign.impl.RecipeCensorFallBackServiceImpl;
 import fun.zhub.ppeng.feign.interceptor.FeignInterceptor;
@@ -23,9 +24,18 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @since 2023-04-25
  **/
 
-@FeignClient(value = "ppeng-module-recipe", fallback = RecipeCensorFallBackServiceImpl.class, configuration = FeignInterceptor.class)
+@FeignClient( value = "ppeng-module-recipe", fallback = RecipeCensorFallBackServiceImpl.class, configuration = FeignInterceptor.class)
 @Component
 public interface RecipeCensorService {
+
+    /**
+     * 根据菜谱id获取菜谱对象
+     *
+     * @param recipeId 菜谱id
+     * @return recipe
+     */
+    @GetMapping("/info/{recipeId}")
+    Recipe queryRecipeById(@PathVariable("recipeId") Long recipeId);
 
     /**
      * 根据菜谱id获取审查结果---仅限服务间调用

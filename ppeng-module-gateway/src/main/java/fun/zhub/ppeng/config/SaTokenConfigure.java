@@ -19,9 +19,7 @@ import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static fun.zhub.ppeng.constant.SaTokenConstants.*;
 
 /**
- * <p>
  * 注册 Sa-Token全局过滤器
- * <p>
  *
  * @author Zaki
  * @version 1.0
@@ -42,7 +40,11 @@ public class SaTokenConfigure {
                         "/user/login/**",
                         "/user/rsa",
                         "/mail/register/**",
-                        "/user/register/**"
+                        "/user/register/**",
+                        "/recipe/comment/list/**",
+                        "/recipe/type/list",
+                        "/recipe/list/**",
+                        "/recipe/recommend/**"
                 )
                 // 鉴权方法：每次访问进入
                 .setAuth(obj -> {
@@ -51,10 +53,6 @@ public class SaTokenConfigure {
                      */
                     SaRouter.match("/**").check(r -> StpUtil.checkLogin());
 
-                    /*
-                     * 禁止登录检查
-                     */
-                    SaRouter.match("/**").check(r -> StpUtil.checkDisable(StpUtil.getLoginId(), DISABLE_LOGIN));
 
                     /*
                      * 角色认证
@@ -64,16 +62,15 @@ public class SaTokenConfigure {
                             "/user/**",
                             "/mail/update/**",
                             "/file/upload/**",
-                            "/message/**"
-                    ).notMatch(
-                            "/user/info/**",
-                            "/message/add"
+                            "/message/**",
+                            "/recipe/**",
+                            "/image/recognition"
                     ).check(r -> StpUtil.checkRole(ROLE_USER));
 
 
                     // 需要admin权限
                     SaRouter.match(
-                            "/user/info/**"
+                            "/hidden/admin/**"
                     ).check(r -> StpUtil.checkRole(ROLE_ADMIN));
 
 
@@ -86,7 +83,6 @@ public class SaTokenConfigure {
                     SaRouter.match("/user/update/email").check(r -> StpUtil.checkSafe(SAFE_UPDATE_EMAIL));
                     // 删除用户
                     SaRouter.match("/user/current").match(SaHttpMethod.DELETE).check(r -> StpUtil.checkSafe(SAFE_DELETE_USER));
-
 
                 })
                 // 异常处理方法：每次setAuth函数出现异常时进入

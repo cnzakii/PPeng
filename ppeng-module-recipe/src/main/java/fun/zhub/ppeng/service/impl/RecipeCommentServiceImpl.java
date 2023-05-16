@@ -14,6 +14,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -83,7 +84,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
      * 实现通过评论id删除评论
      *
      * @param id     评论id
-     * @param userId
+     * @param userId 用户id
      */
     @Override
     public void deleteCommentById(Integer id, Long userId) {
@@ -98,7 +99,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
         Long userId1 = recipeMapper.selectOne(lambdaQueryWrapper2).getUserId();
         Long commenterId = recipeCommentMapper.selectOne(lambdaQueryWrapper1).getCommenterId();
         //判断是否为菜谱发布者
-        if (userId1 == userId) {
+        if (Objects.equals(userId1, userId)) {
             int c1 = recipeCommentMapper.delete(new LambdaQueryWrapper<RecipeComment>().eq(RecipeComment::getId, id));
             if (c1 == 0) {
                 throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价不存在");
@@ -106,7 +107,7 @@ public class RecipeCommentServiceImpl extends ServiceImpl<RecipeCommentMapper, R
 
         }
         //否则，只有评论者才能删除评论
-        else if (commenterId == userId) {
+        else if (Objects.equals(commenterId, userId)) {
             int c2 = recipeCommentMapper.delete(new LambdaQueryWrapper<RecipeComment>().eq(RecipeComment::getId, id));
             if (c2 == 0) {
                 throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "评价不存在");

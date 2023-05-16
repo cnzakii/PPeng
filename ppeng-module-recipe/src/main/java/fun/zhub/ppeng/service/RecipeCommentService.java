@@ -28,8 +28,8 @@ public interface RecipeCommentService extends IService<RecipeComment> {
     /**
      * 通过评论id删除评论
      *
-     * @param id
-     * @param userId
+     * @param id     评论id
+     * @param userId 用户id
      */
     void deleteCommentById(Integer id, Long userId);
 

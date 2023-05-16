@@ -2,6 +2,7 @@ package fun.zhub.ppeng.feign.impl;
 
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
+import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.RecipeCensor;
 import fun.zhub.ppeng.feign.RecipeCensorService;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,11 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class RecipeCensorFallBackServiceImpl implements RecipeCensorService {
+
+    @Override
+    public Recipe queryRecipeById(Long recipeId) {
+        return null;
+    }
 
     @Override
     public RecipeCensor getRecipeCensorById(Long recipeId) {

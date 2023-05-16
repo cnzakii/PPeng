@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -46,6 +47,11 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         Timestamp dateTime = new Timestamp(timestamp);
 
         List<Message> messages = messageMapper.selectMessageListByIdAndTimeLimit(userId, dateTime, pageSize);
+
+        // 如果为空，则直接返回
+        if (CollUtil.isEmpty(messages)) {
+            return new PageBean<>();
+        }
 
         List<MessageDTO> list = messages.stream()
                 .map(bean -> BeanUtil.copyProperties(bean, MessageDTO.class))

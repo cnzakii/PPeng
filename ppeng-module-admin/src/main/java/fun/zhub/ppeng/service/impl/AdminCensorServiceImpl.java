@@ -11,7 +11,6 @@ import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.RecipeCensor;
 import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.feign.RecipeCensorService;
-import fun.zhub.ppeng.feign.RecipeService;
 import fun.zhub.ppeng.service.AdminCensorService;
 import fun.zhub.ppeng.service.AdminService;
 import jakarta.annotation.Resource;
@@ -43,8 +42,6 @@ public class AdminCensorServiceImpl implements AdminCensorService {
     @Resource
     private RecipeCensorService recipeCensorService;
 
-    @Resource
-    private RecipeService recipeService;
 
     @Resource
     private AdminService adminService;
@@ -85,7 +82,7 @@ public class AdminCensorServiceImpl implements AdminCensorService {
         List<ManualCensorDTO> list = idList.stream()
                 .map(id -> {
                     // 根据id查找recipe 和 recipeCensor
-                    Recipe recipe = recipeService.queryRecipeById(id);
+                    Recipe recipe = recipeCensorService.queryRecipeById(id);
                     RecipeCensor recipeCensor = recipeCensorService.getRecipeCensorById(id);
                     // 只有当recipe 和 recipeCensor都存在时，才进行bean对象的拷贝
                     if (BeanUtil.isNotEmpty(recipeCensor) && BeanUtil.isNotEmpty(recipe)) {
