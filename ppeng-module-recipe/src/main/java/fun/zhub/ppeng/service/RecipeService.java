@@ -1,11 +1,9 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.dto.RecipeDTO;
-import fun.zhub.ppeng.dto.RecommendRecipeDTO;
 import fun.zhub.ppeng.entity.Recipe;
-
-import java.util.List;
 
 /**
  * <p>
@@ -58,22 +56,22 @@ public interface RecipeService extends IService<Recipe> {
     /**
      * 根据用户id查询菜谱
      *
-     * @param userId   用户id
-     * @param pageNum  当前页数
-     * @param pageSize 一页所呈现的菜谱数量
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param pageSize  一页所呈现的菜谱数量
      * @return list
      */
-    List<Recipe> getRecipeListByUserId(Long userId, Integer pageNum, Integer pageSize);
+    PageBean<RecipeDTO> getRecipeListByUserId(Long userId, Long timestamp, Integer pageSize);
 
     /**
      * 根据类型id查询菜谱
      *
      * @param typeId   菜谱类型id
-     * @param pageNum  当前页数
+     * @param timestamp 时间戳
      * @param pageSize 一页所呈现的菜谱数量
      * @return list
      */
-    List<Recipe> getRecipeListByTypeId(Integer typeId, Integer pageNum, Integer pageSize);
+    PageBean<RecipeDTO> getRecipeListByTypeId(Integer typeId, Long timestamp, Integer pageSize);
 
 
     /**
@@ -84,7 +82,7 @@ public interface RecipeService extends IService<Recipe> {
      * @param pageSize       一页所呈现的菜谱数量
      * @return recommendRecipeDTO
      */
-    RecommendRecipeDTO getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize);
+    PageBean<RecipeDTO> getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize);
 
 
     /**

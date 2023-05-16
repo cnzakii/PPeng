@@ -3,8 +3,12 @@ package fun.zhub.ppeng.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.dto.*;
+import fun.zhub.ppeng.dto.ContentCensorDTO;
+import fun.zhub.ppeng.dto.PushRecipeDTO;
+import fun.zhub.ppeng.dto.RecipeDTO;
+import fun.zhub.ppeng.dto.UpdateRecipeDTO;
 import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.service.RecipeService;
 import fun.zhub.ppeng.util.MyBeanUtil;
@@ -14,7 +18,6 @@ import jakarta.websocket.server.PathParam;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -82,45 +85,38 @@ public class RecipeController {
     }
 
 
-
-
     /**
      * 根据用户id获取菜谱列表
      *
-     * @param userId 用户id
-     * @param page   当前页数
-     * @param size   一页的菜谱数量
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param size      一页的菜谱数量
      * @return list
      */
     @GetMapping("/list/by/user")
-    public ResponseResult<List<RecipeDTO>> queryRecipeListByUserId(@PathParam("userId") Long userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    public ResponseResult<PageBean<RecipeDTO>> queryRecipeListByUserId(@PathParam("userId") Long userId, @RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
 
-        var list = recipeService.getRecipeListByUserId(userId, page, size)
-                .stream()
-                .map(recipe -> BeanUtil.copyProperties(recipe, RecipeDTO.class))
-                .toList();
+        var pageBean = recipeService.getRecipeListByUserId(userId, timestamp, size);
 
-        return ResponseResult.success(list);
+        return ResponseResult.success(pageBean);
     }
 
 
     /**
      * 根据类型id获取菜谱列表
      *
-     * @param typeId 菜谱类型id
-     * @param page   当前页数
-     * @param size   一页的菜谱数量
+     * @param typeId    菜谱类型id
+     * @param timestamp 时间戳
+     * @param size      一页的菜谱数量
      * @return list
      */
     @GetMapping("/list/by/type")
-    public ResponseResult<List<RecipeDTO>> queryRecipeListByTypeId(@PathParam("typeId") Integer typeId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    public ResponseResult<PageBean<RecipeDTO>> queryRecipeListByTypeId(@PathParam("typeId") Integer typeId, @RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
 
-        var list = recipeService.getRecipeListByTypeId(typeId, page, size)
-                .stream()
-                .map(recipe -> BeanUtil.copyProperties(recipe, RecipeDTO.class))
-                .toList();
+        var pageBean = recipeService.getRecipeListByTypeId(typeId, timestamp, size);
 
-        return ResponseResult.success(list);
+        return ResponseResult.success(pageBean);
     }
 
 
@@ -132,10 +128,10 @@ public class RecipeController {
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/common")
-    public ResponseResult<RecommendRecipeDTO> queryRecommendCommonRecipeList(@RequestParam(value = "lastTimestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    public ResponseResult<PageBean<RecipeDTO>> queryRecommendCommonRecipeList(@RequestParam(value = "timestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
 
-        RecommendRecipeDTO dto = recipeService.getRecommendRecipeList(0, lastTimestamp, size);
-        return ResponseResult.success(dto);
+        var pageBean = recipeService.getRecommendRecipeList(0, lastTimestamp, size);
+        return ResponseResult.success(pageBean);
     }
 
     /**
@@ -146,10 +142,10 @@ public class RecipeController {
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/professional")
-    public ResponseResult<RecommendRecipeDTO> queryRecommendProfessionalRecipeList(@RequestParam(value = "lastTimestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    public ResponseResult<PageBean<RecipeDTO>> queryRecommendProfessionalRecipeList(@RequestParam(value = "timestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
 
-        RecommendRecipeDTO dto = recipeService.getRecommendRecipeList(1, lastTimestamp, size);
-        return ResponseResult.success(dto);
+        var pageBean = recipeService.getRecommendRecipeList(1, lastTimestamp, size);
+        return ResponseResult.success(pageBean);
     }
 
 

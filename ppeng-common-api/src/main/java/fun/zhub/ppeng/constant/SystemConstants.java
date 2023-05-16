@@ -1,5 +1,7 @@
 package fun.zhub.ppeng.constant;
 
+import java.time.ZoneOffset;
+
 /**
  * <p>
  * 系统常量
@@ -10,6 +12,12 @@ package fun.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface SystemConstants {
+
+    /**
+     * 北京时间
+     */
+    ZoneOffset CST = ZoneOffset.ofHours(8);
+
     /**
      * 终端Id
      */

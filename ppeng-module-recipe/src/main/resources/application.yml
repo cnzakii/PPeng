@@ -7,9 +7,6 @@ spring:
   output:
     ansi:
       enabled: always
-  data:
-    redis:
-      database: 2
   cloud:
     nacos:
       discovery:

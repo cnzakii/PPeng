@@ -6,12 +6,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.constant.SystemConstants;
 import fun.zhub.ppeng.dto.RecipeDTO;
-import fun.zhub.ppeng.dto.RecommendRecipeDTO;
 import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,41 +157,53 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     /**
      * 实现 根据用户id查找菜谱
      *
-     * @param userId   用户id
-     * @param pageNum  当前页数
-     * @param pageSize 一页所呈现的菜谱数量
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param pageSize  一页所呈现的菜谱数量
      * @return list
      */
     @Override
-    public List<Recipe> getRecipeListByUserId(Long userId, Integer pageNum, Integer pageSize) {
-        Page<Recipe> page = new Page<>(pageNum, pageSize, false);
-        Page<Recipe> recipePage = recipeMapper.selectPage(page,
-                new LambdaQueryWrapper<Recipe>()
-                        .eq(Recipe::getUserId, userId)
-                        .eq(Recipe::getIsBaned, "0")
-                        .orderByDesc(Recipe::getUpdateTime));
+    public PageBean<RecipeDTO> getRecipeListByUserId(Long userId, Long timestamp, Integer pageSize) {
+        Timestamp dateTime = new Timestamp(timestamp);
 
-        return recipePage.getRecords();
+
+        List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("user_id", userId, dateTime, pageSize);
+
+        List<RecipeDTO> list = recipeList.stream()
+                .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
+                .toList();
+
+        // 获取最小时间戳
+        Recipe recipe = recipeList.get(recipeList.size() - 1);
+        long milli = recipe.getCreateTime().toInstant(SystemConstants.CST).toEpochMilli();
+
+        return new PageBean<>(list, milli);
     }
 
     /**
      * 实现 根据菜谱类型id查找菜谱
      *
-     * @param typeId   菜谱类型id
-     * @param pageNum  当前页数
-     * @param pageSize 一页所呈现的菜谱数量
+     * @param typeId    菜谱类型id
+     * @param timestamp 时间戳
+     * @param pageSize  一页所呈现的菜谱数量
      * @return list
      */
     @Override
-    public List<Recipe> getRecipeListByTypeId(Integer typeId, Integer pageNum, Integer pageSize) {
-        Page<Recipe> page = new Page<>(pageNum, pageSize, false);
-        Page<Recipe> recipePage = recipeMapper.selectPage(page,
-                new LambdaQueryWrapper<Recipe>()
-                        .eq(Recipe::getTypeId, typeId)
-                        .eq(Recipe::getIsBaned, "0")
-                        .orderByDesc(Recipe::getUpdateTime));
+    public PageBean<RecipeDTO> getRecipeListByTypeId(Integer typeId, Long timestamp, Integer pageSize) {
+        Timestamp dateTime = new Timestamp(timestamp);
 
-        return recipePage.getRecords();
+
+        List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("type_id", typeId, dateTime, pageSize);
+
+        List<RecipeDTO> list = recipeList.stream()
+                .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
+                .toList();
+
+        // 获取最小时间戳
+        Recipe recipe = recipeList.get(recipeList.size() - 1);
+        long milli = recipe.getCreateTime().toInstant(SystemConstants.CST).toEpochMilli();
+
+        return new PageBean<>(list, milli);
     }
 
     /**
@@ -199,10 +212,10 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
      * @param isProfessional 是否为专业
      * @param timestamp      最后一篇菜谱的时间戳
      * @param pageSize       一页所呈现的菜谱数量
-     * @return RecommendRecipeDTO
+     * @return Pagebean
      */
     @Override
-    public RecommendRecipeDTO getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize) {
+    public PageBean<RecipeDTO> getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize) {
         String key = (isProfessional == 1) ? RECIPE_RECOMMEND_PROFESSIONAL_KEY : RECIPE_RECOMMEND_COMMON_KEY;
 
         Set<TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, 0, timestamp, 0, pageSize);
@@ -223,12 +236,8 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         }
 
         List<RecipeDTO> list = recipeList.stream().map(this::fillRecipeUserInfo).toList();
-        RecommendRecipeDTO recommendRecipeDTO = new RecommendRecipeDTO();
-        recommendRecipeDTO.setRecipeDTOList(list);
-        recommendRecipeDTO.setMinTimestamp(lastTimestamp);
 
-
-        return recommendRecipeDTO;
+        return new PageBean<>(list, lastTimestamp);
     }
 
     /**

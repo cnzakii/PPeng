@@ -3,6 +3,10 @@ package fun.zhub.ppeng.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import fun.zhub.ppeng.entity.Recipe;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <p>
@@ -15,4 +19,15 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface RecipeMapper extends BaseMapper<Recipe> {
 
+
+    /**
+     * 根据id和时间，查询个数限制查询
+     *
+     * @param field    id字段
+     * @param id       id
+     * @param dateTime 限制时间
+     * @param size     限制个数
+     * @return list
+     */
+    List<Recipe> getRecipeListByIdAndTimeLimit(@Param("field") String field,@Param("id") Object id,@Param("dateTime") Timestamp dateTime,@Param("size") Integer size);
 }

@@ -1,10 +1,13 @@
 package fun.zhub.ppeng.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.constant.SystemConstants;
+import fun.zhub.ppeng.dto.MessageDTO;
 import fun.zhub.ppeng.entity.Message;
 import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.mapper.MessageMapper;
@@ -12,6 +15,7 @@ import fun.zhub.ppeng.service.MessageService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -27,24 +31,31 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     private MessageMapper messageMapper;
 
 
-
     /**
      * 查询用户消息
      *
-     * @param userId   用户id
-     * @param pageNum  页数
-     * @param pageSize 一页所呈现的页数
-     * @return list
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param pageSize  一页所呈现的页数
+     * @return pageBean
      */
     @Override
-    public List<Message> getMessagePage(Long userId, Integer pageNum, Integer pageSize) {
-        Page<Message> page = new Page<>(pageNum, pageSize);
-        Page<Message> messagePage = messageMapper.selectPage(page, new LambdaQueryWrapper<Message>()
-                .eq(Message::getUserId, userId)
-                .orderByAsc(Message::getStatus)
-                .orderByDesc(Message::getCreateTime));
+    public PageBean<MessageDTO> getMessagePage(Long userId, Long timestamp, Integer pageSize) {
+        // 将时间戳转成时间
 
-        return messagePage.getRecords();
+        Timestamp dateTime = new Timestamp(timestamp);
+
+        List<Message> messages = messageMapper.selectMessageListByIdAndTimeLimit(userId, dateTime, pageSize);
+
+        List<MessageDTO> list = messages.stream()
+                .map(bean -> BeanUtil.copyProperties(bean, MessageDTO.class))
+                .toList();
+
+        Message message = messages.get(messages.size() - 1);
+        long milli = message.getCreateTime().toInstant(SystemConstants.CST).toEpochMilli();
+
+
+        return new PageBean<>(list, milli);
     }
 
     /**

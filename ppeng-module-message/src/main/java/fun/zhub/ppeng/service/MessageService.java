@@ -1,9 +1,9 @@
 package fun.zhub.ppeng.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.zhub.ppeng.common.PageBean;
+import fun.zhub.ppeng.dto.MessageDTO;
 import fun.zhub.ppeng.entity.Message;
-
-import java.util.List;
 
 /**
  * MessageService interface
@@ -14,15 +14,15 @@ import java.util.List;
 public interface MessageService extends IService<Message> {
 
 
-
     /**
      * 查询用户消息
-     * @param userId 用户id
-     * @param pageNum 页数
-     * @param pageSize 一页所呈现的页数
-     * @return list
+     *
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param pageSize  一页所呈现的页数
+     * @return pageBean
      */
-    List<Message> getMessagePage(Long userId, Integer pageNum, Integer pageSize);
+    PageBean<MessageDTO> getMessagePage(Long userId, Long timestamp, Integer pageSize);
 
 
     /**
@@ -40,7 +40,6 @@ public interface MessageService extends IService<Message> {
      * @param messageIds 消息id
      */
     void removeMessageById(Long userId, Integer... messageIds);
-
 
 
 }

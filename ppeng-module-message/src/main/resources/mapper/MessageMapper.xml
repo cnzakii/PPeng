@@ -12,9 +12,14 @@
         <result column="is_deleted" property="isDeleted" />
     </resultMap>
 
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        id, userId, title, content, status, is_deleted
-    </sql>
+
+    <!--根据用户id和时间，查询个数限制查询-->
+    <select id="selectMessageListByIdAndTimeLimit" resultType="fun.zhub.ppeng.entity.Message">
+        SELECT id,user_id,title,content,status,create_time,is_deleted
+        FROM t_user_message
+        WHERE is_deleted=0
+          AND (user_id = #{userId} AND create_time &lt; #{dateTime} )
+        ORDER BY status ASC,create_time DESC limit #{size}
+    </select>
 
 </mapper>

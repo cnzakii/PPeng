@@ -10,6 +10,8 @@ package fun.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface RedisConstants {
+
+// -----------------------------------------------------------------------------------邮件相关
     /**
      * 验证码注册前缀
      */
@@ -37,7 +39,7 @@ public interface RedisConstants {
      */
     Long EMAIL_CODE_TTL = 2L;
 
-
+// -----------------------------------------------------------------------------------用户相关
     /**
      * 用户角色前缀
      */
@@ -103,7 +105,7 @@ public interface RedisConstants {
      */
     Long USER_COLLECT_TTL = 30L;
 
-
+// -----------------------------------------------------------------------------------菜谱相关
     /**
      * 菜谱类型名字map前缀
      */
@@ -144,4 +146,15 @@ public interface RedisConstants {
      */
     Long MAP_RECIPE_ID_TTL = 7L;
 
+// -----------------------------------------------------------------------------------管理员相关
+
+    /**
+     * 管理员信息过期前缀
+     */
+    String ADMIN_INFO = "admin:info:";
+
+    /**
+     * 管理员信息过期时间
+     */
+    Long ADMIN_INFO_TTL = 12L;
 }

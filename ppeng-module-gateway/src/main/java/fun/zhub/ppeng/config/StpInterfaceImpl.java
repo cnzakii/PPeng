@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static fun.zhub.ppeng.constant.RedisConstants.*;
+import static fun.zhub.ppeng.constant.RoleConstants.ROLE_ADMIN;
+import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 
 
 /**
@@ -58,10 +60,19 @@ public class StpInterfaceImpl implements StpInterface {
         if (CollUtil.isEmpty(role)) {
             return null;
         }
+        // 更新角色信息缓存
+        stringRedisTemplate.expire(USER_ROLE + loginId, ROLE_USER_TTL, TimeUnit.HOURS);
 
-        // 更新角色和用户信息缓存
-        stringRedisTemplate.expire(USER_ROLE  + loginId, ROLE_USER_TTL, TimeUnit.HOURS);
-        stringRedisTemplate.expire(USER_INFO + loginId, USER_INFO_TTL, TimeUnit.HOURS);
+        if (role.contains(ROLE_USER)) {
+            // 刷新用户缓存
+            stringRedisTemplate.expire(USER_INFO + loginId, USER_INFO_TTL, TimeUnit.HOURS);
+        }
+
+        if (role.contains(ROLE_ADMIN)) {
+            // 刷新管理员缓存
+            stringRedisTemplate.expire(ADMIN_INFO + loginId, ADMIN_INFO_TTL, TimeUnit.HOURS);
+        }
+
 
         return role.stream().toList();
     }

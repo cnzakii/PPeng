@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.dto.AddUserMessageDTO;
@@ -14,8 +15,7 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.Optional;
 
 
 /**
@@ -46,20 +46,18 @@ public class MessageController {
     /**
      * 获取当前用户消息列表
      *
-     * @param userId 用户id
-     * @param page   页数
-     * @param size   一页所呈现的信息数
+     * @param userId    用户id
+     * @param timestamp 时间戳
+     * @param size      一页所呈现的信息数
      * @return list
      */
     @GetMapping("/list")
-    public ResponseResult<List<MessageDTO>> listUserMessageList(@RequestParam("userId") @MatchToken Long userId, @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+    public ResponseResult<PageBean<MessageDTO>> listUserMessageList(@RequestParam("userId") @MatchToken Long userId, @RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
 
-        var list = messageService.getMessagePage(userId, page, size)
-                .stream()
-                .map(bean -> BeanUtil.copyProperties(bean, MessageDTO.class))
-                .toList();
+        var pageBean = messageService.getMessagePage(userId, timestamp, size);
 
-        return ResponseResult.success(list);
+        return ResponseResult.success(pageBean);
     }
 
     /**

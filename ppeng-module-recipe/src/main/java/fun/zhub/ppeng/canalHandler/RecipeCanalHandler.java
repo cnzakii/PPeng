@@ -58,11 +58,20 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
         // 查看新增的菜谱是否专业
         String key = (oldData.getIsProfessional() == 1) ? RECIPE_RECOMMEND_PROFESSIONAL_KEY : RECIPE_RECOMMEND_COMMON_KEY;
 
+        // 查看是否违规
+        if (newData.getIsBaned() == 1) {
+            // 如果违规，则直接删除缓存
+            stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(oldData));
+            return;
+        }
+
         // 转换成时间戳
         long timestamp = oldData.getUpdateTime().toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 
+
         // 删除redis中的缓存
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(oldData));
+
 
         // 添加新的缓存
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(newData), timestamp);

@@ -10,9 +10,6 @@ spring:
       enabled: always
   cache:
     type: caffeine
-  data:
-    redis:
-      database: 1
   cloud:
     nacos:
       discovery:

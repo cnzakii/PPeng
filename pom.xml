@@ -149,13 +149,6 @@
                 <version>${satoken.version}</version>
             </dependency>
 
-            <!-- Sa-Token插件：权限缓存与业务缓存分离 -->
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-alone-redis</artifactId>
-                <version>${satoken.version}</version>
-            </dependency>
-
             <!--百度内容审核API-->
             <dependency>
                 <groupId>com.baidu.aip</groupId>
