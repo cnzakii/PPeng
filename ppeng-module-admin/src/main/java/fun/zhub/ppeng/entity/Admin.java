@@ -33,7 +33,7 @@ public class Admin implements Serializable {
     private Long id;
 
     /**
-     * 手机号
+     * 邮箱
      */
     private String email;
 

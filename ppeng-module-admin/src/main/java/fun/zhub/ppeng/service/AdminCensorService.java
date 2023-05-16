@@ -1,8 +1,7 @@
 package fun.zhub.ppeng.service;
 
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.dto.ManualCensorDTO;
-
-import java.util.List;
 
 /**
  * AdminCensorService interface
@@ -21,7 +20,7 @@ public interface AdminCensorService {
      * @param key      Redis 的key
      * @return list
      */
-    List<ManualCensorDTO> getReportedRecipeList(Long timestamp, Integer pageSize, String key);
+    PageBean<ManualCensorDTO> getReportedRecipeList(Long timestamp, Integer pageSize, String key);
 
     /**
      * 处理人工审核菜谱结果

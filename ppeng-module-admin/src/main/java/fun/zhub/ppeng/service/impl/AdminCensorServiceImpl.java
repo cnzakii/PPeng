@@ -3,6 +3,7 @@ package fun.zhub.ppeng.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.ManualCensorDTO;
 import fun.zhub.ppeng.dto.RecipeCensorResultDTO;
@@ -12,6 +13,7 @@ import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.feign.RecipeCensorService;
 import fun.zhub.ppeng.feign.RecipeService;
 import fun.zhub.ppeng.service.AdminCensorService;
+import fun.zhub.ppeng.service.AdminService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -44,6 +46,9 @@ public class AdminCensorServiceImpl implements AdminCensorService {
     @Resource
     private RecipeService recipeService;
 
+    @Resource
+    private AdminService adminService;
+
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -57,7 +62,7 @@ public class AdminCensorServiceImpl implements AdminCensorService {
      * @return list
      */
     @Override
-    public List<ManualCensorDTO> getReportedRecipeList(Long timestamp, Integer pageSize, String key) {
+    public PageBean<ManualCensorDTO> getReportedRecipeList(Long timestamp, Integer pageSize, String key) {
         // 获取Zset集合，并从小到大排序
         Set<TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().rangeByScoreWithScores(key, timestamp, Long.MAX_VALUE, 0, pageSize);
         // 为null则直接返回
@@ -76,9 +81,8 @@ public class AdminCensorServiceImpl implements AdminCensorService {
         }
 
 
-        List<ManualCensorDTO> list;
         // 根据id获取recipe和recipeCensor
-        list = idList.stream()
+        List<ManualCensorDTO> list = idList.stream()
                 .map(id -> {
                     // 根据id查找recipe 和 recipeCensor
                     Recipe recipe = recipeService.queryRecipeById(id);
@@ -95,7 +99,8 @@ public class AdminCensorServiceImpl implements AdminCensorService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return list;
+
+        return new PageBean<>(list, lastTimestamp);
     }
 
     /**
@@ -149,6 +154,9 @@ public class AdminCensorServiceImpl implements AdminCensorService {
 
         // 将其从相应的redis集合中删除
         stringRedisTemplate.opsForZSet().remove(key, recipeId);
+
+        // 更新管理员信息
+        adminService.updateAdminTaskNum(adminId, result);
 
     }
 

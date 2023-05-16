@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.controller;
 
 import cn.hutool.core.util.StrUtil;
+import fun.zhub.ppeng.common.PageBean;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.dto.ManualCensorDTO;
@@ -11,7 +12,7 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Optional;
 
 import static fun.zhub.ppeng.constant.RedisConstants.APPEAL_RECIPE_KEY;
 import static fun.zhub.ppeng.constant.RedisConstants.REPORT_RECIPE_KEY;
@@ -37,7 +38,8 @@ public class AdminCensorController {
      * @return list
      */
     @GetMapping("/list/{type}")
-    public ResponseResult<List<ManualCensorDTO>> getReportedRecipeList(@PathVariable("type") String type, @RequestParam(value = "lastTimestamp") Long timestamp, @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseResult<PageBean<ManualCensorDTO>> getReportedRecipeList(@PathVariable("type") String type, @RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
         String key;
         // 获取key
         if (StrUtil.equals(type, "reported")) {
