@@ -28,9 +28,10 @@ public interface RecipeCommentService extends IService<RecipeComment> {
     /**
      * 通过评论id删除评论
      *
-     * @param id id
+     * @param id
+     * @param userId
      */
-    void deleteCommentById(Integer id);
+    void deleteCommentById(Integer id, Long userId);
 
     /**
      * 通过菜谱id获取评论

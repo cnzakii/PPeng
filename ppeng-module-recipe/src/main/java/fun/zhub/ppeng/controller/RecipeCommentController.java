@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.RecipeCommentDTO;
 import fun.zhub.ppeng.entity.RecipeComment;
@@ -56,12 +57,8 @@ public class RecipeCommentController {
      */
     @DeleteMapping("/delete/{id}")
     public ResponseResult<String> deleteComment(@PathVariable("id") Integer id) {
-       // Long userId = Long.valueOf((String) StpUtil.getLoginId());
-        /*
-         * TODO 验证身份，只有评论者和作者能够删除
-         */
-
-        recipeCommentService.deleteCommentById(id);
+        Long userId = Long.valueOf((String) StpUtil.getLoginId());
+        recipeCommentService.deleteCommentById(id,userId);
         return ResponseResult.success("删除成功");
 
     }

@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -37,6 +38,7 @@ public class RecipeComment implements Serializable {
     /**
      * 菜谱id
      */
+    @JsonIgnore
     private Long recipeId;
 
     /**
@@ -69,6 +71,7 @@ public class RecipeComment implements Serializable {
     /**
      * 逻辑删除：0，未删除，1，已删除
      */
+    @JsonIgnore
     @TableField(fill = FieldFill.INSERT)
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
