@@ -30,9 +30,9 @@ public interface SystemConstants {
 
 
     /**
-     * 文件存储根路径  /root/ppeng
+     * 文件存储根路径 /root/resource
      */
-    String FILE_ROOT_PATH = "/Users/zaki/Desktop";
+    String FILE_ROOT_PATH = "/root/resource";
 
     /**
      * url

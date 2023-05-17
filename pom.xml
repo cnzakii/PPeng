@@ -149,7 +149,7 @@
                 <version>${satoken.version}</version>
             </dependency>
 
-            <!--百度内容审核API-->
+            <!--百度API-->
             <dependency>
                 <groupId>com.baidu.aip</groupId>
                 <artifactId>java-sdk</artifactId>

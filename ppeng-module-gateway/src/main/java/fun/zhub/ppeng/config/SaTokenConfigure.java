@@ -64,7 +64,7 @@ public class SaTokenConfigure {
                             "/file/upload/**",
                             "/message/**",
                             "/recipe/**",
-                            "/image/recognition"
+                            "/image/recognition/**"
                     ).check(r -> StpUtil.checkRole(ROLE_USER));
 
 
