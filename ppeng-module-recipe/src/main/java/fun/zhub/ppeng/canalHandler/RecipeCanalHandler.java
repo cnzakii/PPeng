@@ -6,11 +6,13 @@ import fun.zhub.ppeng.canal.CanalTable;
 import fun.zhub.ppeng.entity.Recipe;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneOffset;
 
+import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_COMMON_KEY;
 import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_PROFESSIONAL_KEY;
 
@@ -29,6 +31,9 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
 
     /**
@@ -60,8 +65,15 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
 
         // 查看是否违规
         if (newData.getIsBaned() == 1) {
-            // 如果违规，则直接删除缓存
+            // 如果违规
+            // 从推荐列表中删除
             stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(oldData));
+
+            // 如果是普通菜谱，则通过MQ删除ElasticSearch中的相关数据
+            if (oldData.getIsProfessional() == 0) {
+                rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_RECIPE_DELETE, oldData.getId());
+            }
+
             return;
         }
 
@@ -72,9 +84,13 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
         // 删除redis中的缓存
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(oldData));
 
-
         // 添加新的缓存
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(newData), timestamp);
+
+        // 如果是普通菜谱，则通过MQ更新ElasticSearch中的相关数据
+        if (oldData.getIsProfessional() == 0) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_RECIPE_ADD, JSONUtil.toJsonStr(newData));
+        }
 
     }
 
@@ -89,7 +105,12 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
         // 查看新增的菜谱是否专业
         String key = (data.getIsProfessional() == 1) ? RECIPE_RECOMMEND_PROFESSIONAL_KEY : RECIPE_RECOMMEND_COMMON_KEY;
 
-        // 删除redis中的缓存
+        // 从推荐列表中删除
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(data));
+
+        // 如果是普通菜谱，则通过MQ删除ElasticSearch中的相关数据
+        if (data.getIsProfessional() == 0) {
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_RECIPE_DELETE, data.getId());
+        }
     }
 }

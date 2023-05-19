@@ -46,6 +46,11 @@ spring:
           uri: lb://ppeng-module-recipe
           predicates:
             - Path=/recipe/**
+        # 搜索模块
+        - id: search_route
+          uri: lb://ppeng-module-search
+          predicates:
+            - Path=/search/**
 
 
 

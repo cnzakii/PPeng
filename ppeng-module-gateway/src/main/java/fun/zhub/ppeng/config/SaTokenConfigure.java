@@ -44,7 +44,8 @@ public class SaTokenConfigure {
                         "/recipe/comment/list/**",
                         "/recipe/type/list",
                         "/recipe/list/**",
-                        "/recipe/recommend/**"
+                        "/recipe/recommend/**",
+                        "/search/**"
                 )
                 // 鉴权方法：每次访问进入
                 .setAuth(obj -> {

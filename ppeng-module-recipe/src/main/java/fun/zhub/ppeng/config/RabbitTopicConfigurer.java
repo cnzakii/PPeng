@@ -52,7 +52,7 @@ public class RabbitTopicConfigurer {
      * @return getBinding
      */
     @Bean
-    public Binding userCacheUpdateQueueBinding(@Qualifier("recipeCanalQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+    public Binding recipeCanalQueueBinding(@Qualifier("recipeCanalQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CANAL_DATA);
     }

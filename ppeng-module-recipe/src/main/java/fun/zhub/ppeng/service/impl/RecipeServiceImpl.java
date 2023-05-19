@@ -175,7 +175,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         }
 
         List<RecipeDTO> list = recipeList.stream()
-                .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
+                .map(this::fillRecipeUserInfo)
                 .toList();
 
         // 获取最小时间戳
@@ -207,7 +207,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         }
 
         List<RecipeDTO> list = recipeList.stream()
-                .map(bean -> BeanUtil.copyProperties(bean, RecipeDTO.class))
+                .map(this::fillRecipeUserInfo)
                 .toList();
 
         // 获取最小时间戳

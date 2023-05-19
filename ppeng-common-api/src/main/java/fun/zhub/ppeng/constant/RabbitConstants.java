@@ -54,6 +54,18 @@ public interface RabbitConstants {
      */
     String RECIPE_CANAL_QUEUE = "recipe.canal.queue";
 
+    /**
+     * 菜谱添加队列
+     */
+    String RECIPE_ADD_QUEUE = "recipe.add.queue";
+
+    /**
+     * 菜谱删除队列
+     */
+    String RECIPE_DELETE_QUEUE = "recipe.delete.queue";
+
+// ----------------------------------------------------------------路由键
+
 
     /**
      * routingKey 添加用户缓存
@@ -69,6 +81,16 @@ public interface RabbitConstants {
      * routingKey: Canal传输的数据
      */
     String ROUTING_CANAL_DATA = "canal.data";
+
+    /**
+     * routingKey: 菜谱添加
+     */
+    String ROUTING_RECIPE_ADD = "recipe.add";
+
+    /**
+     * routingKey: 菜谱删除
+     */
+    String ROUTING_RECIPE_DELETE = "recipe.delete";
 
 
     /**

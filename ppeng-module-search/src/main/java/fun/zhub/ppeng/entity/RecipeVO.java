@@ -2,6 +2,7 @@ package fun.zhub.ppeng.entity;
 
 
 import fun.zhub.ppeng.constant.AnalyzerType;
+import fun.zhub.ppeng.constant.IndexConstant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +28,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "recipe")
+@Document(indexName = IndexConstant.RECIPE_INDEX)
 public class RecipeVO implements Serializable {
 
     @Serial
@@ -114,6 +115,7 @@ public class RecipeVO implements Serializable {
     /**
      * 更新时间
      */
+    @Field
     private LocalDateTime updateTime;
 
 }
