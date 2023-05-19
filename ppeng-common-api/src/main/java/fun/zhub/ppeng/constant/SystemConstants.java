@@ -14,6 +14,21 @@ import java.time.ZoneOffset;
 public interface SystemConstants {
 
     /**
+     * 默认昵称前缀
+     */
+    String DEFAULT_NICK_NAME_PREFIX = "PPeng_";
+
+    /**
+     * 违规昵称前缀
+     */
+    String BAD_NICK_NAME_PREFIX = "违规昵称_";
+
+    /**
+     * 默认头像路径
+     */
+    String DEFAULT_ICON_PATH = "/icon/ppeng.png";
+
+    /**
      * 北京时间
      */
     ZoneOffset CST = ZoneOffset.ofHours(8);

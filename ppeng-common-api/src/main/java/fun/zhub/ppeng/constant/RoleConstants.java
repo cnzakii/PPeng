@@ -10,9 +10,7 @@ package fun.zhub.ppeng.constant;
  * @since 2023-03-18
  **/
 public interface RoleConstants {
-    String DEFAULT_NICK_NAME_PREFIX = "PPeng_";
 
-    String BAD_NICK_NAME_PREFIX = "违规昵称_";
 
     String ROLE_USER = "user";
 

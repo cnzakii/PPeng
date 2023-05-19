@@ -34,8 +34,9 @@ import java.util.concurrent.TimeUnit;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
-import static fun.zhub.ppeng.constant.RoleConstants.DEFAULT_NICK_NAME_PREFIX;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
+import static fun.zhub.ppeng.constant.SystemConstants.DEFAULT_ICON_PATH;
+import static fun.zhub.ppeng.constant.SystemConstants.DEFAULT_NICK_NAME_PREFIX;
 import static fun.zhub.ppeng.contant.WeChatApiContants.*;
 
 /**
@@ -404,6 +405,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User createUser(User user) {
         user.setNickName(DEFAULT_NICK_NAME_PREFIX + RandomUtil.randomString(10).toUpperCase());
         user.setRole(ROLE_USER);
+        user.setIcon(DEFAULT_ICON_PATH);
 
         user.setGender(0);
         user.setFans(0);

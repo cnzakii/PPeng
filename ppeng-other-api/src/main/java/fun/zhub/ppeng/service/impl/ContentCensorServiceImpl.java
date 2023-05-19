@@ -70,7 +70,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         log.info("用户({})昵称违规===》{}", userId, msg);
 
         // 利用OpenFeign调用修改昵称接口，修改昵称为： 违规昵称_5fsdfsfdf ，并通知用户
-        ResponseResult<String> result = userService.handleBadNickName(userId);
+        ResponseResult<String> result = userService.handleBadNickName(userId, msg);
 
         if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
             log.error("修改{}违规昵称失败", userId);
@@ -100,9 +100,15 @@ public class ContentCensorServiceImpl implements ContentCensorService {
 
         log.info("用户({})头像违规===》{}", userId, msg);
         /*
-         * TODO 服务调用，将icon转换成特定头像
+         * 服务调用，将icon转换成特定头像,并通知用户
          */
+        // 利用OpenFeign调用修改头像接口，修改头像为默认头像，并通知用户
+        ResponseResult<String> result = userService.handleBadIcon(userId, msg);
 
+        if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
+            log.error("修改{}违规头像失败", userId);
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规头像失败");
+        }
 
     }
 

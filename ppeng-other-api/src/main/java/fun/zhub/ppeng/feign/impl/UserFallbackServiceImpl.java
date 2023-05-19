@@ -16,8 +16,15 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class UserFallbackServiceImpl implements UserService {
+
+
     @Override
-    public ResponseResult<String> handleBadNickName(Long id) {
+    public ResponseResult<String> handleBadNickName(Long id, String msg) {
+        return ResponseResult.fail("调用user模块失败");
+    }
+
+    @Override
+    public ResponseResult<String> handleBadIcon(Long id, String msg) {
         return ResponseResult.fail("调用user模块失败");
     }
 
