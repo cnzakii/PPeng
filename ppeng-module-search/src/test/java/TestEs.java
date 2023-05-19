@@ -1,7 +1,6 @@
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
@@ -48,7 +47,6 @@ public class TestEs {
     private ElasticsearchTemplate elasticsearchTemplate;
 
 
-
     @Test
     public void insert() {
         Goods goods = Goods.builder()
@@ -64,7 +62,8 @@ public class TestEs {
           文档存在，执行修改操作
           此处只需要设置索引的对象即可，底层代码会从索引对象的@Document注解中获取索引、类型以及文档的id
          */
-        elasticsearchTemplate.index(new IndexQueryBuilder().withObject(goods).build(), IndexCoordinates.of("goods"));
+
+        elasticsearchTemplate.index(new IndexQueryBuilder().withObject(goods).withId("12").build(), IndexCoordinates.of("goods"));
         log.info("index document finish");
     }
 
@@ -204,7 +203,7 @@ public class TestEs {
     @Test
     public void page() {
         NativeQuery nativeSearchQuery = new NativeQueryBuilder()
-                .withQuery(new MatchAllQuery.Builder().build()._toQuery())
+                .withQuery(new MatchQuery.Builder().field("combined").query("黑色电视").build()._toQuery())
                 .withPageable(PageRequest.of(0, 10))
                 .build();
         /*
@@ -223,6 +222,13 @@ public class TestEs {
          */
         SearchHits<Goods> searchHits = elasticsearchTemplate.search(nativeSearchQuery, Goods.class,
                 IndexCoordinates.of("goods"));
+
+        searchHits.getSearchHits().forEach(bean -> {
+            System.out.println(bean.getScore());
+            System.out.println(bean.getContent());
+        });
+
+
         log.info("page document size：{}，result：{}", searchHits, searchHits);
     }
 
@@ -232,7 +238,7 @@ public class TestEs {
                 .withPreTags("<span style='color:red'>")
                 .withPostTags("</span>")
                 .build();
-        HighlightField highlightField = new HighlightField("title");
+        HighlightField highlightField = new HighlightField("combined");
         Highlight highlight = new Highlight(highlightParameters, Lists.newArrayList(highlightField));
         NativeQuery nativeQuery = new NativeQueryBuilder()
                 .withQuery(new MatchQuery.Builder().field("title").query("apple").build()._toQuery())
@@ -241,6 +247,7 @@ public class TestEs {
                 .build();
         SearchHits<Goods> searchHits = elasticsearchTemplate.search(nativeQuery, Goods.class,
                 IndexCoordinates.of("goods"));
+        searchHits.getSearchHits().forEach(System.out::println);
         log.info("page document size：{}，result：{}", 0, searchHits);
     }
 
@@ -297,10 +304,18 @@ public class TestEs {
 
     @Test
     public void delete() {
-        // 删除文档
-        elasticsearchTemplate.delete("", IndexCoordinates.of("goods"));
-    }
+        Goods goods = Goods.builder()
+                .id(10006L)
+                .name("测试商品")
+                .title("我是一个测试商品，拍了不发货，请谨慎！")
+                .price(new BigDecimal(9999999))
+                .publishDate("2019-11-06")
+                .build();
 
+        // 删除文档
+        String goods1 = elasticsearchTemplate.delete("12", IndexCoordinates.of("goods"));
+        System.out.println(goods1);
+    }
 
 
     private List<Goods> buildGoodsList() {

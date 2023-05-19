@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.entity;
 
 
+import fun.zhub.ppeng.constant.AnalyzerType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +14,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import static fun.zhub.ppeng.constant.AnalyzerType.IK_MAX_WORD;
 
 
 /**
@@ -35,6 +34,12 @@ public class RecipeVO implements Serializable {
     private static final long serialVersionUID = -656244681426117701L;
 
     /**
+     * 合并标题和内容
+     */
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART)
+    private String combind;
+
+    /**
      * 菜谱id
      */
     @Id
@@ -43,57 +48,67 @@ public class RecipeVO implements Serializable {
     /**
      * 发布者id
      */
-    @Field(type = FieldType.Keyword, analyzer =IK_MAX_WORD, searchAnalyzer = "ik_smart")
+    @Field
     private Long userId;
 
     /**
      * 菜谱类型
      */
+    @Field
     private Integer typeId;
 
     /**
      * 标题：现在150字以内
      */
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART, copyTo = {"combind"})
     private String title;
 
     /**
      * 配料表
      */
+    @Field
     private String material;
 
     /**
      * 文字内容
      */
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART, copyTo = {"combind"})
     private String content;
 
     /**
      * 图片路径
      */
+    @Field
     private String mediaUrl;
 
     /**
      * 0代表图文，1代表视频
      */
+    @Field
     private Integer isVideo;
 
     /**
      * 0代表非专业，1代表是专业
      */
+    @Field
     private Integer isProfessional;
 
     /**
      * 点赞数
      */
+    @Field
     private Integer likes;
 
     /**
      * 收藏数
      */
+    @Field
     private Integer collections;
 
     /**
      * 创建时间
      */
+    @Field
     private LocalDateTime createTime;
 
     /**
@@ -101,19 +116,4 @@ public class RecipeVO implements Serializable {
      */
     private LocalDateTime updateTime;
 
-    /**
-     * 审核状态： 0 未审核，1 机器审核，2 人工审核，3 人工复审
-     */
-    private Integer censorState;
-
-    /**
-     * 违规状态： 0 未违规， 1 违规
-     */
-    private Integer isBaned;
-
-
-    /**
-     * 逻辑删除:审核通过，但用户自己删除
-     */
-    private Integer isDeleted;
 }

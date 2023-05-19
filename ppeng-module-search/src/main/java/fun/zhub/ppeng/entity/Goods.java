@@ -21,10 +21,10 @@ public class Goods implements Serializable {
     @Id
     private Long id;
 
-    @Field
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART, copyTo = {"combind"})
     private String name;
 
-    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART)
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART, copyTo = {"combind"})
     private String title;
 
     @Field
@@ -32,4 +32,7 @@ public class Goods implements Serializable {
 
     @Field
     private String publishDate;
+
+    @Field(type = FieldType.Text, analyzer = AnalyzerType.IK_MAX_WORD, searchAnalyzer = AnalyzerType.IK_SMART, ignoreFields = {"combined"}, excludeFromSource = true)
+    private String combined;
 }
