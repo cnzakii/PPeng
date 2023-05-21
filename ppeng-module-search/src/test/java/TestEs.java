@@ -7,7 +7,11 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fun.zhub.ppeng.PPengModuleSearchApplication;
+import fun.zhub.ppeng.constant.IndexConstant;
+import fun.zhub.ppeng.dto.RecipeDTO;
 import fun.zhub.ppeng.entity.Goods;
+import fun.zhub.ppeng.entity.RecipeVO;
+import fun.zhub.ppeng.service.RecipeSearchService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
@@ -46,6 +50,29 @@ public class TestEs {
     @Resource
     private ElasticsearchTemplate elasticsearchTemplate;
 
+    @Resource
+    private RecipeSearchService recipeSearchService;
+
+
+    @Test
+    public void search(){
+        NativeQuery nativeSearchQuery = new NativeQueryBuilder()
+                .withQuery(new MatchQuery.Builder().field("combind").query("水").build()._toQuery())
+                .withPageable(PageRequest.of(0,5))
+                .build();
+
+        // 查询ElasticSearch
+        SearchHits<RecipeVO> searchHits = elasticsearchTemplate.search(nativeSearchQuery, RecipeVO.class,
+                IndexCoordinates.of(IndexConstant.RECIPE_INDEX));
+
+       searchHits.getSearchHits().forEach(s-> System.out.println(s.getContent()));
+
+
+
+        List<RecipeDTO> list = recipeSearchService.selectRecipeByTitleAndContent("面", 1, 5);
+
+        list.forEach(System.out::println);
+    }
 
     @Test
     public void insert() {

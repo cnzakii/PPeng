@@ -78,7 +78,7 @@ public class RecipeSearchServiceimpl implements RecipeSearchService {
     @Override
     public List<RecipeDTO> selectRecipeByTitleAndContent(String keyword, Integer page, Integer size) {
         // ElasticSearch 合并字段
-        String filed = "combined";
+        String filed = "combind";
 
         // 构建查询条件
         NativeQuery nativeSearchQuery = new NativeQueryBuilder()

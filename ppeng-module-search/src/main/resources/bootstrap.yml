@@ -14,3 +14,7 @@ spring:
           data-id: rabbitmq.yaml
           group: PPENG_GROUP
           refresh: true
+        shared-configs[1]:
+          data-id: elasticSearch.yaml
+          group: PPENG_GROUP
+          refresh: true

@@ -32,7 +32,7 @@ public class RecipeSearchController {
      * @return list
      */
     @GetMapping("/search")
-    public ResponseResult<List<RecipeDTO>> searchRecipe(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+    public ResponseResult<List<RecipeDTO>> searchRecipe(@RequestParam("keyword") String keyword, @RequestParam(value = "page",defaultValue = "1") Integer page, @RequestParam(value = "size",defaultValue = "5") Integer size) {
 
         var list = recipeSearchService.selectRecipeByTitleAndContent(keyword, page, size);
 

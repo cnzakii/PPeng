@@ -1,6 +1,7 @@
 server:
   port: 8264
 
+
 spring:
   application:
     name: ppeng-module-search
@@ -10,7 +11,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 10.0.0.88:7744  # Nacos服务注册中心地址
+        server-addr: nacos:8848 # 10.0.0.88:7744  # Nacos服务注册中心地址
+        namespace: ppeng
+        group: PPENG_GROUP
+        username: ppeng
+        password: **confidential**
     sentinel:
       transport:
         dashboard: 10.0.0.88：8182  # 配置Sentinel dashboard地址
@@ -21,8 +26,6 @@ spring:
     uris: http://10.0.0.88:9200
     username: elastic
     password: jq1RRHIkpcp=8SKC5Tsi
-
-
 
 management:
   endpoints:

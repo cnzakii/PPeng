@@ -85,10 +85,11 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
         stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(oldData));
 
         // 添加新的缓存
-        stringRedisTemplate.opsForZSet().remove(key, JSONUtil.toJsonStr(newData), timestamp);
+        stringRedisTemplate.opsForZSet().add(key, JSONUtil.toJsonStr(newData), timestamp);
 
         // 如果是普通菜谱，则通过MQ更新ElasticSearch中的相关数据
         if (oldData.getIsProfessional() == 0) {
+            log.info("传入消息队列，写入ElasticSearch");
             rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_RECIPE_ADD, JSONUtil.toJsonStr(newData));
         }
 

@@ -113,7 +113,7 @@ public class RecipeController {
      */
     @GetMapping("/list/by/type")
     public ResponseResult<PageBean<RecipeDTO>> queryRecipeListByTypeId(@PathParam("typeId") Integer typeId, @RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
-
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
         var pageBean = recipeService.getRecipeListByTypeId(typeId, timestamp, size);
 
         return ResponseResult.success(pageBean);
@@ -123,28 +123,28 @@ public class RecipeController {
     /**
      * 获取推荐列表--普通菜谱
      *
-     * @param lastTimestamp 最小时间戳
+     * @param timestamp 最小时间戳
      * @param size          一页的菜谱数量
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/common")
-    public ResponseResult<PageBean<RecipeDTO>> queryRecommendCommonRecipeList(@RequestParam(value = "timestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
-
-        var pageBean = recipeService.getRecommendRecipeList(0, lastTimestamp, size);
+    public ResponseResult<PageBean<RecipeDTO>> queryRecommendCommonRecipeList(@RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
+        var pageBean = recipeService.getRecommendRecipeList(0, timestamp, size);
         return ResponseResult.success(pageBean);
     }
 
     /**
      * 获取推荐列表--专业菜谱
      *
-     * @param lastTimestamp 最小时间戳
+     * @param timestamp 最小时间戳
      * @param size          一页的菜谱数量
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/professional")
-    public ResponseResult<PageBean<RecipeDTO>> queryRecommendProfessionalRecipeList(@RequestParam(value = "timestamp") Long lastTimestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
-
-        var pageBean = recipeService.getRecommendRecipeList(1, lastTimestamp, size);
+    public ResponseResult<PageBean<RecipeDTO>> queryRecommendProfessionalRecipeList(@RequestParam(value = "timestamp", defaultValue = "") Long timestamp, @RequestParam(value = "size", defaultValue = "5") Integer size) {
+        timestamp = Optional.ofNullable(timestamp).orElseGet(System::currentTimeMillis);
+        var pageBean = recipeService.getRecommendRecipeList(1, timestamp, size);
         return ResponseResult.success(pageBean);
     }
 
