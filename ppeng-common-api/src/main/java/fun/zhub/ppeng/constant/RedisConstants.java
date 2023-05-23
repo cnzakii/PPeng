@@ -106,25 +106,31 @@ public interface RedisConstants {
     Long USER_COLLECT_TTL = 30L;
 
 // -----------------------------------------------------------------------------------菜谱相关
-    /**
-     * 菜谱类型名字map前缀
-     */
-    String RECIPE_TYPE_NAME_KEY = "recipe:type:name:";
 
     /**
-     * 菜谱类型前缀
+     * 菜谱所有类型集合
      */
-    String RECIPE_TYPE_DETAIL_KEY = "recipe:type:name:detail:";
+    String RECIPE_TOTAL_TYPE_KEY = "recipe:type:total:list";
+
+    /**
+     * 菜谱父类集合
+     */
+    String RECIPE_PARENT_TYPE_KEY = "recipe:type:parent:list";
+
+    /**
+     * 菜谱子类集合前缀
+     */
+    String RECIPE_SUB_TYPE_KEY = "recipe:type:sub:list:";
 
     /**
      * 普通菜谱推荐前缀
      */
-    String RECIPE_RECOMMEND_COMMON_KEY = "recipe:recommend:common:";
+    String RECIPE_RECOMMEND_COMMON_KEY = "recipe:recommend:common";
 
     /**
      * 专业菜谱推荐前缀
      */
-    String RECIPE_RECOMMEND_PROFESSIONAL_KEY = "recipe:recommend:professional:";
+    String RECIPE_RECOMMEND_PROFESSIONAL_KEY = "recipe:recommend:professional";
 
     /**
      * 菜谱举报前缀

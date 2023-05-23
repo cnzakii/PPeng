@@ -44,5 +44,5 @@ public interface RecipeSearchService {
      * @param recipeVO 菜谱对象
      * @return RecipeDTO
      */
-    RecipeDTO fillRecipeUserInfo(RecipeVO recipeVO);
+    RecipeDTO toRecipeDTO(RecipeVO recipeVO);
 }

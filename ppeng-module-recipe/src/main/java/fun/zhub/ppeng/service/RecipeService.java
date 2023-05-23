@@ -99,7 +99,7 @@ public interface RecipeService extends IService<Recipe> {
      * @param recipe 菜谱对象
      * @return recipeDTO
      */
-    RecipeDTO fillRecipeUserInfo(Recipe recipe);
+    RecipeDTO toRecipeDTO(Recipe recipe);
 
 
 }

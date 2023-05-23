@@ -4,9 +4,9 @@
 
 
     <select id="getRecipeListByIdAndTimeLimit" resultType="fun.zhub.ppeng.entity.Recipe">
-        SELECT *
+        SELECT id, user_id, type_id, title, material, content, media_url, is_video, is_professional, likes, collections, create_time, update_time, censor_state, is_baned, is_deleted
         FROM t_recipe
-        WHERE is_deleted = 0 AND  (is_baned = 0 AND #{field} = #{id} AND create_time &lt; #{dateTime})
+        WHERE is_deleted = 0 AND  (is_baned = 0 AND ${field} = #{id} AND create_time &lt; #{dateTime})
         ORDER BY create_time DESC
         limit #{size}
     </select>

@@ -22,7 +22,10 @@ import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
 
 /**
  * 菜谱搜索实现类
@@ -93,19 +96,19 @@ public class RecipeSearchServiceimpl implements RecipeSearchService {
 
         // 获取recipeDTO对象
         List<RecipeDTO> list;
-        list = searchHits.getSearchHits().stream().map(bean -> fillRecipeUserInfo(bean.getContent())).toList();
+        list = searchHits.getSearchHits().stream().map(bean -> toRecipeDTO(bean.getContent())).toList();
 
         return list;
     }
 
     /**
-     * 填充菜谱的用户信息
+     * 填充菜谱信息,并转换成RecipeDTO对象
      *
      * @param recipeVO 菜谱对象
      * @return RecipeDTO
      */
     @Override
-    public RecipeDTO fillRecipeUserInfo(RecipeVO recipeVO) {
+    public RecipeDTO toRecipeDTO(RecipeVO recipeVO) {
         RecipeDTO recipeDTO = BeanUtil.copyProperties(recipeVO, RecipeDTO.class);
 
         Long userId = recipeVO.getUserId();
@@ -117,9 +120,17 @@ public class RecipeSearchServiceimpl implements RecipeSearchService {
             return recipeDTO;
         }
 
+        // 添加个人信息
         User userInfo = result.getData();
         recipeDTO.setNickName(userInfo.getNickName());
-        recipeDTO.setIcon(userInfo.getIcon());
+        recipeDTO.setIcon(PPENG_RESOURCE_URL+userInfo.getIcon());
+
+        // 将mediaUrl 字符串转成 String数组
+        String[] array = Arrays.stream(recipeVO.getMediaUrl().trim().split(","))
+                .map(s -> PPENG_RESOURCE_URL + s)
+                .toArray(String[]::new);
+        recipeDTO.setMediaUrl(array);
+
         return recipeDTO;
     }
 

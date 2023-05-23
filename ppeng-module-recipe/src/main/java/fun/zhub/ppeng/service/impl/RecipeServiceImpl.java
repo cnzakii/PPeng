@@ -12,6 +12,7 @@ import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.constant.SystemConstants;
 import fun.zhub.ppeng.dto.RecipeDTO;
+import fun.zhub.ppeng.dto.RecipeTypeDTO;
 import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
@@ -27,13 +28,11 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_COMMON_KEY;
 import static fun.zhub.ppeng.constant.RedisConstants.RECIPE_RECOMMEND_PROFESSIONAL_KEY;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
 
 /**
  * RecipeService
@@ -169,13 +168,14 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 
         List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("user_id", userId, dateTime, pageSize);
 
+
         // 如果为空，则直接返回
         if (CollUtil.isEmpty(recipeList)) {
             return new PageBean<>();
         }
 
         List<RecipeDTO> list = recipeList.stream()
-                .map(this::fillRecipeUserInfo)
+                .map(this::toRecipeDTO)
                 .toList();
 
         // 获取最小时间戳
@@ -195,10 +195,29 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
      */
     @Override
     public PageBean<RecipeDTO> getRecipeListByTypeId(Integer typeId, Long timestamp, Integer pageSize) {
+
         Timestamp dateTime = new Timestamp(timestamp);
 
+        // 根据typeId获取子类菜谱类型集合
+        List<RecipeTypeDTO> subTypeList = recipeTypeService.getSubRecipeTypeListByParentId(typeId);
 
-        List<Recipe> recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("type_id", typeId, dateTime, pageSize);
+        List<Recipe> recipeList = null;
+        if (CollUtil.isEmpty(subTypeList)) {
+            // 如果获取的子类菜谱类型集合为null，说明此菜谱类型Id就是子类菜谱类型Id
+            recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("type_id", typeId, dateTime, pageSize);
+        } else {
+            // 获取所有子类Id集合
+            Object[] ids = subTypeList.stream().map(RecipeTypeDTO::getId).toArray();
+
+            recipeList = recipeMapper.selectList(new LambdaQueryWrapper<Recipe>()
+                    .in(Recipe::getTypeId, ids)
+                    .eq(Recipe::getIsBaned, 0)
+                    .lt(Recipe::getCreateTime, dateTime)
+                    .orderByDesc(Recipe::getCreateTime)
+                    .last(" limit " + pageSize)
+            );
+
+        }
 
 
         // 如果为空，则直接返回
@@ -207,7 +226,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         }
 
         List<RecipeDTO> list = recipeList.stream()
-                .map(this::fillRecipeUserInfo)
+                .map(this::toRecipeDTO)
                 .toList();
 
         // 获取最小时间戳
@@ -246,7 +265,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
             recipeList.add(JSONUtil.toBean(typedTuple.getValue(), Recipe.class));
         }
 
-        List<RecipeDTO> list = recipeList.stream().map(this::fillRecipeUserInfo).toList();
+        List<RecipeDTO> list = recipeList.stream().map(this::toRecipeDTO).toList();
 
         return new PageBean<>(list, lastTimestamp);
     }
@@ -271,13 +290,13 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     }
 
     /**
-     * 填充菜谱的用户信息
+     * 填充菜谱信息,并转换成RecipeDTO对象
      *
      * @param recipe 菜谱对象
      * @return RecipeDTO
      */
     @Override
-    public RecipeDTO fillRecipeUserInfo(Recipe recipe) {
+    public RecipeDTO toRecipeDTO(Recipe recipe) {
         RecipeDTO recipeDTO = BeanUtil.copyProperties(recipe, RecipeDTO.class);
 
         Long userId = recipe.getUserId();
@@ -288,10 +307,20 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
             log.error("填充菜谱的用户信息失败===》{}", result);
             return recipeDTO;
         }
-
+        // 填入用户信息
         User userInfo = result.getData();
         recipeDTO.setNickName(userInfo.getNickName());
-        recipeDTO.setIcon(userInfo.getIcon());
+        recipeDTO.setIcon(PPENG_RESOURCE_URL + userInfo.getIcon());
+
+        // 将mediaUrl 字符串转成 String数组
+        String[] array = Arrays.stream(recipe.getMediaUrl().trim().split(","))
+                .map(s -> PPENG_RESOURCE_URL + s)
+                .toArray(String[]::new);
+        recipeDTO.setMediaUrl(array);
+
+        // 设置recipeDTO的菜谱类型
+        recipeDTO.setType(recipeTypeService.getNameById(recipe.getTypeId()));
+
         return recipeDTO;
     }
 

@@ -48,7 +48,7 @@ public class RecipeDTO implements Serializable {
     /**
      * 菜谱类型
      */
-    private Integer typeId;
+    private String type;
 
     /**
      * 标题：现在150字以内
@@ -68,7 +68,7 @@ public class RecipeDTO implements Serializable {
     /**
      * 图片路径
      */
-    private String mediaUrl;
+    private String[] mediaUrl;
 
     /**
      * 0代表图文，1代表视频

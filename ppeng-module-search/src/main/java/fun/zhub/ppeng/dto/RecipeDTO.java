@@ -68,7 +68,7 @@ public class RecipeDTO implements Serializable {
     /**
      * 图片路径
      */
-    private String mediaUrl;
+    private String[] mediaUrl;
 
     /**
      * 0代表图文，1代表视频
