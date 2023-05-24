@@ -1,11 +1,9 @@
 package fun.zhub.ppeng.controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.dto.user.UserVerifyDTO;
 import fun.zhub.ppeng.entity.User;
-import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.MailService;
 import jakarta.annotation.Resource;
@@ -41,7 +39,6 @@ public class MailController {
      * @return success
      */
     @PostMapping("/register/{mail}")
-    @SentinelResource(value = "sendRegisterMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> sendRegisterMail(@PathVariable("mail") String mail) {
 
 
@@ -58,7 +55,6 @@ public class MailController {
      * @return success
      */
     @PostMapping("/verify")
-    @SentinelResource(value = "sendUpdateMail", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> sendUpdateMail(@RequestBody @Validated UserVerifyDTO userVerifyDTO) {
         Long userId = userVerifyDTO.getUserId();
 

@@ -30,4 +30,4 @@ EXPOSE 3377
 # docker build -t ppeng/recipe:1.0 .
 
 # 运行命令
-# docker run -d -p 9836:9836 --network ppeng_net --restart=always --name ppeng-recipe -v /home/ppeng/logs/ppeng-recipe:/root/logs/ppeng-recipe -v /home/ppeng/resource:/root/resource ppeng/recipe:1.0
+# docker run -d -p 9836:9836 --network ppeng_net --restart=always --name ppeng-recipe -v /home/ppeng/logs/ppeng-recipe:/root/logs/ppeng-recipe ppeng/recipe:1.0

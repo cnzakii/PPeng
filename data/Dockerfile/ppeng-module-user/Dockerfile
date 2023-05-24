@@ -30,4 +30,4 @@ EXPOSE 3377
 # docker build -t ppeng/user:1.0 .
 
 # 运行命令
-# docker run -d -p 3377:3377 --network ppeng_net --restart=always --name ppeng-user -v /home/ppeng/logs/ppeng-user:/root/logs/ppeng-user -v /home/ppeng/resource:/root/resource ppeng/user:1.0
+# docker run -d -p 3377:3377 --network ppeng_net --restart=always --name ppeng-user -v /home/ppeng/logs/ppeng-user:/root/logs/ppeng-user  ppeng/user:1.0

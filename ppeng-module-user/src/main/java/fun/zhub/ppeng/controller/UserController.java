@@ -8,7 +8,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.dto.ContentCensorDTO;
@@ -21,7 +20,6 @@ import fun.zhub.ppeng.dto.update.UpdateUserPasswordDTO;
 import fun.zhub.ppeng.dto.update.UserInfoUpdateDTO;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.exception.BusinessException;
-import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.UserService;
 import fun.zhub.ppeng.util.MyBeanUtil;
 import fun.zhub.ppeng.validation.annotation.MatchToken;
@@ -71,7 +69,6 @@ public class UserController {
      * @return RSA公钥
      */
     @GetMapping("/rsa")
-    @SentinelResource(value = "getPublicKey", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<String> getPublicKey() {
 
         return ResponseResult.success(rsa.getPublicKeyBase64());

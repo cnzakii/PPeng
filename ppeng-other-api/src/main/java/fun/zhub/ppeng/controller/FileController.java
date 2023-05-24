@@ -1,8 +1,6 @@
 package fun.zhub.ppeng.controller;
 
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import fun.zhub.ppeng.common.ResponseResult;
-import fun.zhub.ppeng.exception.GlobalBlockHandler;
 import fun.zhub.ppeng.service.FileService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +35,6 @@ public class FileController {
      * @return url地址
      */
     @PostMapping("/upload/{type}")
-    @SentinelResource(value = "uploadFile", blockHandlerClass = GlobalBlockHandler.class, blockHandler = "handleCommonBlockException")
     public ResponseResult<Object> uploadFile(@PathVariable("type") String type, MultipartFile... file) {
 
         Object url = switch (type) {

@@ -8,6 +8,7 @@ import fun.zhub.ppeng.constant.IndexConstant;
 import fun.zhub.ppeng.dto.RecipeDTO;
 import fun.zhub.ppeng.entity.RecipeVO;
 import fun.zhub.ppeng.entity.User;
+import fun.zhub.ppeng.feign.RecipeService;
 import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.RecipeSearchService;
 import jakarta.annotation.Resource;
@@ -43,6 +44,9 @@ public class RecipeSearchServiceimpl implements RecipeSearchService {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RecipeService recipeService;
 
 
     /**
@@ -123,13 +127,22 @@ public class RecipeSearchServiceimpl implements RecipeSearchService {
         // 添加个人信息
         User userInfo = result.getData();
         recipeDTO.setNickName(userInfo.getNickName());
-        recipeDTO.setIcon(PPENG_RESOURCE_URL+userInfo.getIcon());
+        recipeDTO.setIcon(PPENG_RESOURCE_URL + userInfo.getIcon());
 
         // 将mediaUrl 字符串转成 String数组
         String[] array = Arrays.stream(recipeVO.getMediaUrl().trim().split(","))
                 .map(s -> PPENG_RESOURCE_URL + s)
                 .toArray(String[]::new);
         recipeDTO.setMediaUrl(array);
+
+        // 设置菜谱类型
+        ResponseResult<String> response = recipeService.getNameById(recipeVO.getTypeId());
+        // 判断是否请求成功
+        if (!StrUtil.equals(response.getStatus(), "200")) {
+            log.error("填充菜谱的菜谱类型信息失败===》{}", result);
+            return recipeDTO;
+        }
+        recipeDTO.setType(response.getData());
 
         return recipeDTO;
     }

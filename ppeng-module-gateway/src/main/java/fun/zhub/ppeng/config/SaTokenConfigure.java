@@ -42,7 +42,7 @@ public class SaTokenConfigure {
                         "/mail/register/**",
                         "/user/register/**",
                         "/recipe/comment/list/**",
-                        "/recipe/type/list",
+                        "/recipe/type/**",
                         "/recipe/list/**",
                         "/recipe/recommend/**",
                         "/search/**"

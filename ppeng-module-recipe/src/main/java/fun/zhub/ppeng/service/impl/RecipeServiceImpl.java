@@ -201,7 +201,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         // 根据typeId获取子类菜谱类型集合
         List<RecipeTypeDTO> subTypeList = recipeTypeService.getSubRecipeTypeListByParentId(typeId);
 
-        List<Recipe> recipeList = null;
+        List<Recipe> recipeList;
         if (CollUtil.isEmpty(subTypeList)) {
             // 如果获取的子类菜谱类型集合为null，说明此菜谱类型Id就是子类菜谱类型Id
             recipeList = recipeMapper.getRecipeListByIdAndTimeLimit("type_id", typeId, dateTime, pageSize);

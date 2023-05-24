@@ -95,9 +95,6 @@
             <version>1.34.0</version>
         </dependency>
 
-
-
-
         <!-- nacos注册中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -121,17 +118,6 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
-        <!--SpringCloud alibaba sentinel-datasource-nacos 做持久化-->
-        <dependency>
-            <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-datasource-nacos</artifactId>
-        </dependency>
-
-        <!--SpringCloud alibaba sentinel -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
-        </dependency>
 
         <!--openfeign-->
         <dependency>
