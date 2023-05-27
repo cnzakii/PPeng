@@ -3,19 +3,19 @@
 <mapper namespace="fun.zhub.ppeng.mapper.RecipeCommentMapper">
     <!--通过菜谱id查询该id下的所有parentId=0的评论信息-->
     <select id="findByRecipeId" resultType="fun.zhub.ppeng.entity.RecipeComment">
-        SELECT *
-        FROM t_recipe_comment
+        SELECT c.*,u.icon,u.nick_name
+        FROM t_recipe_comment as c left join t_user as u on u.id =c.commenter_id
         WHERE parent_id = #{parentId}
           and recipe_id = #{recipeId}
-          and is_deleted = 0
+          and c.is_deleted = 0
         order by create_time desc
     </select>
     <!--通过评论id查询该id下的所有的子评论信息-->
     <select id="findByParentId" resultType="fun.zhub.ppeng.entity.RecipeComment">
-        SELECT *
-        FROM t_recipe_comment
+        SELECT c.*,u.icon,u.nick_name
+        FROM t_recipe_comment as c left join t_user as u on u.id =c.commenter_id
         WHERE parent_id = #{parentId}
-          and is_deleted = 0
+          and c.is_deleted = 0
         order by create_time  desc
     </select>
 </mapper>
