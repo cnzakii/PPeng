@@ -33,7 +33,7 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
     @Bean
     public SaServletFilter getSaServletFilter() {
         return new SaServletFilter()
-                .addInclude("/recipe/censor/allow","/recipe/censor/ban","/recipe/info/**","/recipe/censor/info/**")
+                .addInclude("/recipe/censor/allow", "/recipe/censor/ban", "/recipe/info/**", "/recipe/censor/info/**", "/recipe/update/stats")
                 .setAuth(obj -> {
                     // 校验 Same-Token 身份凭证     Same-Token为服务间调用独有标识
                     SaSameUtil.checkCurrentRequestToken();

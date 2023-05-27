@@ -50,6 +50,18 @@ public class RecipeController {
     }
 
     /**
+     * 根据菜谱Id来更新菜谱的点赞数和收藏数--仅限服务间调用
+     *
+     * @param recipeId 菜谱Id
+     * @param field    字段名
+     * @param change   变化的数值
+     */
+    @PostMapping("/update/stats")
+    public boolean updateRecipeStatsById(@RequestParam("recipeId") Long recipeId, @RequestParam("field") String field, @RequestParam("change") int change) {
+        return recipeService.updateRecipeStatsById(recipeId, field, change);
+    }
+
+    /**
      * 菜谱上传
      *
      * @param pushRecipeDTO pushRecipeDTO
@@ -124,7 +136,7 @@ public class RecipeController {
      * 获取推荐列表--普通菜谱
      *
      * @param timestamp 最小时间戳
-     * @param size          一页的菜谱数量
+     * @param size      一页的菜谱数量
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/common")
@@ -138,7 +150,7 @@ public class RecipeController {
      * 获取推荐列表--专业菜谱
      *
      * @param timestamp 最小时间戳
-     * @param size          一页的菜谱数量
+     * @param size      一页的菜谱数量
      * @return RecommendRecipeDTO
      */
     @GetMapping("/recommend/professional")

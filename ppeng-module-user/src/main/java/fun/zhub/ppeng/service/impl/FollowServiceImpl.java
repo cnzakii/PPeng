@@ -44,7 +44,6 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     private UserService userService;
 
 
-
     /**
      * 实现添加关注
      *
@@ -70,8 +69,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
 
         // 累加粉丝数和关注数
-        userService.updateFollowOrFans("follows", userId, "insert");
-        userService.updateFollowOrFans("fans", followId, "insert");
+        userService.updateUserStatsById("follows", userId, 1);
+        userService.updateUserStatsById("fans", followId, 1);
 
 
         // 查看是否有-1元素，有则清除
@@ -131,8 +130,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
 
         // 减少粉丝数和关注数
-        userService.updateFollowOrFans("follows", userId, "delete");
-        userService.updateFollowOrFans("fans", followId, "delete");
+        userService.updateUserStatsById("follows", userId, -1);
+        userService.updateUserStatsById("fans", followId, -1);
 
 
         // 删除redis缓存并刷新过期时间
@@ -220,7 +219,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         // 没有则查询数据库
         Set<String> set = queryFollowById(userId);
 
-        if(set==null||set.isEmpty()){
+        if (set == null || set.isEmpty()) {
             return false;
         }
 

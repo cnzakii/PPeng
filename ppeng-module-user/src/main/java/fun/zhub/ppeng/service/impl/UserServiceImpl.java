@@ -349,28 +349,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 实现更新用户关注或者粉丝
+     * 根据用户ID来更新用户的粉丝数、关注数
      *
-     * @param name   字段名
+     * @param field   字段名
      * @param userId id
-     * @param type   类型
+     * @param change 变化的数值
      */
     @Override
-    public void updateFollowOrFans(String name, Long userId, String type) {
-        String sql;
-        if (StrUtil.equals(type, "insert")) {
-            sql = name + "=" + name + "+1";
-        } else if (StrUtil.equals(type, "delete")) {
-            sql = name + "=" + name + "-1";
-        } else {
-            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "参数失败");
-        }
-
-        int i = userMapper.update(null, new LambdaUpdateWrapper<User>().eq(User::getId, userId).setSql(sql));
-
+    public void updateUserStatsById(String field, Long userId, int change) {
+        int i = userMapper.updateUserStatsById(userId, field, change);
 
         if (i == 0) {
-            log.error("更新用户具体信息{}失败", userId);
+            log.error("更新用户粉丝/关注数{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "更新失败");
         }
     }

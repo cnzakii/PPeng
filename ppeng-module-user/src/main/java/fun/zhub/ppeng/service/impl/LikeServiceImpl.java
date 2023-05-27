@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.zhub.ppeng.common.ResponseStatus;
 import fun.zhub.ppeng.entity.Like;
 import fun.zhub.ppeng.exception.BusinessException;
+import fun.zhub.ppeng.feign.RecipeService;
 import fun.zhub.ppeng.mapper.LikeMapper;
 import fun.zhub.ppeng.service.LikeService;
 import jakarta.annotation.Resource;
@@ -38,6 +39,9 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
     @Resource
     private LikeMapper likeMapper;
 
+    @Resource
+    private RecipeService recipeService;
+
     /**
      * 实现点赞菜谱
      *
@@ -46,14 +50,13 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
      */
     @Override
     public void addLikedRecipe(Long userId, Long recipeId) {
-        String key = USER_LIKE_KEY + userId;
         // 查询是否已经点赞
         Boolean liked = isLiked(userId, recipeId);
         if (BooleanUtil.isTrue(liked)) {
             throw new BusinessException(ResponseStatus.FAIL, "已经点赞了");
         }
 
-        //  存入数据库并写入redis
+        //  存入数据库
         Like like = new Like();
         like.setUserId(userId);
         like.setRecipeId(recipeId);
@@ -62,14 +65,9 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "添加失败");
         }
 
-        // 查看是否有-1元素，有则清除
-        Boolean b = stringRedisTemplate.opsForSet().isMember(key, "-1");
-        if (BooleanUtil.isTrue(b)) {
-            stringRedisTemplate.opsForSet().remove(key, "-1");
-        }
+        // 调用RecipeService服务，添加点赞
+        recipeService.updateRecipeStatsById(recipeId, "likes", 1);
 
-        stringRedisTemplate.opsForSet().add(key, String.valueOf(recipeId));
-        stringRedisTemplate.expire(key, USER_LIKE_TTL, TimeUnit.MINUTES);
     }
 
     /**
@@ -85,7 +83,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
         Set<String> members = stringRedisTemplate.opsForSet().members(key);
 
         if (members != null && !members.isEmpty()) {
-            // 查看是否包含-1，也就是说该用户当前没有关注
+            // 查看是否包含-1，也就是说该用户当前没有点赞
             boolean b = members.contains(String.valueOf(-1));
             stringRedisTemplate.expire(key, USER_LIKE_TTL, TimeUnit.MINUTES);
             if (b && members.size() == 1) {
@@ -135,14 +133,13 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
         if (BooleanUtil.isFalse(liked)) {
             throw new BusinessException(ResponseStatus.FAIL, "尚未点赞");
         }
-
         int i = likeMapper.delete(new QueryWrapper<Like>().eq("user_id", userId).eq("recipe_id", recipeId));
-
         if (i == 0) {
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "删除失败");
         }
-        stringRedisTemplate.opsForSet().remove(USER_LIKE_KEY + userId, String.valueOf(recipeId));
-        stringRedisTemplate.expire(USER_LIKE_KEY + userId, USER_LIKE_TTL, TimeUnit.MINUTES);
+
+        // 调用RecipeService服务，取消点赞
+        recipeService.updateRecipeStatsById(recipeId, "likes", -1);
 
     }
 
@@ -164,13 +161,13 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
             // 刷新过期时间
             stringRedisTemplate.expire(key, USER_LIKE_TTL, TimeUnit.MINUTES);
             return members.contains(String.valueOf(recipeId));
-
         }
 
         // 没有则查询数据库
         Set<String> set = queryLikedRecipeSet(userId);
 
-        if(set==null||set.isEmpty()){
+        // 不存在直接返回
+        if (set == null || set.isEmpty()) {
             return false;
         }
 

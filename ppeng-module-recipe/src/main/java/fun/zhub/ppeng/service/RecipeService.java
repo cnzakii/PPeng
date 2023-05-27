@@ -35,6 +35,15 @@ public interface RecipeService extends IService<Recipe> {
     void updateCensorState(Long recipeId, Integer censorState, Integer isBaned);
 
     /**
+     * 根据菜谱Id来更新菜谱的点赞数和收藏数
+     *
+     * @param recipeId 菜谱Id
+     * @param field    字段名
+     * @param change   变化的数值
+     */
+    Boolean updateRecipeStatsById(Long recipeId, String field, int change);
+
+    /**
      * 删除菜谱
      *
      * @param userId   用户id
@@ -66,9 +75,9 @@ public interface RecipeService extends IService<Recipe> {
     /**
      * 根据类型id查询菜谱
      *
-     * @param typeId   菜谱类型id
+     * @param typeId    菜谱类型id
      * @param timestamp 时间戳
-     * @param pageSize 一页所呈现的菜谱数量
+     * @param pageSize  一页所呈现的菜谱数量
      * @return list
      */
     PageBean<RecipeDTO> getRecipeListByTypeId(Integer typeId, Long timestamp, Integer pageSize);

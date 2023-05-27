@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 /**
  * 注解FixedValues的Validator<br>
- * 校验Integer数值只能是某一组固定的数组
+ * 校验Integer数值只能是某一组固定的数组中的某一元素
  *
  * @author Zaki
  * @version 1.0

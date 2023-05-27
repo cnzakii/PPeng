@@ -98,13 +98,13 @@ public interface UserService extends IService<User> {
     String updateUserIcon(Long userId, MultipartFile icon);
 
     /**
-     * 更新粉丝或者关注数
+     * 根据用户ID来更新用户的粉丝数、关注数
      *
-     * @param name   字段名
+     * @param field  字段名
      * @param userId id
-     * @param type   类型
+     * @param change 变化的数值
      */
-    void updateFollowOrFans(String name, Long userId, String type);
+    void updateUserStatsById(String field, Long userId, int change);
 
 
     /**

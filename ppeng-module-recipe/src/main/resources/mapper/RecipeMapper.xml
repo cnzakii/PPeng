@@ -3,6 +3,7 @@
 <mapper namespace="fun.zhub.ppeng.mapper.RecipeMapper">
 
 
+
     <select id="getRecipeListByIdAndTimeLimit" resultType="fun.zhub.ppeng.entity.Recipe">
         SELECT id, user_id, type_id, title, material, content, media_url, is_video, is_professional, likes, collections, create_time, update_time, censor_state, is_baned, is_deleted
         FROM t_recipe
@@ -10,4 +11,10 @@
         ORDER BY create_time DESC
         limit #{size}
     </select>
+
+    <update id="updateRecipeStatsById" useGeneratedKeys="true" keyProperty="updateCount">
+        UPDATE t_recipe
+        SET ${field} = ${field} + #{change}
+        WHERE id = #{recipeId}
+    </update>
 </mapper>

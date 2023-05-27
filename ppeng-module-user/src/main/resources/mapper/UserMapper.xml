@@ -3,6 +3,9 @@
 <mapper namespace="fun.zhub.ppeng.mapper.UserMapper">
 
 
-
-
+    <update id="updateUserStatsById"  useGeneratedKeys="true" keyProperty="updateCount">
+        UPDATE t_user
+        SET ${field} = ${field} + #{change}
+        WHERE id = #{userId}
+    </update>
 </mapper>

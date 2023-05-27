@@ -3,6 +3,7 @@ package fun.zhub.ppeng.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import fun.zhub.ppeng.entity.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -15,4 +16,12 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
+    /**
+     * 根据用户ID来更新用户的粉丝数、关注数
+     *
+     * @param userId 用户Id
+     * @param field  更新的字段
+     * @param change 更新的数值
+     */
+    int updateUserStatsById(@Param("userId") Long userId,@Param("field") String field,@Param("change") int change);
 }

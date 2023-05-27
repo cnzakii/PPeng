@@ -29,5 +29,14 @@ public interface RecipeMapper extends BaseMapper<Recipe> {
      * @param size     限制个数
      * @return list
      */
-    List<Recipe> getRecipeListByIdAndTimeLimit(@Param("field") String field,@Param("id") Object id,@Param("dateTime") Timestamp dateTime,@Param("size") Integer size);
+    List<Recipe> getRecipeListByIdAndTimeLimit(@Param("field") String field, @Param("id") Object id, @Param("dateTime") Timestamp dateTime, @Param("size") Integer size);
+
+    /**
+     * 根据菜谱Id来更新菜谱的点赞数和收藏数
+     *
+     * @param recipeId 菜谱Id
+     * @param field    字段名
+     * @param change   变化的数值
+     */
+    int updateRecipeStatsById(@Param("recipeId") Long recipeId, @Param("field") String field, @Param("change") int change);
 }

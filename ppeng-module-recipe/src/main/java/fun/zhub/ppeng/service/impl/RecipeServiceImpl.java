@@ -118,6 +118,21 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     }
 
     /**
+     * 根据菜谱Id来更新菜谱的点赞数和收藏数
+     *
+     * @param recipeId 菜谱Id
+     * @param field    字段名
+     * @param change   变化的数值
+     * @return true or false
+     */
+    @Override
+    public Boolean updateRecipeStatsById(Long recipeId, String field, int change) {
+        int i = recipeMapper.updateRecipeStatsById(recipeId, field, change);
+
+        return i==1;
+    }
+
+    /**
      * 实现删除菜谱
      *
      * @param userId   用户id
