@@ -124,7 +124,6 @@ public class MyCanalUtil {
         if (data.isEmpty()) {
             return null;
         }
-
         // 检查clazz是否为Bean类型
         if (BeanUtil.isBean(clazz)) {
             return data.stream()

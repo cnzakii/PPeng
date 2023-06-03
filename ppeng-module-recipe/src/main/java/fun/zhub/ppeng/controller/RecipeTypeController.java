@@ -49,4 +49,17 @@ public class RecipeTypeController {
         var list = recipeTypeService.getParentRecipeTypeList();
         return ResponseResult.success(list);
     }
+
+    /**
+     * 根据父类id获取子类列表
+     *
+     * @param parentId 父类id
+     * @return list
+     */
+    @GetMapping("list/child")
+    public ResponseResult<List<RecipeTypeDTO>> getSubRecipeTypeListByParentId(@RequestParam("parentId") Integer parentId) {
+        var list = recipeTypeService.getSubRecipeTypeListByParentId(parentId);
+
+        return ResponseResult.success(list);
+    }
 }

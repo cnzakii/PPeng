@@ -9,7 +9,7 @@ import jakarta.validation.ConstraintValidatorContext;
  * 用于校验Integer类型的数值仅能为0或者1
  *
  * @author Zaki
- * @version TODO
+ * @version 2.0
  * @since 2023-05-15
  **/
 public class ZeroOrOneValidator implements ConstraintValidator<ZeroOrOne, Integer> {
