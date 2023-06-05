@@ -98,6 +98,6 @@ public class GlobalExceptionHandler {
 
         log.error("ResponseCode：500,Exception: {}", exception.getLocalizedMessage());
 
-        return ResponseResult.base(HTTP_STATUS_500, exception.getLocalizedMessage());
+        return ResponseResult.base(HTTP_STATUS_500);
     }
 }
