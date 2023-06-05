@@ -83,6 +83,18 @@ public class RecipeComment implements Serializable {
     @TableField(exist = false)
     private List<RecipeComment> children;
 
+    /**
+     * 评论者头像
+     */
+    @TableField(exist = false)
+    private  String icon;
+
+    /**
+     * 评论者昵称
+     */
+    @TableField(exist = false)
+    private  String nickName;
+
 
 
 
