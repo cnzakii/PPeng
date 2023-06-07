@@ -61,7 +61,7 @@ public class AdminCensorController {
      *
      * @return success
      */
-    @PostMapping("/handle/{type}reported")
+    @PostMapping("/handle/{type}")
     public ResponseResult<String> handleReportedRecipe(@PathVariable("type") String type, @RequestBody @Validated ManualCensorResultDTO resultDTO) {
         String key;
         int isNotify = 0;
