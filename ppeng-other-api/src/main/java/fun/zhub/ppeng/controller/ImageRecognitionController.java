@@ -1,6 +1,8 @@
 package fun.zhub.ppeng.controller;
 
 import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.common.ResponseStatus;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.ImageRecognitionService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +33,9 @@ public class ImageRecognitionController {
      */
     @PostMapping("/dish")
     public ResponseResult<Map<String, Double>> dishRecognition(MultipartFile dish) {
+        if (dish == null) {
+            throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "无法读取到有效文件");
+        }
 
         var result = recognitionService.recognizeDish(dish);
 

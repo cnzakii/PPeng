@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.dto;
 
+import fun.zhub.ppeng.validation.annotation.MatchToken;
 import fun.zhub.ppeng.validation.annotation.ZeroOrOne;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,7 @@ public class PushRecipeDTO implements Serializable {
      * 发布者id
      */
     @NotNull(message = "userId不能为空")
+    @MatchToken
     private Long userId;
 
     /**

@@ -22,6 +22,7 @@ import fun.zhub.ppeng.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -37,7 +38,6 @@ import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 import static fun.zhub.ppeng.constant.SystemConstants.DEFAULT_ICON_PATH;
 import static fun.zhub.ppeng.constant.SystemConstants.DEFAULT_NICK_NAME_PREFIX;
-import static fun.zhub.ppeng.contant.WeChatApiContants.*;
 
 /**
  * <p>
@@ -57,20 +57,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private RabbitTemplate rabbitTemplate;
 
-
     @Resource
     private UserMapper userMapper;
 
-
     @Resource
     private Snowflake snowflake;
-
 
     @Resource
     private WeChatService weChatService;
 
     @Resource
     private FileService fileService;
+
+    @Value("${api.wx.appId}")
+    private String appId;
+
+    @Value("${api.wx.secret}")
+    private String secret;
+
+    @Value("${api.wx.grantType}")
+    private String grantType;
 
 
     /**
@@ -142,7 +148,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public User loginByWeChat(String code) {
         // 使用OpenFeign调用微信登录接口，获取该用户的唯一openId
-        String json = weChatService.loginByWeChat(APP_ID, SECRET, code, GRANT_TYPE);
+        String json = weChatService.loginByWeChat(appId, secret, code, grantType);
 
         // 获取openId
         String openId = Optional.ofNullable(JSONUtil.parseObj(json).getStr("openid"))
@@ -276,7 +282,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     throw new BusinessException(ResponseStatus.HTTP_STATUS_400, "用户存在");
                 });
 
-
         int i = userMapper.update(null,
                 new LambdaUpdateWrapper<User>()
                         .eq(User::getId, userId)
@@ -287,7 +292,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.error("更新用户{}失败", userId);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "内部错误-更新失败");
         }
-
 
     }
 
@@ -351,7 +355,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 根据用户ID来更新用户的粉丝数、关注数
      *
-     * @param field   字段名
+     * @param field  字段名
      * @param userId id
      * @param change 变化的数值
      */

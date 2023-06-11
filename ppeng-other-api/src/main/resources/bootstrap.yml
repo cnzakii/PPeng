@@ -22,3 +22,11 @@ spring:
           data-id: sa-token.yaml
           group: PPENG_GROUP
           refresh: true
+        shared-configs[3]:
+          data-id: other-api.yaml
+          group: PPENG_GROUP
+          refresh: true
+        shared-configs[4]:
+          data-id: mail.yaml
+          group: PPENG_GROUP
+          refresh: true

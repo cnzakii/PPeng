@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,7 +51,6 @@ public class ImageRecognitionServiceImpl implements ImageRecognitionService {
         // 默认0.95，可以通过该参数调节识别效果，降低非菜识别率
         options.put("filter_threshold", "0.7");
 
-
         byte[] bytes;
         try {
             bytes = dish.getBytes();
@@ -77,8 +77,10 @@ public class ImageRecognitionServiceImpl implements ImageRecognitionService {
         map = IntStream.range(0, jsonArray.length())
                 .mapToObj(jsonArray::getJSONObject)
                 .collect(Collectors.toMap(
-                        jsonObject -> jsonObject.getString("name"),
-                        jsonObject -> Double.parseDouble(jsonObject.getString("probability"))
+                        jsonObject -> jsonObject.getString("name"), // 提取菜品名
+                        jsonObject -> Double.parseDouble(jsonObject.getString("probability")), // 提取可信度
+                        (oldValue, newValue) -> oldValue,  // 如果存在相同的键，保留旧值
+                        LinkedHashMap::new  // 指定结果为LinkedHashMap
                 ));
 
         return map;

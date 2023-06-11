@@ -19,18 +19,3 @@ spring:
         group: PPENG_GROUP
         username: ppeng
         password: **confidential**
-
-  mail:
-    host: smtp.office365.com
-    username: PPeng@****
-    password: **confidential**
-    default-encoding: UTF-8
-    port: 587
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2023-04-15
  **/
 
-@FeignClient(url = "https://api.weixin.qq.com", name = "WeChatService",fallback = WeChatFallbackServiceImpl.class)
+@FeignClient(url = "https://api.weixin.qq.com", name = "WeChatService", fallback = WeChatFallbackServiceImpl.class)
 @Component
 public interface WeChatService {
 

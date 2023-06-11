@@ -2,10 +2,9 @@ package fun.zhub.ppeng.config;
 
 import com.baidu.aip.contentcensor.AipContentCensor;
 import com.baidu.aip.imageclassify.AipImageClassify;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static fun.zhub.ppeng.constants.BaiduApiConstants.*;
 
 /**
  * <p>
@@ -20,14 +19,25 @@ import static fun.zhub.ppeng.constants.BaiduApiConstants.*;
 @Configuration
 public class BaiduContentCensorConfigurer {
 
+    @Value("${api.baidu.appId}")
+    private String appId;
+
+    @Value("${api.baidu.apiKey}")
+    private String apiKey;
+
+    @Value("${api.baidu.secretKey}")
+    private String secretKey;
+
+
     /**
      * 配置内容审核client
+     *
      * @return AipContentCensor
      */
     @Bean
-    public AipContentCensor getAipContentCensor(){
+    public AipContentCensor getAipContentCensor() {
         // 初始化一个AipContentCensor
-        AipContentCensor client = new AipContentCensor(APP_ID, API_KEY, SECRET_KEY);
+        AipContentCensor client = new AipContentCensor(appId, apiKey, secretKey);
 
         // 可选：设置网络连接参数
         client.setConnectionTimeoutInMillis(2000);
@@ -39,11 +49,12 @@ public class BaiduContentCensorConfigurer {
 
     /**
      * 配置图片识别client
+     *
      * @return AipImageClassify
      */
     @Bean
-    public AipImageClassify getAipImageClassify(){
-        AipImageClassify client = new AipImageClassify(APP_ID,API_KEY,SECRET_KEY);
+    public AipImageClassify getAipImageClassify() {
+        AipImageClassify client = new AipImageClassify(appId, apiKey, secretKey);
         // 可选：设置网络连接参数
         client.setConnectionTimeoutInMillis(2000);
         client.setSocketTimeoutInMillis(60000);

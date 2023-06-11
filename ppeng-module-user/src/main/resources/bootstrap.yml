@@ -26,3 +26,7 @@ spring:
           data-id: mysql-druid.yaml
           group: PPENG_GROUP
           refresh: true
+        shared-configs[4]:
+          data-id: other-api.yaml
+          group: PPENG_GROUP
+          refresh: true

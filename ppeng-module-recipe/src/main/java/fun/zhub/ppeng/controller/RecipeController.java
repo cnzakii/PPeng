@@ -13,16 +13,17 @@ import fun.zhub.ppeng.entity.Recipe;
 import fun.zhub.ppeng.service.RecipeService;
 import fun.zhub.ppeng.util.MyBeanUtil;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static fun.zhub.ppeng.constant.RabbitConstants.PPENG_EXCHANGE;
 import static fun.zhub.ppeng.constant.RabbitConstants.ROUTING_CONTENT_CENSOR;
+import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
 
 
 /**
@@ -68,18 +69,16 @@ public class RecipeController {
      * @return recipeId
      */
     @PostMapping("/push")
-    public ResponseResult<String> pushRecipe(@Valid @RequestBody PushRecipeDTO pushRecipeDTO) {
-        // 验证id是否和token对应的id一致
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-        Long userId = pushRecipeDTO.getUserId();
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
+    public ResponseResult<String> pushRecipe(@Validated @RequestBody PushRecipeDTO pushRecipeDTO) {
         Recipe recipe = BeanUtil.copyProperties(pushRecipeDTO, Recipe.class);
         recipe.setIsProfessional(0);
-        String urls = String.join(",", pushRecipeDTO.getMediaUrl());
-        recipe.setMediaUrl(urls);
 
+        // 去除媒体文件路径前缀
+        String[] array = Arrays.stream(pushRecipeDTO.getMediaUrl())
+                .map(url -> url.replace(PPENG_RESOURCE_URL, ""))
+                .toArray(String[]::new);
+        String urls = String.join(",", array);
+        recipe.setMediaUrl(urls);
         Long recipeId = recipeService.createRecipe(recipe);
 
         /*
@@ -168,12 +167,8 @@ public class RecipeController {
      * @return success
      */
     @PutMapping("/update")
-    public ResponseResult<String> updateRecipe(@Valid @RequestBody UpdateRecipeDTO updateRecipeDTO) {
+    public ResponseResult<String> updateRecipe(@Validated @RequestBody UpdateRecipeDTO updateRecipeDTO) {
         Long userId = updateRecipeDTO.getUserId();
-        Long id = Long.valueOf((String) StpUtil.getLoginId());
-        if (!Objects.equals(id, userId)) {
-            return ResponseResult.fail("id错误");
-        }
 
         // 获取recipe对象
         Recipe recipe = recipeService.getRecipeByUserIdAndRecipeId(userId, updateRecipeDTO.getRecipeId());

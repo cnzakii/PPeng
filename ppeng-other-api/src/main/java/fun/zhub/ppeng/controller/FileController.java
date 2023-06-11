@@ -1,6 +1,7 @@
 package fun.zhub.ppeng.controller;
 
 import fun.zhub.ppeng.common.ResponseResult;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.FileService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_400;
 
 /**
  * <p>
@@ -36,12 +39,15 @@ public class FileController {
      */
     @PostMapping("/upload/{type}")
     public ResponseResult<Object> uploadFile(@PathVariable("type") String type, MultipartFile... file) {
+        if (file == null || file.length == 0) {
+            throw new BusinessException(HTTP_STATUS_400, "无法读取到有效文件");
+        }
 
         Object url = switch (type) {
             case "icon" -> fileService.uploadUserIcon(file[0]);
             case "recipe-images" -> fileService.uploadRecipeImages(file);
             case "recipe-video" -> fileService.uploadRecipeVideo(file[0]);
-            default -> null;
+            default -> throw new BusinessException(HTTP_STATUS_400, "类型错误");
         };
 
         return ResponseResult.success(url);
