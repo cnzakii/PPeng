@@ -2,9 +2,9 @@ spring:
   data:
     redis:
       database: 0           # Redis数据库索引
-      host: 47.115.207.226
+      host: redis           #TODO 换成你的Redis的IP地址，在同一docker网络下，填写容器名即可
       port: 6379
-      password: **confidential**
+      password:   #TODO 换成你的Redis密码
       timeout: 5000ms   # 连接超时时间
       lettuce:
         pool:

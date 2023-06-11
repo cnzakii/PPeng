@@ -1,9 +1,9 @@
 spring:
   rabbitmq:
-    host: 47.115.207.226
+    host: rabbitmq             #TODO 换成你的RabbitMQ的IP地址，在同一docker网络下，填写容器名即可
     port: 5672
     username: ppeng
-    password: **confidential**
+    password:                 #TODO 换成你的RabbitMQ的ppeng用户密码
     virtual-host: /
     listener:
       simple:

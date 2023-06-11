@@ -2,9 +2,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.115.207.226:3306/db_ppeng?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=Asia/Shanghai
+    url: jdbc:mysql://mysql:3306/db_ppeng?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=Asia/Shanghai #TODO 换成你的数据库IP地址，在同一docker网络下，填写容器名即可
     username: root
-    password: Ghidb!sd902#!.
+    password:  #TODO 换成你的数据库密码
     druid:
       # 配置druid连接池
       initial-size: 5 # 初始化数量

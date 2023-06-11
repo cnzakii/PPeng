@@ -1,0 +1,5 @@
+spring:
+  elasticsearch:
+    uris: es:9200           #TODO 换成你的ElasticSearch地址，在同一docker网络下，填写容器名:默认端口即可
+    username: elastic
+    password:       #TODO 换成你的Elastic用户密码

@@ -1,0 +1,13 @@
+api:
+  # 百度API
+  # 需要申请/购买 菜品识别 和 内容审核(文本、图像、短视频) 两大功能，否则将导致对应的功能无法使用
+  baidu:
+    appId:        # TODO 填入appId
+    apiKey:       # TODO 填入apiKey
+    secretKey:    # TODO 填入secretKey
+  # 微信登录API
+  # 需要申请微信一键登录的API，否则将导致无法使用微信一键登录功能
+  wx:
+    appId:        # TODO 填入appId
+    secret:       # TODO 填入secret
+    grantType: authorization_code

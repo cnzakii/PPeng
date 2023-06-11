@@ -1,0 +1,14 @@
+spring:
+  mail:
+    host: smtp.office365.com      #TODO 填写SMTP服务器的主机名
+    username: PPeng@****   #TODO 填写你邮箱
+    password:                     #TODO 填写你邮箱密码
+    default-encoding: UTF-8
+    port: 587                     #TODO 填写SMTP服务器的主机的端口
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
