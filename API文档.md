@@ -1,4 +1,4 @@
-<img src="/Users/zaki/IntelliJProjects/ppeng-backend-v1/assets/logo.png" style="zoom: 30%;" />
+<img src="./assets/logo.png" style="zoom: 30%;" />
 
 # ”烹烹“—PPeng API文档
 
