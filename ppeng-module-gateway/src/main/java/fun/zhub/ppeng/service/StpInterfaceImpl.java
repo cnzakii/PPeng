@@ -1,4 +1,4 @@
-package fun.zhub.ppeng.config;
+package fun.zhub.ppeng.service;
 
 
 import cn.dev33.satoken.stp.StpInterface;
@@ -17,9 +17,8 @@ import static fun.zhub.ppeng.constant.RoleConstants.ROLE_USER;
 
 
 /**
- * <p>
- * 自定义权限验证接口扩展
- * <p>
+ * 自定义权限验证接口实现类<br>
+ * 本类实现请求对象的权限自定义获取
  *
  * @author Zaki
  * @version 1.0

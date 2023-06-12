@@ -11,11 +11,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: nacos:8848 #****:8848  #****:7744
+        server-addr: nacos:8848 # TODO 换成你的nacos地址，如果在同一docker网络下，填写容器名：端口号即可
         namespace: ppeng
         group: PPENG_GROUP
         username: ppeng
-        password: **confidential**
+        password: **confidential**  # TODO 换成你的nacos用户密码
 
 
 mybatis-plus:

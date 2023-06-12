@@ -3,13 +3,13 @@ spring:
     nacos:
       # 配置中心
       config:
-        server-addr: nacos:8848 #****:8848   # ****:7744
+        server-addr: nacos:8848 # TODO 换成你的nacos地址，如果在同一docker网络下，填写容器名：端口号即可
         enabled: true
         file-extension: yaml
         group: PPENG_GROUP
         namespace: ppeng
         username: ppeng
-        password: **confidential**
+        password: **confidential**    # TODO 换成你的nacos用户密码
         shared-configs[0]:
           data-id: redis.yaml
           group: PPENG_GROUP
