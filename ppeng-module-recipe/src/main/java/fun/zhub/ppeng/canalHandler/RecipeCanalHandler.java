@@ -92,7 +92,6 @@ public class RecipeCanalHandler extends AbstractCanalHandler<Recipe> {
             log.info("传入消息队列，写入ElasticSearch");
             rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_RECIPE_ADD, JSONUtil.toJsonStr(newData));
         }
-
     }
 
     /**

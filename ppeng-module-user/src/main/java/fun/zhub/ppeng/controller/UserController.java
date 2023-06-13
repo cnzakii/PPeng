@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
+import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_400;
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 import static fun.zhub.ppeng.constant.RedisConstants.*;
 import static fun.zhub.ppeng.constant.SaTokenConstants.*;
@@ -177,6 +178,9 @@ public class UserController {
         // email脱敏
         userDTO.setEmail(DesensitizedUtil.email(userDTO.getEmail()));
 
+        // 拼接资源文件前缀
+        userDTO.setIcon(PPENG_RESOURCE_URL + userDTO.getIcon());
+
         return ResponseResult.success(userDTO);
     }
 
@@ -237,7 +241,7 @@ public class UserController {
                     StpUtil.openSafe(SAFE_DELETE_USER, SAFE_TIME);
                 }
             }
-            default -> throw new BusinessException(ResponseStatus.HTTP_STATUS_400);
+            default -> throw new BusinessException(HTTP_STATUS_400);
         }
 
         if (BooleanUtil.isFalse(b)) {
@@ -343,9 +347,11 @@ public class UserController {
      * @param icon   头像文件
      * @return success
      */
-    @PutMapping("/update/icon/{userId}")
+    @PostMapping("/update/icon/{userId}")
     public ResponseResult<String> updateUserIcon(@PathVariable("userId") @MatchToken Long userId, MultipartFile icon) {
-
+        if (icon==null) {
+            throw new BusinessException(HTTP_STATUS_400, "头像不能为空");
+        }
 
         String iconPath = userService.updateUserIcon(userId, icon);
 

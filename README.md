@@ -42,7 +42,7 @@ ps: `4核4G`被完全干爆，最终使用了`16核8G`的服务器才完全启�
 
   `Spring Boot`,`Spring Cloud`,`Spring Cloud Alibaba`
 
-- Microservices Related
+- 微服务相关
 
   - 服务注册与发现,配置中心: `Nacos`
   - 服务网关: `Spring Cloud Gateway`

@@ -42,10 +42,9 @@ public class RecipeCensorController {
      * 根据菜谱id获取审查结果---仅限服务间调用
      */
     @GetMapping("/info/{recipeId}")
-    public RecipeCensor getRecipeCensorById(@PathVariable("recipeId") Long recipeId){
+    public RecipeCensor getRecipeCensorById(@PathVariable("recipeId") Long recipeId) {
         return censorService.getById(recipeId);
     }
-
 
 
     /**
@@ -70,8 +69,8 @@ public class RecipeCensorController {
      * @param sign 标识
      * @return success
      */
-    @PostMapping("/appeal")
-    public ResponseResult<String> appealRecipe(@RequestParam("sign") String sign) {
+    @PostMapping("/appeal/{sign}")
+    public ResponseResult<String> appealRecipe(@PathVariable("sign") String sign) {
         Long userId = Long.valueOf((String) StpUtil.getLoginId());
         String key = MAP_RECIPE_ID_KEY + sign;
 
@@ -100,7 +99,8 @@ public class RecipeCensorController {
 
 
     /**
-     * 封禁菜谱，人工审核或者机器审核不通过时调用，如果人工审核不通过，则删除该菜谱
+     * 封禁菜谱，人工审核或者机器审核不通过时调用，如果人工审核不通过，则删除该菜谱<br>
+     * 仅限服务间调用
      *
      * @param resultDTO 菜谱审核结果数据传输对象
      * @return success
@@ -138,7 +138,8 @@ public class RecipeCensorController {
     }
 
     /**
-     * 放行菜谱，人工审核或者机器审核通过时调用
+     * 放行菜谱，人工审核或者机器审核通过时调用<br>
+     * 仅限服务间调用
      *
      * @param resultDTO 菜谱审核结果数据传输对象
      * @return success

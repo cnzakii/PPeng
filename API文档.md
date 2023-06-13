@@ -47,7 +47,7 @@
     - [请求参数](#请求参数-9)
     - [返回结果](#返回结果-10)
     - [返回数据结构](#返回数据结构-10)
-  - [PUT 更新用户头像](#put-更新用户头像)
+  - [POST 更新用户头像](#post-更新用户头像)
     - [请求参数](#请求参数-10)
     - [返回结果](#返回结果-11)
     - [返回数据结构](#返回数据结构-11)
@@ -1149,9 +1149,9 @@ POST /user/safe/verify
 |» message|string|true|none|状态信息|none|
 |» data|null|true|none|null|none|
 
-## PUT 更新用户头像
+## POST 更新用户头像
 
-PUT /user/update/icon/{userId}
+POST /user/update/icon/{userId}
 
 > Body 请求参数
 

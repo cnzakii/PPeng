@@ -14,6 +14,7 @@ import fun.zhub.ppeng.service.RecipeService;
 import fun.zhub.ppeng.util.MyBeanUtil;
 import jakarta.annotation.Resource;
 import jakarta.websocket.server.PathParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ import static fun.zhub.ppeng.constant.SystemConstants.PPENG_RESOURCE_URL;
  */
 @RestController
 @RequestMapping("/recipe")
+@Slf4j
 public class RecipeController {
 
     @Resource
@@ -90,6 +92,7 @@ public class RecipeController {
         } else {
             censorDTO = new ContentCensorDTO("recipeVideo", recipeId, recipe.getTitle(), urls);
         }
+        log.info("开始审核菜谱({})", recipeId);
         rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(censorDTO));
 
         return ResponseResult.success(String.valueOf(recipeId));
