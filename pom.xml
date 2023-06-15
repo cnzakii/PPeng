@@ -12,13 +12,13 @@
 
     <modules>
         <module>ppeng-module-user</module>
-        <module>ppeng-common-api</module>
         <module>ppeng-module-gateway</module>
         <module>ppeng-module-recipe</module>
         <module>ppeng-module-admin</module>
         <module>ppeng-module-search</module>
-        <module>ppeng-other-api</module>
         <module>ppeng-module-message</module>
+        <module>ppeng-common-api</module>
+        <module>ppeng-other-api</module>
     </modules>
 
 
@@ -43,6 +43,7 @@
         <velocity.engine.version>2.3</velocity.engine.version>
         <bcprov.jdk15to18.version>1.72</bcprov.jdk15to18.version>
         <baidu.aip.version>4.16.6</baidu.aip.version>
+
     </properties>
 
     <dependencyManagement>

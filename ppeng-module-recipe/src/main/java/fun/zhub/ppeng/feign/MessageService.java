@@ -19,6 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Component
 public interface MessageService {
 
-    @PostMapping("/add")
+    @PostMapping("/message/add")
     Boolean addMeaasge(@RequestBody AddUserMessageDTO messageDTO);
 }

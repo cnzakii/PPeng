@@ -329,8 +329,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 异步删除旧的icon,
         String oldIconPath = user.getIcon();
-        if (StrUtil.isNotEmpty(oldIconPath) && !StrUtil.equals(oldIconPath, "/icon/default.png")) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, FILE_DELETE_QUEUE, user.getIcon());
+        if (StrUtil.isNotEmpty(oldIconPath) && !StrUtil.equals(oldIconPath, DEFAULT_ICON_PATH)) {
+            log.info("删除用户({})旧头像", userId);
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_FILE_DELETE, user.getIcon());
         }
 
         // 上传头像

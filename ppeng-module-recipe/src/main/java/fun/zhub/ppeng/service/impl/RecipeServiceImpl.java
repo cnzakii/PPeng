@@ -129,7 +129,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     public Boolean updateRecipeStatsById(Long recipeId, String field, int change) {
         int i = recipeMapper.updateRecipeStatsById(recipeId, field, change);
 
-        return i==1;
+        return i == 1;
     }
 
     /**
@@ -263,7 +263,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
     public PageBean<RecipeDTO> getRecommendRecipeList(Integer isProfessional, Long timestamp, Integer pageSize) {
         String key = (isProfessional == 1) ? RECIPE_RECOMMEND_PROFESSIONAL_KEY : RECIPE_RECOMMEND_COMMON_KEY;
 
-        Set<TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, 0, timestamp, 0, pageSize);
+        Set<TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, 0, timestamp, 1, pageSize);
 
         // 为null则直接返回
         if (CollUtil.isEmpty(typedTuples)) {

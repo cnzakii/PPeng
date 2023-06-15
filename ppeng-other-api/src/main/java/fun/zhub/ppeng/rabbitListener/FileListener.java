@@ -41,6 +41,7 @@ public class FileListener {
             key = ROUTING_FILE_DELETE
     ))
     public void deleteFile(String filePath) {
+        log.info("file.delete.queue队列监听到消息====》{}", filePath);
         fileService.deleteFile(filePath);
     }
 

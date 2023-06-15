@@ -1,7 +1,9 @@
 package fun.zhub.ppeng.rabbitListener;
 
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fun.zhub.ppeng.dto.ContentCensorDTO;
+import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.service.ContentCensorService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import static fun.zhub.ppeng.common.ResponseStatus.HTTP_STATUS_500;
 import static fun.zhub.ppeng.constant.RabbitConstants.*;
 
 /**
@@ -42,15 +45,20 @@ public class ContentCensorListener {
             key = ROUTING_CONTENT_CENSOR
     ))
     public void listenTextContentCensorQueue(String json) {
+        log.info("content.censor.queue队列监听到消息====》{}", json);
 
-        ContentCensorDTO bean = JSONUtil.toBean(json, ContentCensorDTO.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ContentCensorDTO bean;
+        try {
+            bean = objectMapper.readValue(json, ContentCensorDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(HTTP_STATUS_500, "解析字符串出错");
+        }
 
-        log.debug("content.censor.queue队列监听到消息====》{}", bean);
 
         String type = bean.getType();
         Long id = bean.getId();
         String[] data = bean.getData();
-
 
         switch (type) {
             case "nickName" -> censorService.censorNickName(id, data[0]);

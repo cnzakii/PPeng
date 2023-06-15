@@ -50,7 +50,7 @@ public interface SystemConstants {
     String FILE_ROOT_PATH = "/root/resource";
 
     /**
-     * url
+     * url  TODO 换成你的域名
      */
     String PPENG_URL = "https://ppeng.zhub.fun/";
 
@@ -61,8 +61,13 @@ public interface SystemConstants {
     String PPENG_RESOURCE_URL = PPENG_URL + "resource";
 
     /**
+     * 接口url  TODO 换成你的接口路径前缀
+     */
+    String PPENG_API_URL = PPENG_URL + "v1/api";
+
+    /**
      * 菜谱上述url
      */
-    String PPENG_RECIPE_APPEAL_URL = PPENG_URL + "recipe/censor/appeal";
+    String PPENG_RECIPE_APPEAL_URL = PPENG_API_URL + "/recipe/censor/appeal";
 
 }

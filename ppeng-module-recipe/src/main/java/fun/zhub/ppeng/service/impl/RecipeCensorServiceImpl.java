@@ -131,7 +131,9 @@ public class RecipeCensorServiceImpl extends ServiceImpl<RecipeCensorMapper, Rec
             // 生成链接
             String url = PPENG_RECIPE_APPEAL_URL + "?sign=" + sign;
 
-            content = "尊敬的用户，您的菜谱( 标题为" + recipe.getTitle() + " )存在违规内容，违规原因是" + censorResult + "。如果你对此有异议，请点击下方链接(有效期为7天)提交人工复审，我们将在7个工作日回复您。感谢您的配合！\n" + url;
+            content = "尊敬的用户，您的菜谱( 标题为" + recipe.getTitle() + " )存在违规内容，违规原因是" + censorResult
+                    + "。如果你对此有异议，请点击下方链接(有效期为7天)提交人工复审，我们将在7个工作日回复您。感谢您的配合！\n"
+                    + "<a href=\"" + url + "\">点我申述</a>";
         }
         AddUserMessageDTO addUserMessageDTO = new AddUserMessageDTO(userId, title, content);
 

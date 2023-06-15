@@ -69,8 +69,8 @@ public class RecipeCensorController {
      * @param sign 标识
      * @return success
      */
-    @PostMapping("/appeal/{sign}")
-    public ResponseResult<String> appealRecipe(@PathVariable("sign") String sign) {
+    @PostMapping("/appeal")
+    public ResponseResult<String> appealRecipe(@RequestParam("sign") String sign) {
         Long userId = Long.valueOf((String) StpUtil.getLoginId());
         String key = MAP_RECIPE_ID_KEY + sign;
 

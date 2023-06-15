@@ -68,16 +68,6 @@ public class RabbitTopicConfigurer {
         return QueueBuilder.durable(USER_CANAL_QUEUE).build();
     }
 
-    /**
-     * 配置文件删除队列
-     *
-     * @return fileDeleteQueue
-     */
-    @Bean("fileDeleteQueue")
-    public Queue fileDeleteQueue() {
-
-        return QueueBuilder.durable(FILE_DELETE_QUEUE).build();
-    }
 
 
     /**
@@ -119,19 +109,6 @@ public class RabbitTopicConfigurer {
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CANAL_DATA);
     }
 
-
-    /**
-     * 队列和交换机绑定关系
-     *
-     * @param queue    队列
-     * @param exchange 交换机
-     * @return getBinding
-     */
-    @Bean
-    public Binding fileDeleteQueueBinding(@Qualifier("fileDeleteQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
-
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_FILE_DELETE);
-    }
 
 
 }

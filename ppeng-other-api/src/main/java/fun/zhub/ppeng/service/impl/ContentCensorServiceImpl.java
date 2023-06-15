@@ -10,6 +10,7 @@ import fun.zhub.ppeng.exception.BusinessException;
 import fun.zhub.ppeng.feign.RecipeCensorService;
 import fun.zhub.ppeng.feign.UserService;
 import fun.zhub.ppeng.service.ContentCensorService;
+import fun.zhub.ppeng.service.FileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -45,6 +46,8 @@ public class ContentCensorServiceImpl implements ContentCensorService {
     @Resource
     private UserService userService;
 
+    @Resource
+    private FileService fileService;
 
     @Resource
     private RecipeCensorService recipeService;
@@ -73,7 +76,7 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         ResponseResult<String> result = userService.handleBadNickName(userId, msg);
 
         if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
-            log.error("修改{}违规昵称失败", userId);
+            log.error("修改{}违规昵称失败===》{}", userId, result);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规昵称失败");
         }
 
@@ -97,8 +100,10 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             return;
         }
 
-
         log.info("用户({})头像违规===》{}", userId, msg);
+
+        // 删除违规头像
+        fileService.deleteFile(path);
         /*
          * 服务调用，将icon转换成特定头像,并通知用户
          */
@@ -106,10 +111,9 @@ public class ContentCensorServiceImpl implements ContentCensorService {
         ResponseResult<String> result = userService.handleBadIcon(userId, msg);
 
         if (!StrUtil.equals(result.getStatus(), ResponseStatus.SUCCESS.getResponseCode())) {
-            log.error("修改{}违规头像失败", userId);
+            log.error("修改{}违规头像失败===》{}", userId, result);
             throw new BusinessException(ResponseStatus.HTTP_STATUS_500, "修改违规头像失败");
         }
-
     }
 
     /**
@@ -161,7 +165,6 @@ public class ContentCensorServiceImpl implements ContentCensorService {
             // 审核通过，记录审核结果并更新审核状态
             recipeService.setaccessible(censorResultDTO);
         }
-
 
     }
 

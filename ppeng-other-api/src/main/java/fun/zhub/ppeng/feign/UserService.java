@@ -4,7 +4,6 @@ import fun.zhub.ppeng.common.ResponseResult;
 import fun.zhub.ppeng.entity.User;
 import fun.zhub.ppeng.feign.impl.UserFallbackServiceImpl;
 import fun.zhub.ppeng.feign.interceptor.FeignInterceptor;
-import jakarta.websocket.server.PathParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +33,7 @@ public interface UserService {
      * @return success
      */
     @PostMapping("/user/censor/nick/name")
-    ResponseResult<String> handleBadNickName(@PathParam("id") Long id, @RequestParam("msg") String msg);
+    ResponseResult<String> handleBadNickName(@RequestParam("id") Long id, @RequestParam("msg") String msg);
 
 
     /**
@@ -44,7 +43,7 @@ public interface UserService {
      * @param msg 违规信息
      * @return success
      */
-    @PostMapping("/icon")
+    @PostMapping("/user/censor/icon")
     ResponseResult<String> handleBadIcon(@RequestParam("id") Long id, @RequestParam("msg") String msg);
 
     /**

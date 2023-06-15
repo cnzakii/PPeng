@@ -44,14 +44,24 @@ public class RabbitTopicConfigurer {
         return QueueBuilder.durable(MAIL_SEND_QUEUE).build();
     }
 
+    /**
+     * 配置文件删除队列
+     *
+     * @return fileDeleteQueue
+     */
+    @Bean("fileDeleteQueue")
+    public Queue fileDeleteQueue() {
+
+        return QueueBuilder.durable(FILE_DELETE_QUEUE).build();
+    }
 
     /**
      * 配置文本内容审核队列
      *
-     * @return textContentCensorQueue
+     * @return contentCensorQueue
      */
-    @Bean("textContentCensorQueue")
-    public Queue textContentCensorQueue() {
+    @Bean("contentCensorQueue")
+    public Queue contentCensorQueue() {
 
         return QueueBuilder.durable(CONTENT_CENSOR_QUEUE).build();
     }
@@ -77,7 +87,20 @@ public class RabbitTopicConfigurer {
      * @return getBinding
      */
     @Bean
-    public Binding textContentCensorQueueBinding(@Qualifier("textContentCensorQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+    public Binding fileDeleteQueueBinding(@Qualifier("fileDeleteQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
+
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_FILE_DELETE);
+    }
+
+    /**
+     * 队列和交换机绑定关系
+     *
+     * @param queue    队列
+     * @param exchange 交换机
+     * @return getBinding
+     */
+    @Bean
+    public Binding contentCensorQueueBinding(@Qualifier("contentCensorQueue") Queue queue, @Qualifier("ppengTopicExchange") TopicExchange exchange) {
 
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_CONTENT_CENSOR);
     }

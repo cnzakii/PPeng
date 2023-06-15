@@ -349,7 +349,7 @@ public class UserController {
      */
     @PostMapping("/update/icon/{userId}")
     public ResponseResult<String> updateUserIcon(@PathVariable("userId") @MatchToken Long userId, MultipartFile icon) {
-        if (icon==null) {
+        if (icon == null) {
             throw new BusinessException(HTTP_STATUS_400, "头像不能为空");
         }
 
@@ -357,7 +357,11 @@ public class UserController {
 
         // 异步审核图片
         if (StrUtil.isNotEmpty(iconPath)) {
-            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(new ContentCensorDTO("icon", userId, iconPath.replace(PPENG_RESOURCE_URL, ""))));
+            log.info("开始审核用户({})头像", userId);
+            ContentCensorDTO dto = new ContentCensorDTO("icon", userId, iconPath);
+            log.info(JSONUtil.toJsonStr(dto));
+            log.info(dto.toString());
+            rabbitTemplate.convertAndSend(PPENG_EXCHANGE, ROUTING_CONTENT_CENSOR, JSONUtil.toJsonStr(dto));
         }
 
         return ResponseResult.success(PPENG_RESOURCE_URL + iconPath);

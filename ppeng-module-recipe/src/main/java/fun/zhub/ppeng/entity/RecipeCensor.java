@@ -1,5 +1,6 @@
 package fun.zhub.ppeng.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Zaki
@@ -29,6 +30,7 @@ public class RecipeCensor implements Serializable {
     /**
      * 菜谱id
      */
+    @TableId(value = "recipe_id")
     private Long recipeId;
 
     /**
@@ -48,7 +50,6 @@ public class RecipeCensor implements Serializable {
 
     /**
      * 第一次人工审查人员id
-
      */
     private Long manualCensorId;
 
@@ -69,7 +70,6 @@ public class RecipeCensor implements Serializable {
 
     /**
      * 第二次人工审核时间
-
      */
     private LocalDateTime secondManualCensorTime;
 }
